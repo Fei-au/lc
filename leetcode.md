@@ -1,3 +1,4 @@
+- [Tag](#tag)
 - [Time Complexities](#time-complexities)
   - [Constant Time — 𝑂(1)O(1)](#constant-time--𝑂1o1)
   - [Logarithmic Time — 𝑂(log⁡𝑛)](#logarithmic-time--𝑂log𝑛)
@@ -17,7 +18,6 @@
   - [List ArrayList](#list-arraylist)
   - [26. Remove Duplicates from Sorted Array](#26-remove-duplicates-from-sorted-array)
   - [27. Remove Element](#27-remove-element)
-    - [two pointer](#two-pointer)
   - [35. Search Insert Position](#35-search-insert-position)
   - [48. Rotate Image](#48-rotate-image)
   - [54. Spiral Matrix](#54-spiral-matrix)
@@ -29,12 +29,12 @@
   - [118. Pascal's Triangle](#118-pascals-triangle)
   - [189. Rotate Array](#189-rotate-array)
   - [209. Minimum Size Subarray Sum](#209-minimum-size-subarray-sum)
-    - [two pointer](#two-pointer-1)
+    - [two pointer](#two-pointer)
   - [283. Move Zeroes](#283-move-zeroes)
   - [414. Third Maximum Number](#414-third-maximum-number)
   - [448. Find All Numbers Disappeared in an Array](#448-find-all-numbers-disappeared-in-an-array)
   - [485. Max Consecutive Ones](#485-max-consecutive-ones)
-    - [two pointer](#two-pointer-2)
+    - [two pointer](#two-pointer-1)
   - [487. Max Consecutive Ones II](#487-max-consecutive-ones-ii)
   - [724. Find Pivot Index](#724-find-pivot-index)
   - [905. Sort Array By Parity](#905-sort-array-by-parity)
@@ -76,6 +76,7 @@
   - [234. Palindrome Linked List](#234-palindrome-linked-list)
   - [328. Odd Even Linked List](#328-odd-even-linked-list)
   - [707. Design Linked List](#707-design-linked-list)
+- [Set (Python)](#set-python)
 - [Hash Table](#hash-table)
 - [TreeSet](#treeset)
 - [Queue](#queue)
@@ -109,6 +110,11 @@
 - [滑动窗口](#滑动窗口)
   - [674. Longest Continuous Increasing Subsequ](#674-longest-continuous-increasing-subsequ)
 
+
+# Tag
+- Array
+- Two Pointers
+- Sliding Window
 
 
 # Time Complexities
@@ -338,10 +344,15 @@ def quick_sort(arr):
 ```python
 # Exponential
 5**2
-
 pow(5,2)
 
-
+# Divide
+## Double divide
+5/2 = 2.5
+4/2 = 2.0
+## Floor divide
+5 // 2 = 2
+4 // 2 = 2
 ```
 
 ## Division and Modulus
@@ -700,9 +711,23 @@ Arrays.asList("a", "b");
 
 
 ## 26. Remove Duplicates from Sorted Array
-
+Tag: Array, Sliding Window, Two Pointers
 ![image-20230613161652475](./leetcode.assets/image-20230613161652475.png)
 
+```python
+class Solution6(object):
+    def removeDuplicates(self, nums):
+        """
+        :type nums: List[int]
+        :rtype: int
+        """
+        valid = 1
+        for i in range(1, len(nums)):
+            if nums[i - 1] != nums[i]:
+                nums[valid] = nums[i]
+                valid += 1
+        return valid
+```
 **滑动窗口**
 
 从第二位开始遍历，用k记录有多少个重复的数字，同时用来标记该赋值的地方
@@ -732,10 +757,48 @@ class Solution {
 
 
 ## 27. Remove Element
-
-### two pointer
+Tag: Array, Two Pointers 
 
 ![image-20230613160127119](./leetcode.assets/image-20230613160127119.png)
+
+```python
+# TC: O(n)
+# SC: O(1)
+class Solution5(object):
+    def removeElement(self, nums, val):
+        """
+        :type nums: List[int]
+        :type val: int
+        :rtype: int
+        """
+        n = len(nums)
+        if n == 0:
+            return 0
+        valid = 0
+        for i in range(n):
+            if nums[i] != val:
+                nums[valid] = nums[i]
+                valid += 1
+        
+        return valid
+
+        # Or:
+        n = len(nums)
+        if n == 0:
+            return 0
+        i = 0
+        j = n - 1
+        while i != j:
+            if nums[i] != val:
+                i += 1
+            else:
+                k = nums[i]
+                nums[i] = nums[j]
+                nums[j] = k
+                j -= 1
+
+        return i+1 if nums[i] != val else i
+```
 
 遍历，增加一个k来表示有效数字的index
 
@@ -1076,10 +1139,40 @@ partition2
 
 
 ## 88. Merge Sorted Array
+Tag: Array, Two Pointers
 
 ![image-20230612175447132](./leetcode.assets/image-20230612175447132.png)
 
-
+```python
+# TC: O(m+n)
+# SC: O(1)
+class Solution4(object):
+    def merge(self, nums1, m, nums2, n):
+        """
+        :type nums1: List[int]
+        :type m: int
+        :type nums2: List[int]
+        :type n: int
+        :rtype: None Do not return anything, modify nums1 in-place instead.
+        """
+        i = m - 1
+        j = n - 1
+        if n == 0:
+            return
+        for cur in range(m + n - 1, -1, -1):
+            # i -> cur
+            if i == -1 or j == -1:
+                break
+            if nums1[i] >= nums2[j]:
+                nums1[cur] = nums1[i]
+                i-=1
+            else:
+                nums1[cur] = nums2[j]
+                j-=1
+        while j >= 0:
+            nums1[j] = nums2[j]
+            j-=1
+```
 
 **solution 1**
 
@@ -1487,10 +1580,9 @@ a
 
 
 ## [485. Max Consecutive Ones](https://leetcode.com/problems/max-consecutive-ones/)
-tag: Array, List, Two Pointers, Sliding Window
+tag: Array, Two Pointers, Sliding Window
 ### two pointer
 ```python
-# List
 # TC: O(n)
 # SC: O(1)
 class Solution(object):
@@ -1719,6 +1811,33 @@ class Solution1(object):
 
 
 ## 941. Valid Mountain Array
+Tag: Array, Two Pointers
+
+```python
+# TC: O(n)
+# SC: O(1)
+class Solution8(object):
+    def validMountainArray(self, arr):
+        """
+        :type arr: List[int]
+        :rtype: bool
+        """
+        up = 0
+        n = len(arr)
+        down = n - 1
+        while up < n - 1:
+            if arr[up] < arr[up+1]:
+                up += 1
+            else:
+                break
+
+        while down > 0:
+            if arr[down] < arr[down-1]:
+                down-=1
+            else:
+                break
+        return True if up == down and up > 0 and down < n - 1 else False
+```
 
 从头开始查，升序到尽头的index1
 
@@ -1817,7 +1936,7 @@ Tag: Array, Two Pointers
 ![image-20230617170845425](./leetcode.assets/image-20230617170845425.png)
 
 ```python
-# Two Pointers, from ends to middle
+# from ends to middle
 # TC: O(n)
 # SC: O(n)
 class Solution(object):
@@ -1840,7 +1959,7 @@ class Solution(object):
             i -= 1
         return res
 
-# Two Pointers, from middle to two ends
+# from middle to two ends
 # TC: O(n)
 # SC: O(n)
 class Solution(object):
@@ -1911,11 +2030,43 @@ class Solution(object):
 
 
 ## [1089. Duplicate Zeros](https://leetcode.com/problems/duplicate-zeros/)
-Tag: Array, 
+Tag: Array, Two Pointers
 ![image-20230612171217969](./leetcode.assets/image-20230612171217969.png)
 
 ```python
-
+# TC: O(n)
+# SC: O(1)
+class Solution3(object):
+    def duplicateZeros(self, arr):
+        """
+        :type arr: List[int]
+        :rtype: None Do not return anything, modify arr in-place instead.
+        """
+        i = 0
+        zeros = 0
+        last_zero = False
+        n = len(arr)
+        while i + zeros < n:
+            if arr[i] == 0:
+                if i + zeros == n - 1:
+                    last_zero = True
+                else:
+                    zeros += 1
+            i += 1
+        j = n - 1
+        while j >= 0:
+            if j == n - 1 and last_zero:
+                arr[j] = 0
+                j -= 1
+                continue
+            if arr[j - zeros] == 0:
+                arr[j] = 0
+                arr[j - 1] = 0
+                zeros -= 1
+                j -= 2
+            else:
+                arr[j] = arr[j - zeros]
+                j -= 1
 
 ```
 
@@ -2047,9 +2198,27 @@ class Solution(object):
 
 
 ## 1346. Check If N and Its Double Exist
+Tag: Array
 
 ![image-20230613163829541](./leetcode.assets/image-20230613163829541.png)
 
+```python
+# TC: O(n)
+# SC: O(n)
+class Solution7(object):
+    def checkIfExist(self, arr):
+        """
+        :type arr: List[int]
+        :rtype: bool
+        """
+        s = set()
+        for ele in arr:
+            if ele * 2 in s or (ele % 2 == 0 and ele // 2 in s):
+                return True
+            else:
+                s.add(ele)
+        return False
+```
 
 
 **solution 1**
@@ -2762,6 +2931,8 @@ deque.removeLast();
 
 ## [19. Remove Nth Node From End of List](https://leetcode.com/problems/remove-nth-node-from-end-of-list/)
 
+Tag: Two Pointers
+
 ![image-20230730123537955](./leetcode.assets/image-20230730123537955.png)
 
 ```
@@ -2950,7 +3121,7 @@ public class ez21MergeTwoSortedLists {
 
 
 ## 141. Linked List Cycle
-
+Tag: Two Pointers
 ![image-20230705201832794](./leetcode.assets/image-20230705201832794.png)
 
 ![image-20230705201914153](./leetcode.assets/image-20230705201914153.png)
@@ -2978,7 +3149,7 @@ Solution:
 ```
 
 ## 142. Linked List Cycle II
-
+Tag: Two Pointers
 ![image-20230709134411097](./leetcode.assets/image-20230709134411097.png)
 
 ![image-20230709134423752](./leetcode.assets/image-20230709134423752.png)
@@ -3404,7 +3575,58 @@ class Node{
 ```
 
 
+# Set (Python)
 
+```python
+# 1. 初始化 set
+hash_set = set()
+
+# 2. 添加新元素, add 无返回
+hash_set.add(3)
+hash_set.add(2)
+hash_set.add(1)
+
+# 3. 移除元素（如果元素不存在会报错，建议使用 discard）
+hash_set.remove(2)  # 2没在set中时报错
+hash_set.discard(2) # 安全不报错
+
+# 4. 判断元素是否存在
+if 2 not in hash_set:
+    print("Key 2 is not in the hash set.")
+if 2 in hash_set:
+    pass
+
+# 5. 获取大小
+print(f"The size of hash set is: {len(hash_set)}")
+
+# 6. 遍历 set
+for i in hash_set:
+    print(i, end=" ")
+print("are in the hash set.")
+
+# 7. 清空 set
+hash_set.clear()
+
+# 8. 判断是否为空
+if not hash_set:
+    print("hash set is empty now!")
+
+# 9. 过滤列表，只保留出现在另一个集合中的元素（retainAll）
+cars = ["Volvo", "BMW"]
+valid = {"Volvo"}
+
+# retainAll: Python 中用 set 过滤
+cars = [car for car in cars if car in valid]
+
+print(cars)  # ['Volvo']
+
+# 10. filter out掉另一个set中的元素
+cars = ["Volvo", "BMW"]
+valid = {"Volvo"}
+res = cars.difference(valid)
+# res: "BMW"
+
+```
 # Hash Table
 
 **HashSet**
