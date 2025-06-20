@@ -113,8 +113,28 @@
 
 # Tag
 - Array
+  - From right to left
+   
 - Two Pointers
+  - One pointer point to iterate index, another pointer point to valid index
+  - From right to left
+  - From two ends
+  - Find the middle, from middle to two ends
+  - Iterate twice, first round collect info, second round process it
+  - Slow pointer and fast pointer
+    - fast pointer move twice as slow pointer
+    - fast pointer move n steps (n from questions) in advance
+  - 
 - Sliding Window
+  Normally need two pointers
+  - Iternate left pointer in the range
+    - Move left pointer to the valid start place
+    - Assign right pointer to left pointer position, and move to valid end place (or the next position of valid end place)
+    - get a valid window and process
+    - Assign left pointer to right pointer position
+  
+- Cyclic Sort
+  - Regard value at the index as the next index
 
 
 # Time Complexities
@@ -1372,11 +1392,29 @@ class Solution {
 
 
 ## 283. Move Zeroes
-
+Tag: Array
 ![image-20230614214439581](leetcode.assets/image-20230614214439581.png)
 
 
+```python
+# TC: O(n)
+# SC: O(1)
+class Solution(object):
+    def moveZeroes(self, nums):
+        """
+        :type nums: List[int]
+        :rtype: None Do not return anything, modify nums in-place instead.
+        """
+        cur = 0
+        n = len(nums)
+        for i in range(n):
+            if nums[i] != 0:
+                nums[cur] = nums[i]
+                cur += 1
 
+        for j in range(cur, n, 1):
+            nums[j] = 0
+```
 
 
 和26题一样的解法
@@ -1421,7 +1459,34 @@ class Solution {
 
 
 ## 414. Third Maximum Number
+Tag: Array
 
+```python
+# TC: O(n)
+# SC: O(1)
+class Solution(object):
+    def thirdMax(self, nums):
+        """
+        :type nums: List[int]
+        :rtype: int
+        """
+        m1 = None
+        m2 =None
+        m3 =None
+        for ele in nums:
+            if ele == m1 or ele == m2 or ele == m3:
+                continue
+            if m1 is None or ele > m1:
+                m3 = m2
+                m2 = m1
+                m1 = ele
+            elif m2 is None or ele > m2:
+                m3 = m2
+                m2 = ele
+            elif m3 is None or ele> m3:
+                m3 = ele
+        return m1 if m3 is None else m3
+```
 
 
 
@@ -1490,8 +1555,55 @@ a
 
 
 ## 448. Find All Numbers Disappeared in an Array
-
+Tag: Array, Cyclic Sort
 ![image-20230616193351698](leetcode.assets/image-20230616193351698.png)
+
+
+```python
+# TC: O(n)
+# SC: O(n)
+class Solution(object):
+    def findDisappearedNumbers(self, nums):
+        """
+        :type nums: List[int]
+        :rtype: List[int]
+        """
+        n = len(nums)
+        output = [0] * (n + 1)
+        for ele in nums:
+            output[ele] = 1
+        res = []
+        for i in range(1, len(output), 1):
+            if output[i] == 0:
+                res.append(i)
+        return res
+
+# Iterate each positions value as its an index
+# TC: O(2n) -> O(n)
+# SC: O(1)
+class Solution(object):
+    def findDisappearedNumbers(self, nums):
+        """
+        :type nums: List[int]
+        :rtype: List[int]
+        """
+        n = len(nums)
+        for i in range(n):
+            cur = i
+            nv = nums[cur]
+            while nv != cur + 1:
+                temp = nums[nv - 1]
+                nums[nv - 1] = nv
+                cur = nv - 1
+                nv = temp
+        res = []
+        for i in range(n):
+            if nums[i] != i + 1:
+                res.append(i + 1)
+        return res
+```
+
+
 
 方法0：
 
@@ -1601,7 +1713,6 @@ class Solution(object):
                 cur_value = 0
         return max_value
 
-# Tow pointers
 # TC: O(n)
 # SC: O(1)
 class Solution1(object):
@@ -1765,7 +1876,27 @@ class Solution1(object):
 
 
 ## 905. Sort Array By Parity
+Tag: Array, Two Pointers
 
+```python
+# TC: O(n)
+# SC: O(1)
+class Solution(object):
+    def sortArrayByParity(self, nums):
+        """
+        :type nums: List[int]
+        :rtype: List[int]
+        """
+        cur = 0
+        n = len(nums)
+        for i in range(n):
+            if nums[i] %2 == 0:
+                temp = nums[i]
+                nums[i] = nums[cur]
+                nums[cur] = temp
+                cur += 1
+        return nums
+```
 遍历，用position标记下一个偶数放的位置
 
 ​	如果遇到偶数，与position交换，position++
@@ -2169,8 +2300,32 @@ class Solution(object):
 
 
 ## 1299. Replace Elements with Greatest Element on Right Side
-
+Tag: Array
 ![image-20230614152908705](leetcode.assets/image-20230614152908705.png)
+
+```python
+# TC: O(n)
+# SC: O(1)
+class Solution9(object):
+    def replaceElements(self, arr):
+        """
+        :type arr: List[int]
+        :rtype: List[int]
+        """
+        # 1. Two for loop, find the biggest
+        # 2. From right to left
+        max_value = -1
+        n = len(arr)
+        for i in range(n-1, -1, -1):
+            if arr[i] > max_value:
+                # switch
+                temp = max_value
+                max_value = arr[i]
+                arr[i] = temp
+            else:
+                arr[i] = max_value
+        return arr
+```
 
 从右往左遍历，用max记录右边最大值
 
@@ -3125,6 +3280,25 @@ Tag: Two Pointers
 ![image-20230705201832794](./leetcode.assets/image-20230705201832794.png)
 
 ![image-20230705201914153](./leetcode.assets/image-20230705201914153.png)
+```python
+# TC: O(n)
+# SC: O(1)
+class Solution11(object):
+    def hasCycle(self, head):
+        """
+        :type head: ListNode
+        :rtype: bool
+        """
+        fast = head
+        slow = head
+
+        while fast is not None and fast.next is not None and fast.next.next is not None:
+            fast = fast.next.next
+            slow = slow.next
+            if fast == slow:
+                return True
+        return False
+```
 
 Solution:
 
@@ -4134,10 +4308,26 @@ int partition(int left, int right){
 
 
 ## 1051. Height Checker
-
+Tag: Array, Sort
 ![image-20230614225500049](leetcode.assets/image-20230614225500049.png)
 
-
+```python
+# TC: O(max(sort, n))
+# SC: O(n)
+class Solution(object):
+    def heightChecker(self, heights):
+        """
+        :type heights: List[int]
+        :rtype: int
+        """
+        original_height = [ele for ele in heights]
+        heights.sort()
+        res = 0
+        for i in range(len(heights)):
+            if original_height[i] != heights[i]:
+                res += 1
+        return res
+```
 
 先sort，再比较
 
