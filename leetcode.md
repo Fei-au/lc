@@ -136,6 +136,9 @@
 - Cyclic Sort
   - Regard value at the index as the next index
 
+- Floyd’s Cycle Detection
+  - 
+
 
 # Time Complexities
 
@@ -3276,7 +3279,7 @@ public class ez21MergeTwoSortedLists {
 
 
 ## 141. Linked List Cycle
-Tag: Two Pointers
+Tag: Two Pointers, Floyd’s Cycle Detection
 ![image-20230705201832794](./leetcode.assets/image-20230705201832794.png)
 
 ![image-20230705201914153](./leetcode.assets/image-20230705201914153.png)
@@ -3323,12 +3326,55 @@ Solution:
 ```
 
 ## 142. Linked List Cycle II
-Tag: Two Pointers
+Tag: Two Pointers, Floyd’s Cycle Detection
 ![image-20230709134411097](./leetcode.assets/image-20230709134411097.png)
 
 ![image-20230709134423752](./leetcode.assets/image-20230709134423752.png)
 
 ![image-20230709134440423](./leetcode.assets/image-20230709134440423.png)
+
+![image-20230709134440423](./leetcode.assets/image-2025062101.png)
+```python
+'''
+x len to circle start
+k the first round steps
+r circle len
+
+2k - k = nr
+because: 
+nr = x + a
+so:
+x = nr - a
+so:
+x = n-1 (r) + rest
+A new pointer start from start and the slower pointer also start move from where it is. They will meet at the start of the circle
+'''
+class Solution(object):
+    def detectCycle(self, head):
+        """
+        :type head: ListNode
+        :rtype: ListNode
+        """
+        fast = head
+        slow = head
+
+        while fast is not None and fast.next is not None:
+            fast = fast.next.next
+            slow = slow.next
+            if fast is slow:
+                break
+        if fast is None or fast.next is None:
+            return None
+        
+        ano_start = head
+        while True:
+            if ano_start is slow:
+                break
+            ano_start = ano_start.next
+            slow = slow.next
+        return slow
+
+```
 
 using two pointers, one of them one step at a time. another pointer each take two steps. Suppose the first meet at step ***k***,the length of the Cycle is ***r***. so..**2k-k=nr,k=nr**
 Now, the distance between the start node of list and the start node of cycle is ***s***. the distance between the start of list and the first meeting node is ***k***(the pointer which wake one step at a time waked k steps).the distance between the start node of cycle and the first meeting node is ***m***, so...**s=k-m,
