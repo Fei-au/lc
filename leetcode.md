@@ -139,6 +139,11 @@
 - Floyd’s Cycle Detection
   - 
 
+- Linked List
+  - Add dummy head to avoid first element boundry problem
+  - Find interaction point, Connect two linked list by loop one and then go another one.
+  - N th from the end, Two pointers, one go n step first, and then another from start, the first one from where it is, this find the nth from the end 
+
 
 # Time Complexities
 
@@ -3088,10 +3093,75 @@ deque.removeLast();
 
 
 ## [19. Remove Nth Node From End of List](https://leetcode.com/problems/remove-nth-node-from-end-of-list/)
-
-Tag: Two Pointers
+Tag: Linked List, Two Pointers
 
 ![image-20230730123537955](./leetcode.assets/image-20230730123537955.png)
+
+```python
+# Definition for singly-linked list.
+# class ListNode(object):
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+# TC: O(n)
+# SC: O(1)
+class Solution(object):
+    def removeNthFromEnd(self, head, n):
+        """
+        :type head: Optional[ListNode]
+        :type n: int
+        :rtype: Optional[ListNode]
+        """
+        dumy_h = ListNode(0)
+        dumy_h.next = head
+        p1 = dumy_h
+        p2 = dumy_h
+
+        while n > 0:
+            p1 = p1.next
+            n-=1
+        while p1.next is not None:
+            p1 = p1.next
+            p2 = p2.next
+        p2.next = p2.next.next
+        return dumy_h.next
+        
+        # 下面方法跑了两遍
+        # TC: O(2n)
+        # SC: O(1)
+        # dumy_h = ListNode(0)
+        # dumy_h.next = head
+        # p = dumy_h
+        # i = 0
+        # while p is not None:
+        #     p = p.next
+        #     i += 1
+        # steps = i - n
+        # p = dumy_h
+        # while steps - 1 > 0:
+        #     p= p.next
+        #     steps -= 1
+        # p.next = p.next.next
+        # return dumy_h.next
+        
+        # 下面没有使用dummy head，多了许多判断和漏了边界条件，可以添加dummy head
+        # p = head
+        # i = 0
+        # while p is not None:
+        #     p = p.next
+        #     i += 1
+        # if i == 1 and n == 1:
+        #     return None
+        # if n == i:
+        #     return head.next
+        # steps = i - n
+        # p = head
+        # while steps -1 > 0:
+        #     p = p.next
+        #     steps -= 1
+        # p.next = p.next.next if p.next is not None else None
+        # return head
+```
 
 ```
 /**
@@ -3349,6 +3419,8 @@ so:
 x = n-1 (r) + rest
 A new pointer start from start and the slower pointer also start move from where it is. They will meet at the start of the circle
 '''
+# TC: O(n)
+# SC: O(1)
 class Solution(object):
     def detectCycle(self, head):
         """
@@ -4508,14 +4580,36 @@ a |= 3;        // 0111 -> 7
 ```
 
 ## 160. Intersection of Two Linked Lists
-
+Tag: Linked List, Two Pointers
 ![image-20230720214811176](leetcode.assets/image-20230720214811176.png)
 
 ![image-20230720214831352](leetcode.assets/image-20230720214831352.png)
 
 ![image-20230720214928497](leetcode.assets/image-20230720214928497.png)
 
+```python
+# Definition for singly-linked list.
+# class ListNode(object):
+#     def __init__(self, x):
+#         self.val = x
+#         self.next = None
+# TC: O(n)
+# SC: O(1)
+class Solution(object):
+    def getIntersectionNode(self, headA, headB):
+        """
+        :type head1, head1: ListNode
+        :rtype: ListNode
+        """
+        p1 = headA
+        p2 = headB
 
+        while p1 is not p2:
+            p1 = p1.next if p1 is not None else headB
+            p2 = p2.next if p2 is not None else headA
+        return p1
+        
+```
 
 方法一：
 
