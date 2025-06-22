@@ -3560,8 +3560,44 @@ My solution:
 ```
 
 ## [203. Remove Linked List Elements](https://leetcode.com/problems/remove-linked-list-elements/)
-
+Tag: Linked List, Recursion
 ![image-20230730123223316](./leetcode.assets/image-20230730123223316.png)
+```python
+
+# Definition for singly-linked list.
+# class ListNode(object):
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+
+class Solution(object):
+    def removeElements(self, head, val):
+        """
+        :type head: Optional[ListNode]
+        :type val: int
+        :rtype: Optional[ListNode]1
+        """
+        dummy_h = ListNode(0)
+        dummy_h.next = head
+        h = dummy_h
+        while h.next is not None:
+            if h.next.val == val:
+                h.next = h.next.next
+            else:
+                h = h.next
+        return dummy_h.next
+
+        # TC: O(n)
+        # SC: O(n)
+        # Recursion, 局部变量，返回地址，参数等会压入call stack
+        # if head is None:
+        #     return head
+        # head.next = self.removeElements( head.next,val)
+        # if head.val == val:
+        #     return head.next
+        # return head
+
+```
 
 ```
 /**
@@ -3605,10 +3641,33 @@ class Solution {
 
 
 ## [206. Reverse Linked List](https://leetcode.com/problems/reverse-linked-list/)
-
+Tag: Linked List
 ![image-20230730123703471](./leetcode.assets/image-20230730123703471.png)
+```python
+# TC: O(n)
+# SC: O(1)
+# Definition for singly-linked list.
+# class ListNode(object):
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution(object):
+    def reverseList(self, head):
+        """
+        :type head: Optional[ListNode]
+        :rtype: Optional[ListNode]
+        """
+    
+        prev = None
+        while head is not None:
+            next = head.next
+            head.next = prev
+            prev = head
+            head = next
 
+        return prev
 ```
+```java
 /**
  * Definition for singly-linked list.
  * public class ListNode {
@@ -3672,9 +3731,52 @@ public ListNode reverseList(ListNode head) {
 ```
 
 ## [234. Palindrome Linked List](https://leetcode.com/problems/palindrome-linked-list/)
-
+Tag: Linked List, Two Pointers
 ![image-20230730141848828](./leetcode.assets/image-20230730141848828.png)
+```python
+# Definition for singly-linked list.
+# class ListNode(object):
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution(object):
+    def isPalindrome(self, head):
+        """
+        :type head: Optional[ListNode]
+        :rtype: bool
+        """
+        # TC: O(n)
+        # SC: O(1)
+        slow = head
+        fast = head
+        while fast.next is not None and fast.next.next is not None:
+            slow = slow.next
+            fast = fast.next.next
+        h2 = slow.next
 
+        if fast.next is None:
+            # total len is odd, slow is at middle
+            h1 = self.reverse(head, slow)
+        else:
+            # total len is even, slow is at first half end
+            h1 = self.reverse(head, slow.next)
+        
+        while h1 is not None:
+            if h1.val != h2.val:
+                return False
+            h1 = h1.next
+            h2 = h2.next
+        return True
+        
+    def reverse(self, head, h2):
+        prev = None
+        while head is not h2:
+            next = head.next
+            head.next = prev
+            prev = head
+            head = next
+        return prev
+```
 ```
 public boolean isPalindrome(ListNode head) {
               ListNode p1 = head;
@@ -3711,8 +3813,38 @@ public boolean isPalindrome(ListNode head) {
 
 
 ## [328. Odd Even Linked List](https://leetcode.com/problems/odd-even-linked-list/)
-
+Tag: Linked List
 ![image-20230730121254899](./leetcode.assets/image-20230730121254899.png)
+```python
+# Definition for singly-linked list.
+# class ListNode(object):
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution(object):
+    def oddEvenList(self, head):
+        """
+        :type head: Optional[ListNode]
+        :rtype: Optional[ListNode]
+        """
+        # TC: O(n)
+        # SC: O(1)
+        if head is None or head.next is None:
+            return head
+        
+        odd = head
+        even = head.next
+        res = head
+        dummy_even = head.next
+
+        while even is not None and even.next is not None:
+            odd.next = even.next
+            even.next = even.next.next
+            odd = odd.next
+            even = even.next
+        odd.next = dummy_even
+        return res
+```
 
 ```
 /**
