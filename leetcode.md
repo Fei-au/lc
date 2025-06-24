@@ -137,12 +137,17 @@
   - Regard value at the index as the next index
 
 - Floyd’s Cycle Detection
-  - 
+  
 
 - Linked List
+  - Find the common patter from the very first elements, and apply them to each elements to see if it applied, adjust to fit all boundry senario. Find a common state of each step, and loop them.
   - Add dummy head to avoid first element boundry problem
   - Find interaction point, Connect two linked list by loop one and then go another one.
   - N th from the end, Two pointers, one go n step first, and then another from start, the first one from where it is, this find the nth from the end 
+
+- Recursion
+  
+
 
 
 # Time Complexities
@@ -3012,10 +3017,43 @@ deque.removeLast();
 
 
 ## [2. Add Two Numbers](https://leetcode.com/problems/add-two-numbers/)
-
+Tag: Linked List,
 ![image-20230812012940487](leetcode.assets/image-20230812012940487.png)
-
+```python
+# Definition for singly-linked list.
+# class ListNode(object):
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+# TC: O(max(m, n))
+# SC: O(max(m, n)) but answer is not count as space complexity, so O(1)
+class Solution(object):
+    def addTwoNumbers(self, l1, l2):
+        """
+        :type l1: Optional[ListNode]
+        :type l2: Optional[ListNode]
+        :rtype: Optional[ListNode]
+        """
+        dummy_h = ListNode(0)
+        h = dummy_h
+        add_on = 0
+        while l1 is not None or l2 is not None or add_on != 0:
+            a1 = 0 if l1 is None else l1.val
+            a2 = 0 if l2 is None else l2.val
+            total = a1 + a2 + add_on
+            add_on = total // 10
+            h.next = ListNode(total % 10)
+            h = h.next
+            if l1 is not None:
+                l1 = l1.next
+            if l2 is not None:
+                l2 = l2.next
+            
+        return dummy_h.next
 ```
+
+
+```java
  public ListNode addTwoNumbers(ListNode l1, ListNode l2) {
         // return addTwoNumbers2(l1,l2,0);
 
@@ -3235,10 +3273,58 @@ class Solution {
 ```
 
 ## 21. Merge Two Sorted Lists
-
+Tag: Linked List, Recursion
 ![image-20230811230822528](leetcode.assets/image-20230811230822528.png)
+```python
+# Definition for singly-linked list.
+# class ListNode(object):
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution(object):
+    def mergeTwoLists(self, list1, list2):
+        """
+        :type list1: Optional[ListNode]
+        :type list2: Optional[ListNode]
+        :rtype: Optional[ListNode]
+        """
+        # TC: O(m+n)
+        # SC: O(1)
+        dummy_h = ListNode(0)
+        h = dummy_h
+        while list1 is not None and list2 is not None:
+            if list1.val < list2.val:
+                h.next = list1
+                list1 = list1.next
+            else:
+                h.next = list2
+                list2 = list2.next
+            h=h.next
+        if list1 is None:
+            h.next = list2
+        else:
+            h.next = list1
+        
+        return dummy_h.next
 
+        # Recursion
+        # TC: O(m+n)
+        # SC: O(m+n)
+        if list1 is None:
+            return list2
+        
+        if list2 is None:
+            return list1
+
+        
+        if list1.val < list2.val:
+            list1.next = self.mergeTwoLists(list1.next, list2)
+            return list1
+        else:
+            list2.next = self.mergeTwoLists(list1, list2.next)
+            return list2
 ```
+```java
 public class ez21MergeTwoSortedLists {
 
     public static void main(String[] args) {
@@ -4815,10 +4901,11 @@ class Solution(object):
 
 
 ## [190. Reverse Bits](https://leetcode.com/problems/reverse-bits/)
-
 ![截屏2023-06-20 21.47.43](./leetcode.assets/截屏2023-06-20 21.47.43.png)
 
-```
+
+
+```java
     public int reverseBits(int n) {
         int reversed = 0, power = 31;
         while (n != 0) {
