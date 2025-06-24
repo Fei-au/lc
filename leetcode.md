@@ -64,10 +64,11 @@
     - [Add](#add)
     - [Delete](#delete)
   - [Double linked list](#double-linked-list)
-  - [](#)
   - [2. Add Two Numbers](#2-add-two-numbers)
   - [19. Remove Nth Node From End of List](#19-remove-nth-node-from-end-of-list)
   - [21. Merge Two Sorted Lists](#21-merge-two-sorted-lists)
+  - [61. Rotate List](#61-rotate-list)
+  - [138. Copy List with Random Pointer](#138-copy-list-with-random-pointer)
   - [141. Linked List Cycle](#141-linked-list-cycle)
   - [142. Linked List Cycle II](#142-linked-list-cycle-ii)
   - [160. Intersection of Two Linked Lists](#160-intersection-of-two-linked-lists)
@@ -75,6 +76,7 @@
   - [206. Reverse Linked List](#206-reverse-linked-list)
   - [234. Palindrome Linked List](#234-palindrome-linked-list)
   - [328. Odd Even Linked List](#328-odd-even-linked-list)
+  - [430. Flatten a Multilevel Doubly Linked List](#430-flatten-a-multilevel-doubly-linked-list)
   - [707. Design Linked List](#707-design-linked-list)
 - [Set (Python)](#set-python)
 - [Hash Table](#hash-table)
@@ -86,8 +88,8 @@
   - [DSF](#dsf)
 - [Heap](#heap)
   - [PriorityQueue](#priorityqueue)
+  - [](#)
   - [](#-1)
-  - [](#-2)
 - [Binary Search](#binary-search)
 - [Sorting 排序算法](#sorting-排序算法)
   - [快排 QuickSort](#快排-quicksort)
@@ -114,7 +116,7 @@
 # Tag
 - Array
   - From right to left
-   
+  
 - Two Pointers
   - One pointer point to iterate index, another pointer point to valid index
   - From right to left
@@ -138,7 +140,6 @@
 
 - Floyd’s Cycle Detection
   
-
 - Linked List
   - Find the common patter from the very first elements, and apply them to each elements to see if it applied, adjust to fit all boundry senario. Find a common state of each step, and loop them.
   - Add dummy head to avoid first element boundry problem
@@ -2992,7 +2993,6 @@ class DoublyListNode {
     DoublyListNode(int x) {val = x;}
 }
 ```
-## 
 
 
 
@@ -3432,6 +3432,134 @@ public class ez21MergeTwoSortedLists {
 
 ```
 
+## 61. Rotate List
+Tag: Linked List, Two Pointers
+
+![image-20250624193546358](./leetcode.assets/image-20250624193546358.png)
+
+```python
+# Definition for singly-linked list.
+# class ListNode(object):
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution(object):
+    def rotateRight(self, head, k):
+        """
+        :type head: Optional[ListNode]
+        :type k: int
+        :rtype: Optional[ListNode]
+        """
+        # TC: O(n)
+        # SC: O(1)
+        if head is None:
+            return head
+        l = 0
+        h = head
+        while h is not None:
+            h = h.next
+            l += 1
+        res = k % l
+        if res == 0:
+            return head
+        fast = head
+        while res > 0:
+            fast = fast.next
+            res -= 1
+        slow = head
+        while fast.next is not None:
+            fast = fast.next
+            slow = slow.next
+        n_h = slow.next
+        slow.next = None
+        fast.next = head
+        return n_h
+```
+
+
+
+
+## 138. Copy List with Random Pointer
+Tag: Linked List, Hash Table
+
+![image-20250624184003479](./leetcode.assets/image-20250624184003479.png)
+
+![image-20250624184008240](./leetcode.assets/image-20250624184008240.png)
+
+
+
+先复制，连接，再拆分
+
+![image-20250624193230942](./leetcode.assets/image-20250624193230942.png)
+
+
+
+
+```python
+"""
+# Definition for a Node.
+class Node:
+    def __init__(self, x, next=None, random=None):
+        self.val = int(x)
+        self.next = next
+        self.random = random
+"""
+class Solution(object):
+    def copyRandomList(self, head):
+        """
+        :type head: Node
+        :rtype: Node
+        """
+        # 先连接复制，再拆分
+        # TC: O(n)
+        # SC: O(1)
+        if head is None:
+            return head
+        h = head
+        while head is not None:
+            next = head.next
+            head.next = Node(head.val)
+            head.next.next = next
+            head = next
+        head = h
+        while head is not None:
+            if head.random is not None:
+                head.next.random = head.random.next
+            head = head.next.next
+        head = h
+        res = head.next
+        while head is not None:
+            next = head.next.next
+            if next is not None:
+                head.next.next = next.next
+            head.next = next
+            head = next
+        return res
+
+
+        # Hashtable
+        # TC: O(n)
+        # SC: O(n)
+        d = {}
+        dummy_n = Node(0)
+        n = dummy_n
+        h = head
+        while head is not None:
+            temp = Node(head.val)
+            n.next = temp
+            d[head] = temp
+            n = n.next
+            head = head.next
+        n = dummy_n.next
+        while h is not None:
+            if h.random is not None:
+                n.random = d.get(h.random)
+            h = h.next
+            n = n.next
+        return dummy_n.next
+
+
+```
 
 
 ## 141. Linked List Cycle
@@ -3932,7 +4060,7 @@ class Solution(object):
         return res
 ```
 
-```
+```java
 /**
  * Definition for singly-linked list.
  * public class ListNode {
@@ -3965,6 +4093,53 @@ class Solution {
     }
 }
 ```
+
+
+## 430. Flatten a Multilevel Doubly Linked List
+Tag: Linked List
+![image-20250624181521323](./leetcode.assets/image-20250624181521323.png)
+
+![image-20250624181528959](./leetcode.assets/image-20250624181528959.png)
+
+
+```python
+"""
+# Definition for a Node.
+class Node(object):
+    def __init__(self, val, prev, next, child):
+        self.val = val
+        self.prev = prev
+        self.next = next
+        self.child = child
+"""
+# TC: O(n)
+# SC: O(1)
+class Solution(object):
+    def flatten(self, head):
+        """
+        :type head: Node
+        :rtype: Node
+        """
+        dummy_h = head
+        while head is not None:
+            if head.child is None:
+                head = head.next
+            else:
+                next = head.next
+                child = head.child
+                while child.next is not None:
+                    child = child.next
+                head.next = head.child
+                head.child.prev = head
+                head.child = None
+                if next is not None:
+                    child.next = next
+                    next.prev = child
+                head = head.next
+        return dummy_h
+```
+
+
 
 
 
