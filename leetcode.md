@@ -22,6 +22,7 @@
   - [48. Rotate Image](#48-rotate-image)
   - [54. Spiral Matrix](#54-spiral-matrix)
   - [56. Merge Intervals](#56-merge-intervals)
+  - [66. Plus One](#66-plus-one)
   - [73. Set Matrix Zeroes](#73-set-matrix-zeroes)
   - [75. Sort Colors](#75-sort-colors)
   - [80. Remove Duplicates from Sorted Array II](#80-remove-duplicates-from-sorted-array-ii)
@@ -37,6 +38,7 @@
     - [two pointer](#two-pointer-1)
   - [487. Max Consecutive Ones II](#487-max-consecutive-ones-ii)
   - [724. Find Pivot Index](#724-find-pivot-index)
+  - [747.Largest Number At Least Twice of Others](#747largest-number-at-least-twice-of-others)
   - [905. Sort Array By Parity](#905-sort-array-by-parity)
   - [941. Valid Mountain Array](#941-valid-mountain-array)
   - [977. Squares of a Sorted Array](#977-squares-of-a-sorted-array)
@@ -1039,6 +1041,24 @@ public List<Integer> spiralOrder(int[][] matrix) {
 ```
 
 
+## 66. Plus One
+Tag: Array
+```python
+class Solution:
+    def plusOne(self, digits: List[int]) -> List[int]:
+        n = len(digits)
+        add_on = 1
+        for i in range(n-1, -1, -1):
+            total = digits[i] + add_on
+            add_on = total // 10
+            rest = total % 10
+            digits[i] = rest
+            if add_on == 0:
+                break
+        if add_on != 0:
+            digits.insert(0, add_on)
+        return digits
+```
 
 
 
@@ -1829,12 +1849,31 @@ class Solution1(object):
 
 
 ## 724. Find Pivot Index
-
+Tag: Array
 ![image-20230622105748130](./leetcode.assets/image-20230622105748130.png)
 
 ![image-20230622105816122](./leetcode.assets/image-20230622105816122.png)
 
+```python
+class Solution:
+    def pivotIndex(self, nums: List[int]) -> int:
+        # TC: O(n)
+        # SC: O(1)
+        r_sum = 0
+        for ele in nums:
+            r_sum += ele
+        l_sum = 0
+        n = len(nums)
+        for i in range(n):
+            r_sum -= nums[i]
+            if i > 0:
+                l_sum += nums[i-1]
+            if l_sum == r_sum:
+                return i
+        return -1
 ```
+
+```java
   public int pivotIndex(int[] nums) {
   
   // 这个没有考虑负数，以为两边都是正数，审题！
@@ -1876,7 +1915,34 @@ class Solution1(object):
     }
 ```
 
+## 747.Largest Number At Least Twice of Others
+Tag: Array
 
+```python
+class Solution:
+    # TC: O(n)
+    # SP: O(1)
+    def dominantIndex(self, nums: List[int]) -> int:
+        l = None
+        l2 = None
+        idx = -1
+        n = len(nums)
+        for i in range(n):
+            ele = nums[i]
+            if l is None:
+                l = ele
+                idx = i
+            else:
+                if ele > l:
+                    l2 = l
+                    l = ele
+                    idx = i
+                elif l2 is None:
+                    l2 = ele
+                elif ele > l2:
+                    l2 = ele
+        return idx if l >= l2*2 else -1
+```
 
 ## 905. Sort Array By Parity
 Tag: Array, Two Pointers
@@ -2435,12 +2501,36 @@ class Solution {
 # String (Python)
 
 ```python
+# 1. compare
+'aaa' == 'aaa' # True
+# 2. Concatenate
+s1 = "hello"
+s1 += " world"
+# 3. Find character
+idx = s1.find('o') # first occurrence
+idx = s1.rfind('o') # last occurrence
+# 4. Substring
+s1[6:11] # from inclusive, end exclusive
+# 5. toCharArray
+char_list = list(s1)
+char_list[4]
+# Convert back to string
+"".join(char_list)
+# 6. StringBuilder, use string and list
 
-# Convert int to str
+
+# 7. Convert int to str
 n = 1
 s = str(1)
 >>> s
 >>> "1"
+s = int(s)
+>>> 1
+# 8. Convert char to int
+a = '0'
+a - '0' # 0
+# 9. Sort string
+"".join(sorted(s))
 
 ```
 
