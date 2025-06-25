@@ -66,10 +66,11 @@
     - [Add](#add)
     - [Delete](#delete)
   - [Double linked list](#double-linked-list)
-  - [](#)
   - [2. Add Two Numbers](#2-add-two-numbers)
   - [19. Remove Nth Node From End of List](#19-remove-nth-node-from-end-of-list)
   - [21. Merge Two Sorted Lists](#21-merge-two-sorted-lists)
+  - [61. Rotate List](#61-rotate-list)
+  - [138. Copy List with Random Pointer](#138-copy-list-with-random-pointer)
   - [141. Linked List Cycle](#141-linked-list-cycle)
   - [142. Linked List Cycle II](#142-linked-list-cycle-ii)
   - [160. Intersection of Two Linked Lists](#160-intersection-of-two-linked-lists)
@@ -77,6 +78,7 @@
   - [206. Reverse Linked List](#206-reverse-linked-list)
   - [234. Palindrome Linked List](#234-palindrome-linked-list)
   - [328. Odd Even Linked List](#328-odd-even-linked-list)
+  - [430. Flatten a Multilevel Doubly Linked List](#430-flatten-a-multilevel-doubly-linked-list)
   - [707. Design Linked List](#707-design-linked-list)
 - [Set (Python)](#set-python)
 - [Hash Table](#hash-table)
@@ -88,8 +90,8 @@
   - [DSF](#dsf)
 - [Heap](#heap)
   - [PriorityQueue](#priorityqueue)
+  - [](#)
   - [](#-1)
-  - [](#-2)
 - [Binary Search](#binary-search)
 - [Sorting 排序算法](#sorting-排序算法)
   - [快排 QuickSort](#快排-quicksort)
@@ -116,7 +118,7 @@
 # Tag
 - Array
   - From right to left
-   
+  
 - Two Pointers
   - One pointer point to iterate index, another pointer point to valid index
   - From right to left
@@ -139,7 +141,16 @@
   - Regard value at the index as the next index
 
 - Floyd’s Cycle Detection
-  - 
+  
+- Linked List
+  - Find the common patter from the very first elements, and apply them to each elements to see if it applied, adjust to fit all boundry senario. Find a common state of each step, and loop them.
+  - Add dummy head to avoid first element boundry problem
+  - Find interaction point, Connect two linked list by loop one and then go another one.
+  - N th from the end, Two pointers, one go n step first, and then another from start, the first one from where it is, this find the nth from the end 
+
+- Recursion
+  
+
 
 
 # Time Complexities
@@ -3072,7 +3083,6 @@ class DoublyListNode {
     DoublyListNode(int x) {val = x;}
 }
 ```
-## 
 
 
 
@@ -3097,10 +3107,43 @@ deque.removeLast();
 
 
 ## [2. Add Two Numbers](https://leetcode.com/problems/add-two-numbers/)
-
+Tag: Linked List,
 ![image-20230812012940487](leetcode.assets/image-20230812012940487.png)
-
+```python
+# Definition for singly-linked list.
+# class ListNode(object):
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+# TC: O(max(m, n))
+# SC: O(max(m, n)) but answer is not count as space complexity, so O(1)
+class Solution(object):
+    def addTwoNumbers(self, l1, l2):
+        """
+        :type l1: Optional[ListNode]
+        :type l2: Optional[ListNode]
+        :rtype: Optional[ListNode]
+        """
+        dummy_h = ListNode(0)
+        h = dummy_h
+        add_on = 0
+        while l1 is not None or l2 is not None or add_on != 0:
+            a1 = 0 if l1 is None else l1.val
+            a2 = 0 if l2 is None else l2.val
+            total = a1 + a2 + add_on
+            add_on = total // 10
+            h.next = ListNode(total % 10)
+            h = h.next
+            if l1 is not None:
+                l1 = l1.next
+            if l2 is not None:
+                l2 = l2.next
+            
+        return dummy_h.next
 ```
+
+
+```java
  public ListNode addTwoNumbers(ListNode l1, ListNode l2) {
         // return addTwoNumbers2(l1,l2,0);
 
@@ -3178,10 +3221,75 @@ deque.removeLast();
 
 
 ## [19. Remove Nth Node From End of List](https://leetcode.com/problems/remove-nth-node-from-end-of-list/)
-
-Tag: Two Pointers
+Tag: Linked List, Two Pointers
 
 ![image-20230730123537955](./leetcode.assets/image-20230730123537955.png)
+
+```python
+# Definition for singly-linked list.
+# class ListNode(object):
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+# TC: O(n)
+# SC: O(1)
+class Solution(object):
+    def removeNthFromEnd(self, head, n):
+        """
+        :type head: Optional[ListNode]
+        :type n: int
+        :rtype: Optional[ListNode]
+        """
+        dumy_h = ListNode(0)
+        dumy_h.next = head
+        p1 = dumy_h
+        p2 = dumy_h
+
+        while n > 0:
+            p1 = p1.next
+            n-=1
+        while p1.next is not None:
+            p1 = p1.next
+            p2 = p2.next
+        p2.next = p2.next.next
+        return dumy_h.next
+        
+        # 下面方法跑了两遍
+        # TC: O(2n)
+        # SC: O(1)
+        # dumy_h = ListNode(0)
+        # dumy_h.next = head
+        # p = dumy_h
+        # i = 0
+        # while p is not None:
+        #     p = p.next
+        #     i += 1
+        # steps = i - n
+        # p = dumy_h
+        # while steps - 1 > 0:
+        #     p= p.next
+        #     steps -= 1
+        # p.next = p.next.next
+        # return dumy_h.next
+        
+        # 下面没有使用dummy head，多了许多判断和漏了边界条件，可以添加dummy head
+        # p = head
+        # i = 0
+        # while p is not None:
+        #     p = p.next
+        #     i += 1
+        # if i == 1 and n == 1:
+        #     return None
+        # if n == i:
+        #     return head.next
+        # steps = i - n
+        # p = head
+        # while steps -1 > 0:
+        #     p = p.next
+        #     steps -= 1
+        # p.next = p.next.next if p.next is not None else None
+        # return head
+```
 
 ```
 /**
@@ -3255,10 +3363,58 @@ class Solution {
 ```
 
 ## 21. Merge Two Sorted Lists
-
+Tag: Linked List, Recursion
 ![image-20230811230822528](leetcode.assets/image-20230811230822528.png)
+```python
+# Definition for singly-linked list.
+# class ListNode(object):
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution(object):
+    def mergeTwoLists(self, list1, list2):
+        """
+        :type list1: Optional[ListNode]
+        :type list2: Optional[ListNode]
+        :rtype: Optional[ListNode]
+        """
+        # TC: O(m+n)
+        # SC: O(1)
+        dummy_h = ListNode(0)
+        h = dummy_h
+        while list1 is not None and list2 is not None:
+            if list1.val < list2.val:
+                h.next = list1
+                list1 = list1.next
+            else:
+                h.next = list2
+                list2 = list2.next
+            h=h.next
+        if list1 is None:
+            h.next = list2
+        else:
+            h.next = list1
+        
+        return dummy_h.next
 
+        # Recursion
+        # TC: O(m+n)
+        # SC: O(m+n)
+        if list1 is None:
+            return list2
+        
+        if list2 is None:
+            return list1
+
+        
+        if list1.val < list2.val:
+            list1.next = self.mergeTwoLists(list1.next, list2)
+            return list1
+        else:
+            list2.next = self.mergeTwoLists(list1, list2.next)
+            return list2
 ```
+```java
 public class ez21MergeTwoSortedLists {
 
     public static void main(String[] args) {
@@ -3366,6 +3522,134 @@ public class ez21MergeTwoSortedLists {
 
 ```
 
+## 61. Rotate List
+Tag: Linked List, Two Pointers
+
+![image-20250624193546358](./leetcode.assets/image-20250624193546358.png)
+
+```python
+# Definition for singly-linked list.
+# class ListNode(object):
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution(object):
+    def rotateRight(self, head, k):
+        """
+        :type head: Optional[ListNode]
+        :type k: int
+        :rtype: Optional[ListNode]
+        """
+        # TC: O(n)
+        # SC: O(1)
+        if head is None:
+            return head
+        l = 0
+        h = head
+        while h is not None:
+            h = h.next
+            l += 1
+        res = k % l
+        if res == 0:
+            return head
+        fast = head
+        while res > 0:
+            fast = fast.next
+            res -= 1
+        slow = head
+        while fast.next is not None:
+            fast = fast.next
+            slow = slow.next
+        n_h = slow.next
+        slow.next = None
+        fast.next = head
+        return n_h
+```
+
+
+
+
+## 138. Copy List with Random Pointer
+Tag: Linked List, Hash Table
+
+![image-20250624184003479](./leetcode.assets/image-20250624184003479.png)
+
+![image-20250624184008240](./leetcode.assets/image-20250624184008240.png)
+
+
+
+先复制，连接，再拆分
+
+![image-20250624193230942](./leetcode.assets/image-20250624193230942.png)
+
+
+
+
+```python
+"""
+# Definition for a Node.
+class Node:
+    def __init__(self, x, next=None, random=None):
+        self.val = int(x)
+        self.next = next
+        self.random = random
+"""
+class Solution(object):
+    def copyRandomList(self, head):
+        """
+        :type head: Node
+        :rtype: Node
+        """
+        # 先连接复制，再拆分
+        # TC: O(n)
+        # SC: O(1)
+        if head is None:
+            return head
+        h = head
+        while head is not None:
+            next = head.next
+            head.next = Node(head.val)
+            head.next.next = next
+            head = next
+        head = h
+        while head is not None:
+            if head.random is not None:
+                head.next.random = head.random.next
+            head = head.next.next
+        head = h
+        res = head.next
+        while head is not None:
+            next = head.next.next
+            if next is not None:
+                head.next.next = next.next
+            head.next = next
+            head = next
+        return res
+
+
+        # Hashtable
+        # TC: O(n)
+        # SC: O(n)
+        d = {}
+        dummy_n = Node(0)
+        n = dummy_n
+        h = head
+        while head is not None:
+            temp = Node(head.val)
+            n.next = temp
+            d[head] = temp
+            n = n.next
+            head = head.next
+        n = dummy_n.next
+        while h is not None:
+            if h.random is not None:
+                n.random = d.get(h.random)
+            h = h.next
+            n = n.next
+        return dummy_n.next
+
+
+```
 
 
 ## 141. Linked List Cycle
@@ -3439,6 +3723,8 @@ so:
 x = n-1 (r) + rest
 A new pointer start from start and the slower pointer also start move from where it is. They will meet at the start of the circle
 '''
+# TC: O(n)
+# SC: O(1)
 class Solution(object):
     def detectCycle(self, head):
         """
@@ -3578,8 +3864,44 @@ My solution:
 ```
 
 ## [203. Remove Linked List Elements](https://leetcode.com/problems/remove-linked-list-elements/)
-
+Tag: Linked List, Recursion
 ![image-20230730123223316](./leetcode.assets/image-20230730123223316.png)
+```python
+
+# Definition for singly-linked list.
+# class ListNode(object):
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+
+class Solution(object):
+    def removeElements(self, head, val):
+        """
+        :type head: Optional[ListNode]
+        :type val: int
+        :rtype: Optional[ListNode]1
+        """
+        dummy_h = ListNode(0)
+        dummy_h.next = head
+        h = dummy_h
+        while h.next is not None:
+            if h.next.val == val:
+                h.next = h.next.next
+            else:
+                h = h.next
+        return dummy_h.next
+
+        # TC: O(n)
+        # SC: O(n)
+        # Recursion, 局部变量，返回地址，参数等会压入call stack
+        # if head is None:
+        #     return head
+        # head.next = self.removeElements( head.next,val)
+        # if head.val == val:
+        #     return head.next
+        # return head
+
+```
 
 ```
 /**
@@ -3623,10 +3945,33 @@ class Solution {
 
 
 ## [206. Reverse Linked List](https://leetcode.com/problems/reverse-linked-list/)
-
+Tag: Linked List
 ![image-20230730123703471](./leetcode.assets/image-20230730123703471.png)
+```python
+# TC: O(n)
+# SC: O(1)
+# Definition for singly-linked list.
+# class ListNode(object):
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution(object):
+    def reverseList(self, head):
+        """
+        :type head: Optional[ListNode]
+        :rtype: Optional[ListNode]
+        """
+    
+        prev = None
+        while head is not None:
+            next = head.next
+            head.next = prev
+            prev = head
+            head = next
 
+        return prev
 ```
+```java
 /**
  * Definition for singly-linked list.
  * public class ListNode {
@@ -3690,9 +4035,52 @@ public ListNode reverseList(ListNode head) {
 ```
 
 ## [234. Palindrome Linked List](https://leetcode.com/problems/palindrome-linked-list/)
-
+Tag: Linked List, Two Pointers
 ![image-20230730141848828](./leetcode.assets/image-20230730141848828.png)
+```python
+# Definition for singly-linked list.
+# class ListNode(object):
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution(object):
+    def isPalindrome(self, head):
+        """
+        :type head: Optional[ListNode]
+        :rtype: bool
+        """
+        # TC: O(n)
+        # SC: O(1)
+        slow = head
+        fast = head
+        while fast.next is not None and fast.next.next is not None:
+            slow = slow.next
+            fast = fast.next.next
+        h2 = slow.next
 
+        if fast.next is None:
+            # total len is odd, slow is at middle
+            h1 = self.reverse(head, slow)
+        else:
+            # total len is even, slow is at first half end
+            h1 = self.reverse(head, slow.next)
+        
+        while h1 is not None:
+            if h1.val != h2.val:
+                return False
+            h1 = h1.next
+            h2 = h2.next
+        return True
+        
+    def reverse(self, head, h2):
+        prev = None
+        while head is not h2:
+            next = head.next
+            head.next = prev
+            prev = head
+            head = next
+        return prev
+```
 ```
 public boolean isPalindrome(ListNode head) {
               ListNode p1 = head;
@@ -3729,10 +4117,40 @@ public boolean isPalindrome(ListNode head) {
 
 
 ## [328. Odd Even Linked List](https://leetcode.com/problems/odd-even-linked-list/)
-
+Tag: Linked List
 ![image-20230730121254899](./leetcode.assets/image-20230730121254899.png)
+```python
+# Definition for singly-linked list.
+# class ListNode(object):
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution(object):
+    def oddEvenList(self, head):
+        """
+        :type head: Optional[ListNode]
+        :rtype: Optional[ListNode]
+        """
+        # TC: O(n)
+        # SC: O(1)
+        if head is None or head.next is None:
+            return head
+        
+        odd = head
+        even = head.next
+        res = head
+        dummy_even = head.next
 
+        while even is not None and even.next is not None:
+            odd.next = even.next
+            even.next = even.next.next
+            odd = odd.next
+            even = even.next
+        odd.next = dummy_even
+        return res
 ```
+
+```java
 /**
  * Definition for singly-linked list.
  * public class ListNode {
@@ -3765,6 +4183,53 @@ class Solution {
     }
 }
 ```
+
+
+## 430. Flatten a Multilevel Doubly Linked List
+Tag: Linked List
+![image-20250624181521323](./leetcode.assets/image-20250624181521323.png)
+
+![image-20250624181528959](./leetcode.assets/image-20250624181528959.png)
+
+
+```python
+"""
+# Definition for a Node.
+class Node(object):
+    def __init__(self, val, prev, next, child):
+        self.val = val
+        self.prev = prev
+        self.next = next
+        self.child = child
+"""
+# TC: O(n)
+# SC: O(1)
+class Solution(object):
+    def flatten(self, head):
+        """
+        :type head: Node
+        :rtype: Node
+        """
+        dummy_h = head
+        while head is not None:
+            if head.child is None:
+                head = head.next
+            else:
+                next = head.next
+                child = head.child
+                while child.next is not None:
+                    child = child.next
+                head.next = head.child
+                head.child.prev = head
+                head.child = None
+                if next is not None:
+                    child.next = next
+                    next.prev = child
+                head = head.next
+        return dummy_h
+```
+
+
 
 
 
@@ -4598,14 +5063,36 @@ a |= 3;        // 0111 -> 7
 ```
 
 ## 160. Intersection of Two Linked Lists
-
+Tag: Linked List, Two Pointers
 ![image-20230720214811176](leetcode.assets/image-20230720214811176.png)
 
 ![image-20230720214831352](leetcode.assets/image-20230720214831352.png)
 
 ![image-20230720214928497](leetcode.assets/image-20230720214928497.png)
 
+```python
+# Definition for singly-linked list.
+# class ListNode(object):
+#     def __init__(self, x):
+#         self.val = x
+#         self.next = None
+# TC: O(n)
+# SC: O(1)
+class Solution(object):
+    def getIntersectionNode(self, headA, headB):
+        """
+        :type head1, head1: ListNode
+        :rtype: ListNode
+        """
+        p1 = headA
+        p2 = headB
 
+        while p1 is not p2:
+            p1 = p1.next if p1 is not None else headB
+            p2 = p2.next if p2 is not None else headA
+        return p1
+        
+```
 
 方法一：
 
@@ -4679,10 +5166,11 @@ a |= 3;        // 0111 -> 7
 
 
 ## [190. Reverse Bits](https://leetcode.com/problems/reverse-bits/)
-
 ![截屏2023-06-20 21.47.43](./leetcode.assets/截屏2023-06-20 21.47.43.png)
 
-```
+
+
+```java
     public int reverseBits(int n) {
         int reversed = 0, power = 31;
         while (n != 0) {
