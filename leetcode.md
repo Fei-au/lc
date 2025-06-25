@@ -1064,8 +1064,6 @@ class Solution:
             add_on = total // 10
             rest = total % 10
             digits[i] = rest
-            if add_on == 0:
-                break
         if add_on != 0:
             digits.insert(0, add_on)
         return digits
