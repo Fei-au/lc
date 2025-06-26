@@ -37,6 +37,7 @@
   - [485. Max Consecutive Ones](#485-max-consecutive-ones)
     - [two pointer](#two-pointer-1)
   - [487. Max Consecutive Ones II](#487-max-consecutive-ones-ii)
+  - [498.](#498)
   - [724. Find Pivot Index](#724-find-pivot-index)
   - [747.Largest Number At Least Twice of Others](#747largest-number-at-least-twice-of-others)
   - [905. Sort Array By Parity](#905-sort-array-by-parity)
@@ -935,8 +936,41 @@ class Solution {
 ```
 
 ## 54. Spiral Matrix
-
+Tag: Array, Matrix
 ![image-20230625180740585](./leetcode.assets/image-20230625180740585.png)
+```python
+class Solution16:
+    # TC: (m*n)
+    # SC: (1)
+    def spiralOrder(self, matrix: List[List[int]]) -> List[int]:
+        m = len(matrix) -1
+        n = len(matrix[0]) -1
+        res = []
+        i_start = 0
+        j_start = 0
+        while True:
+            i = i_start
+            for j in range(j_start, n + 1, 1):
+                res.append(matrix[i][j])
+            i_start += 1
+            j = n
+            for i in range(i_start, m + 1, 1):
+                res.append(matrix[i][j])
+            n -= 1
+            i = m
+            if m < i_start or n < j_start:
+                break
+            for j in range(n, j_start - 1, -1):
+                res.append(matrix[i][j])
+            m -= 1
+            j = j_start
+            for i in range(m, i_start - 1, -1):
+                res.append(matrix[i][j])
+            j_start += 1
+            if m < i_start or n < j_start:
+                break
+        return res
+```
 
 方法1：
 
@@ -1855,7 +1889,44 @@ class Solution1(object):
         return ans;
 ```
 
+## 498.
+Tag: Array, Matrix
+![image-2025062649801](./leetcode.assets/image-2025062649801.png)
 
+```python
+**class Solution:
+    # TC: O(m*n)
+    # SC: O(1)
+    def findDiagonalOrder(self, mat: List[List[int]]) -> List[int]:
+        m = len(mat)
+        n = len(mat[0])
+        i = 0
+        j = 0
+        res = []
+        while True:
+            res.append(mat[i][j])
+            if i == m - 1 and j == n - 1:
+                break
+            if (i + j) % 2 == 0:
+                if i == 0 or j == n - 1:
+                    if j < n - 1:
+                        j += 1
+                    else:
+                        i += 1
+                else:
+                    i -= 1
+                    j += 1
+            else:
+                if i == m - 1 or j == 0:
+                    if i < m - 1:
+                        i += 1
+                    else:
+                        j += 1
+                else:
+                    i += 1
+                    j -= 1
+        return res**
+```
 
 ## 724. Find Pivot Index
 Tag: Array
