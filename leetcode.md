@@ -135,8 +135,12 @@
   - Iternate left pointer in the range
     - Move left pointer to the valid start place
     - Assign right pointer to left pointer position, and move to valid end place (or the next position of valid end place)
-    - get a valid window and process
+    - Get a valid window and process
     - Assign left pointer to right pointer position
+  - Use the outer loop to iternate the right pointer
+    - Check if the range valid in every outer loop
+      - if not valid, then keep iterate the right pointer
+      - if valid, inside the outer loop, loop left pointer 
   
 - Cyclic Sort
   - Regard value at the index as the next index
@@ -1405,8 +1409,46 @@ class Solution {
 
 
 ## 209. Minimum Size Subarray Sum
-
+tag: Array, Two Pointers, Sliding Windows
 ### two pointer
+
+```python
+class Solution:
+    # TC: O(n) right pointer move n times and left pointer move at most n times
+    # SC: O(1)
+    def minSubArrayLen(self, target: int, nums: List[int]) -> int:
+        left = 0 # 0 - n-1
+        right = 0 # 1 - n
+        n = len(nums)
+        sm = 0
+        res = float('inf')
+        while right < n:
+            sm += nums[right]
+            right += 1 # is larger than 1 bit
+            while sm >= target:
+                res = min(res, right - left)
+                sm -= nums[left]
+                left += 1
+        return 0 if res == float('inf') else res
+
+    def minSubArrayLen(self, target: int, nums: List[int]) -> int:
+        left = 0 # 0 - n-1
+        right = 1 # 1 - n
+        n = len(nums)
+        sm = 0
+        res = n
+        while left < right and right <= n:
+            while sm < target and right <= n:
+                sm += nums[right-1]
+                right += 1
+            if sm < target:
+                return res if res != n else 0
+            while sm >= target and left < right:
+                sm -= nums[left]
+                left += 1
+            res = min(res, right - left)
+        return res
+```
 
 方法1：
 
@@ -2607,10 +2649,14 @@ s = str(1)
 s = int(s)
 >>> 1
 # 8. Convert char to int
-a = '0'
-a - '0' # 0
+>>> ord('a')
+>>> 97
+>>> ord('a') - ord('a')
+>>> 0
 # 9. Sort string
+# sorted and reversed return an iterator
 "".join(sorted(s))
+"".join(reversed(s))
 
 ```
 
@@ -2834,9 +2880,26 @@ class Solution {
 
 
 ## 14. Longest Common Prefix
-
+Tag: String, Trie
 ![image-20230623111648066](./leetcode.assets/image-20230623111648066.png)
-
+```python
+class Solution:
+    def longestCommonPrefix(self, strs: List[str]) -> str:
+        # String
+        # TC: O(m*n)
+        # SC: O(1)
+        common  = strs[0]
+        n = len(strs)
+        for i in range(1,n,1):
+            m_l = min(len(common), len(strs[i]))
+            for j in range(m_l, -1, -1):
+                if common[:j] == strs[i][:j]:
+                    common = common[:j]
+                    break
+            if len(common) == 0:
+                return ""
+        return common
+```
 ```java
 String result = strs[0];
 for (String str :strs) {
@@ -2856,16 +2919,47 @@ return result;
 ```
 
 ## 28. Find the Index of the First Occurrence in a String
-
+Tag: String
 ![image-20230625235532477](./leetcode.assets/image-20230625235532477.png)
-
+```python
+class Solution:
+    # TC: O(m*n) slice caused O(stop-start)
+    # SC: O(1)  ignoring temporary slices since they’re garbage collected
+    def strStr(self, haystack: str, needle: str) -> int:
+        res  = 0
+        n = len(haystack)
+        l = len(needle)
+        for i in range(n):
+            if i+l <= n and haystack[i: i+l] == needle:
+                return i
+        return -1
+    def strStr(self, haystack: str, needle: str) -> int:
+        # TC: O(m*n)
+        # SC: O(1)
+        res  = 0
+        n = len(haystack)
+        l = len(needle)
+        for i in range(n):
+            if haystack[i] == needle[0]:
+                all_match = True
+                for j in range(1, l, 1):
+                    if i+j < n and haystack[i + j] == needle[j]:
+                        pass
+                    else:
+                        all_match = False
+                        break
+                if all_match:
+                    return i
+        return -1
+        
+```
 注意substring
 
 i的范围在  i=0; i<haystack.len 的时候， substring取 i,i+1，取一个字符
 
 所以当substring取len个字符，即 i到i+len的时候，haystack.len - (len-1)
 
-```
+```java
     public int strStr(String haystack, String needle) {
         int len = needle.length();
 
@@ -3058,8 +3152,26 @@ carry记录进位，sum%2, sum/2取值
 ```
 
 ## 167. Two Sum II - Input Array Is Sorted
-
+Tag: Array, Two Pointers
 ![image-20230626130345826](./leetcode.assets/image-20230626130345826.png)
+```python
+class Solution:
+    def twoSum(self, numbers: List[int], target: int) -> List[int]:
+        # TC: O(n)
+        # SC: O(1)
+        n = len(numbers)
+        start = 0
+        end = n - 1
+        while start != end:
+            t = numbers[start] + numbers[end]
+            if t == target:
+                return [start + 1, end + 1]
+            elif t < target:
+                start += 1
+            else:
+                end -= 1
+        return [0,0]
+```
 
 暴力解法会超时
 
@@ -3084,10 +3196,22 @@ carry记录进位，sum%2, sum/2取值
 
 
 ## 344. Reverse String
-
+Tag: Array, String
 ![image-20230626120252825](./leetcode.assets/image-20230626120252825.png)
-
+```python
+    def reverseString(self, s: List[str]) -> None:
+        """
+        Do not return anything, modify s in-place instead.
+        """
+        # TC: O(n)
+        # SC: O(1)
+        n = len(s)
+        for i in range(n//2):
+            temp = s[i]
+            s[i] = s[n-1-i]
+            s[n-1-i] = temp
 ```
+```java
     public void reverseString(char[] s) {
                 for (int i = 0; i < s.length/2; i++) {
             char temp = s[i];
