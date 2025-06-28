@@ -13,6 +13,7 @@
 - [Random](#random)
   - [nextInt](#nextint)
 - [List (Python)](#list-python)
+  - [Slice (Python)](#slice-python)
 - [Array](#array)
   - [Arrays方法](#arrays方法)
   - [List ArrayList](#list-arraylist)
@@ -30,14 +31,12 @@
   - [118. Pascal's Triangle](#118-pascals-triangle)
   - [189. Rotate Array](#189-rotate-array)
   - [209. Minimum Size Subarray Sum](#209-minimum-size-subarray-sum)
-    - [two pointer](#two-pointer)
   - [283. Move Zeroes](#283-move-zeroes)
   - [414. Third Maximum Number](#414-third-maximum-number)
   - [448. Find All Numbers Disappeared in an Array](#448-find-all-numbers-disappeared-in-an-array)
   - [485. Max Consecutive Ones](#485-max-consecutive-ones)
-    - [two pointer](#two-pointer-1)
   - [487. Max Consecutive Ones II](#487-max-consecutive-ones-ii)
-  - [498.](#498)
+  - [498. Diagonal Traverse](#498-diagonal-traverse)
   - [724. Find Pivot Index](#724-find-pivot-index)
   - [747.Largest Number At Least Twice of Others](#747largest-number-at-least-twice-of-others)
   - [905. Sort Array By Parity](#905-sort-array-by-parity)
@@ -99,6 +98,7 @@
   - [Partition](#partition)
   - [1051. Height Checker](#1051-height-checker)
     - [?couting sort？](#couting-sort)
+- [Bit manupulation (python)](#bit-manupulation-python)
 - [Bit manipulation](#bit-manipulation)
   - [进制](#进制)
   - [计算机中的整数表示](#计算机中的整数表示)
@@ -154,6 +154,13 @@
   - N th from the end, Two pointers, one go n step first, and then another from start, the first one from where it is, this find the nth from the end 
 
 - Recursion
+
+- Matrix
+  - Set from and start then loop, the row start, column start, row end, column end could be change to satisfy the condition
+  - Use (row + column) to indicate diagnoses
+  - 
+
+- Dynamic Programming
   
 
 
@@ -531,6 +538,16 @@ nums = ["abcd", "ac", "abc", "D"]
 >>> nums
 >>> ["D", "ac", "abc", "abcd"]
 
+nums.reverse() # reverse itself, no return
+reversed_nums = nums[::-1] # slice reverse
+reversed_nums = list(reversed(arr)) # 返回迭代器, 配合list使用
+
+left, right = 0, len(arr) - 1
+while left < right:
+    arr[left], arr[right] = arr[right], arr[left]
+    left += 1
+    right -= 1
+
 # 7. Copy range
 # from index 1 to 4 (1 inclusive, 4 exclusive)
 part_array = nums[1:4]
@@ -568,6 +585,16 @@ nums2 = [1]
 >>> nums1 is nums2
 >>> False
 
+```
+
+## Slice (Python)
+```python
+arr[start:stop:step]
+
+# 切片
+print(arr[::1])   # [10, 20, 30, 40, 50] 正常顺序
+print(arr[::2])   # [10, 30, 50] 隔一个取一个
+print(arr[::-1])  # [50, 40, 30, 20, 10] 完整反转
 ```
 
 
@@ -1332,7 +1359,28 @@ class Solution {
 
 
 ## 118. Pascal's Triangle
+Tag: Array, Dynamic Programming
 
+```python
+class Solution:
+    # TC: O(n^2)
+    # SC: O(1)
+    def generate(self, numRows: int) -> List[List[int]]:
+        res = [
+            [1]
+        ]
+        if numRows == 1:
+            return res
+        for i in range(1, numRows, 1):
+            last_row = res[i - 1]
+            cur_len = i + 1
+            cur = [1]
+            for j in range(1, len(last_row), 1):
+                cur.append(last_row[j] + last_row[j-1])
+            cur.append(1)
+            res.append(cur)
+        return res
+```
 方法：
 
 121 ->
@@ -1410,7 +1458,6 @@ class Solution {
 
 ## 209. Minimum Size Subarray Sum
 tag: Array, Two Pointers, Sliding Windows
-### two pointer
 
 ```python
 class Solution:
@@ -1801,7 +1848,7 @@ class Solution(object):
 
 ## [485. Max Consecutive Ones](https://leetcode.com/problems/max-consecutive-ones/)
 tag: Array, Two Pointers, Sliding Window
-### two pointer
+
 ```python
 # TC: O(n)
 # SC: O(1)
@@ -1931,7 +1978,7 @@ class Solution1(object):
         return ans;
 ```
 
-## 498.
+## 498. Diagonal Traverse
 Tag: Array, Matrix
 ![image-2025062649801](./leetcode.assets/image-2025062649801.png)
 
@@ -1967,7 +2014,7 @@ Tag: Array, Matrix
                 else:
                     i += 1
                     j -= 1
-        return res**
+        return res
 ```
 
 ## 724. Find Pivot Index
@@ -2651,8 +2698,10 @@ s = int(s)
 # 8. Convert char to int
 >>> ord('a')
 >>> 97
->>> ord('a') - ord('a')
+>>> ord('a') - ord('0')
 >>> 0
+a = '0'
+ord(a) - ord('0') # 0
 # 9. Sort string
 # sorted and reversed return an iterator
 "".join(sorted(s))
@@ -5153,6 +5202,8 @@ class Solution {
 
 
 
+
+# Bit manupulation (python)
 
 
 
