@@ -90,6 +90,7 @@
   - [2. Tow Sum](#2-tow-sum)
   - [136. Single Number](#136-single-number)
   - [202. Happy Number](#202-happy-number)
+  - [205.](#205)
   - [217. Contains Duplicate](#217-contains-duplicate)
   - [349. Intersection of Two Arrays](#349-intersection-of-two-arrays)
 - [TreeSet](#treeset)
@@ -5031,6 +5032,36 @@ class Solution:
             sm += tmp ** 2
             n //= 10
         return sm
+```
+
+## 205. 
+Tag: Hash Table, Array
+```python
+class Solution:
+    # TC: O(n)
+    # SC: O(n)
+    def isIsomorphic(self, s: str, t: str) -> bool:
+        if len(s) != len(t):
+            return False
+        n1 = [-1] * 128
+        n2 = [-1] * 128
+        for i in range(len(s)):
+            a = s[i]
+            b = t[i]
+            if n1[ord(a)] != n2[ord(b)]:
+                return False
+            n1[ord(a)] = i
+            n2[ord(b)] = i
+        return True
+
+        s_t={}
+        t_s={}
+        for i in range(len(s)):
+            if (s_t.get(s[i], t[i]) != t[i]) or (t_s.get(t[i], s[i]) != s[i]):
+                return False
+            s_t[s[i]] = t[i]
+            t_s[t[i]] = s[i]
+        return True
 ```
 
 ## 217. Contains Duplicate
