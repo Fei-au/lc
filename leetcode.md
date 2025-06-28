@@ -1425,8 +1425,50 @@ class Solution:
 ```
 
 ## 189. Rotate Array
-
+Tag: Array, Rotate, Two Pointers
 ![image-20230630234029078](./leetcode.assets/image-20230630234029078.png)
+```python
+class Solution:
+    # TC: O(n)
+    # SC: O(1)
+    # Use start and end is better, reduce calculations
+    def rotate(self, nums: List[int], k: int) -> None:
+        """
+        Do not return anything, modify nums in-place instead.
+        """
+        n = len(nums)
+        k = k % n
+        self.rotate_range(nums, 0, n-1)
+        self.rotate_range(nums, 0, k - 1)
+        self.rotate_range(nums, k, n-1)
+
+    def rotate_range(self, nums: List[int], start: int, end: int) -> None:
+        while start < end:
+            temp = nums[start]
+            nums[start] = nums[end]
+            nums[end] = temp
+            start += 1
+            end -= 1
+
+    def rotate(self, nums: List[int], k: int) -> None:
+        """
+        Do not return anything, modify nums in-place instead.
+        """
+        n = len(nums)
+        k = k % n
+        for i in range(n//2):
+            temp = nums[i]
+            nums[i] = nums[n - 1- i]
+            nums[n - 1- i] = temp
+        for i in range(k//2):
+            temp = nums[i]
+            nums[i] = nums[k - 1- i]
+            nums[k - 1- i] = temp
+        for i in range(k, (n-k)//2 + k, 1):
+            temp = nums[i]
+            nums[i] = nums[n + k - 1 - i]
+            nums[n + k - 1 - i] = temp
+```
 
 方法：
 
