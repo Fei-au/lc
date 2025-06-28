@@ -87,8 +87,9 @@
 - [Hash Table (Python dict)](#hash-table-python-dict)
 - [HashSet](#hashset)
 - [HashMap](#hashmap)
+  - [2. Tow Sum](#2-tow-sum)
   - [136. Single Number](#136-single-number)
-  - [202.](#202)
+  - [202. Happy Number](#202-happy-number)
   - [217. Contains Duplicate](#217-contains-duplicate)
   - [349. Intersection of Two Arrays](#349-intersection-of-two-arrays)
 - [TreeSet](#treeset)
@@ -4960,6 +4961,21 @@ if not hashmap:
     }
 	
 ```
+## 2. Tow Sum
+Tag: Hash Table, Array
+```python
+class Solution:
+    # TC: O(n)
+    # SC: O(n)
+    def twoSum(self, nums: List[int], target: int) -> List[int]:
+        d = {}
+        for i in range(len(nums)):
+            if d.get(target - nums[i]) is None:
+                d[nums[i]] = i
+            else:
+                return [d.get(target - nums[i]), i]
+        return []
+```
 
 ## 136. Single Number
 Tag: Hash Table, Array
@@ -4977,7 +4993,7 @@ class Solution:
         return s.pop()
 ```
 
-## 202.
+## 202. Happy Number
 Tag: Hash Table
 ```python
 class Solution:
