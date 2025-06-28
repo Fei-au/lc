@@ -14,6 +14,7 @@
   - [nextInt](#nextint)
 - [List (Python)](#list-python)
   - [Slice (Python)](#slice-python)
+  - [__iter__() Python](#iter-python)
 - [Array](#array)
   - [Arrays方法](#arrays方法)
   - [List ArrayList](#list-arraylist)
@@ -29,6 +30,7 @@
   - [80. Remove Duplicates from Sorted Array II](#80-remove-duplicates-from-sorted-array-ii)
   - [88. Merge Sorted Array](#88-merge-sorted-array)
   - [118. Pascal's Triangle](#118-pascals-triangle)
+  - [119. Pascal's Triangle II](#119-pascals-triangle-ii)
   - [189. Rotate Array](#189-rotate-array)
   - [209. Minimum Size Subarray Sum](#209-minimum-size-subarray-sum)
   - [283. Move Zeroes](#283-move-zeroes)
@@ -61,6 +63,7 @@
   - [151. Reverse Words in a String](#151-reverse-words-in-a-string)
   - [167. Two Sum II - Input Array Is Sorted](#167-two-sum-ii---input-array-is-sorted)
   - [344. Reverse String](#344-reverse-string)
+  - [557. Reverse Words in a String III](#557-reverse-words-in-a-string-iii)
   - [561. Array Partition](#561-array-partition)
 - [Linked List](#linked-list)
     - [Add](#add)
@@ -81,7 +84,13 @@
   - [430. Flatten a Multilevel Doubly Linked List](#430-flatten-a-multilevel-doubly-linked-list)
   - [707. Design Linked List](#707-design-linked-list)
 - [Set (Python)](#set-python)
-- [Hash Table](#hash-table)
+- [Hash Table (Python dict)](#hash-table-python-dict)
+- [HashSet](#hashset)
+- [HashMap](#hashmap)
+  - [136. Single Number](#136-single-number)
+  - [202.](#202)
+  - [217. Contains Duplicate](#217-contains-duplicate)
+  - [349. Intersection of Two Arrays](#349-intersection-of-two-arrays)
 - [TreeSet](#treeset)
 - [Queue](#queue)
   - [BSF](#bsf)
@@ -129,6 +138,11 @@
   - Slow pointer and fast pointer
     - fast pointer move twice as slow pointer
     - fast pointer move n steps (n from questions) in advance
+  - For rotate problem, reverse and reverse part could achieve rotate effect
+  - Use two pointers to reverse a string / list, by 
+    - exchange two pointer if left < right 
+    - use start and len-1-start and loop [start,(len-start)//2]
+    - use left and right, and loop [left,left+(right-left)//2], len is right-left+1
   - 
 - Sliding Window
   Normally need two pointers
@@ -146,7 +160,8 @@
   - Regard value at the index as the next index
 
 - Floyd’s Cycle Detection
-  
+  - Any thing if there is a cycle, we could use it to check. A fast pointer, a slow pointer
+  - 
 - Linked List
   - Find the common patter from the very first elements, and apply them to each elements to see if it applied, adjust to fit all boundry senario. Find a common state of each step, and loop them.
   - Add dummy head to avoid first element boundry problem
@@ -161,6 +176,12 @@
   - 
 
 - Dynamic Programming
+  - 118 119 redo by using dynamic programming thoughts
+
+- Hash Table
+  - Check duplicate
+  - Use space to optimize time
+  - 
   
 
 
@@ -597,8 +618,11 @@ print(arr[::2])   # [10, 30, 50] 隔一个取一个
 print(arr[::-1])  # [50, 40, 30, 20, 10] 完整反转
 ```
 
-
-
+## __iter__() Python
+以下都实现了__iter__方法，可以使用 for, in, iter(), next()
+```python
+list, tuple, str, set, dict, range, bytes, bytearray, file, zip, map, filter, enumerate, reversed, deque, frozenset
+```
 
 
 # Array
@@ -1424,6 +1448,22 @@ class Solution:
     }
 ```
 
+## 119. Pascal's Triangle II
+Tag: Array, Dynamic Programming
+```python
+class Solution:
+    # TC: O(n^2)
+    # SC: O(1)
+    def getRow(self, rowIndex: int) -> List[int]:
+        res = [1]
+        for i in range(0, rowIndex, 1):
+            res.append(1)
+            n = len(res)
+            for j in range(n-2, 0, -1):
+                res[j] += res[j-1]
+        return res
+```
+
 ## 189. Rotate Array
 Tag: Array, Rotate, Two Pointers
 ![image-20230630234029078](./leetcode.assets/image-20230630234029078.png)
@@ -1606,11 +1646,20 @@ class Solution(object):
         n = len(nums)
         for i in range(n):
             if nums[i] != 0:
+                temp =nums[cur]
                 nums[cur] = nums[i]
-                cur += 1
+                nums[i] = temp
+                cur+=1
 
-        for j in range(cur, n, 1):
-            nums[j] = 0
+        # cur = 0
+        # n = len(nums)
+        # for i in range(n):
+        #     if nums[i] != 0:
+        #         nums[cur] = nums[i]
+        #         cur += 1
+
+        # for j in range(cur, n, 1):
+        #     nums[j] = 0
 ```
 
 
@@ -3105,11 +3154,33 @@ carry记录进位，sum%2, sum/2取值
 
 
 ## 151. Reverse Words in a String
-
+Tag: String, Two Pointers, Sliding Window
 ![image-20230623220232747](./leetcode.assets/image-20230623220232747.png)
 
 ![image-20230623220252930](./leetcode.assets/image-20230623220252930.png)
+```python
+class Solution:
+    # TC: O(n)
+    # SC: O(1) or O(n)
+    def reverseWords(self, s: str) -> str:
+        # sliding windows
+        # use list save each words
+        n = len(s)
+        left = n-1
+        right = n-1
+        res = []
+        while left >= 0:
+            right = left
+            while s[right] == ' ' and right >= 0:
+                right -= 1
+            left = right
+            while s[left] != ' ' and left >= 0:
+                left -= 1
+            if left != right:
+                res.append(s[left+1: right + 1])
+        return " ".join(res)
 
+```
 方法1:
 
 - 反转string
@@ -3310,6 +3381,35 @@ Tag: Array, String
             s[s.length - 1- i] = temp;
         }
     }
+```
+
+## 557. Reverse Words in a String III
+Tag: String, Two Pointers, Sliding Window
+```python
+class Solution:
+    # TC: O(n + n) O(n)
+    # SC: O(n)
+    # When reverse single word, we could also use two pointers and exchagne them in half word length to reduce half time complexity
+    def reverseWords(self, s: str) -> str:
+        res = []
+        left = 0
+        right = 0
+        n = len(s)
+        while right < n:
+            left = right
+            while left < n and s[left] == ' ':
+                left += 1
+            right = left
+            while  right < n and s[right] != ' ':
+                right += 1
+            res.append(s[left:right][::-1])
+        return ' '.join(res)
+
+    def reverse_str(self, s: str, left: int, right: int)->str:
+        res = ''
+        for i in range(right, left - 1, -1):
+            res += s[i]
+        return res
 ```
 
 ## 561. Array Partition
@@ -4637,6 +4737,7 @@ class Node{
 # Set (Python)
 
 ```python
+# in, add, remove 在set中，平均 TC 为 O(1),最坏为O(n), SC 为 O(n)
 # 1. 初始化 set
 hash_set = set()
 
@@ -4685,10 +4786,89 @@ valid = {"Volvo"}
 res = cars.difference(valid)
 # res: "BMW"
 
+# 11. &, -, ^
+# intersection
+# union
+# difference
+# symmetric diff
+# Only valid on sets
 ```
-# Hash Table
+| 操作符 | 方法名           | 含义                   | 示例                             |           |                              |
+| --- | ------------- | -------------------- | ------------------------------ | --------- | ---------------------------- |
+| `&` | `set1 & set2` | 交集（intersection）     | `{1,2} & {2,3}` → `{2}`        |           |                              |
+|  `` ` `` | ``set1 ` set2`` | 并集（union） | `{1,2} \| {2,3}` → `{1,2,3}` |
+| `-` | `set1 - set2` | 差集（difference）       | `{1,2,3} - {2,3}` → `{1}`      |           |                              |
+| `^` | `set1 ^ set2` | 对称差集（symmetric diff） | `{1,2,3} ^ {2,3,4}` → `{1, 4}` |           |                              |
 
-**HashSet**
+
+
+# Hash Table (Python dict)
+```python
+# in, add, remove 在dict中，平均 TC 为 O(1),最坏为O(n), SC 为 O(n)
+# 1. initialize a dict
+d = {}
+
+# 2. insert a new (key, value) pair only if key not present
+d.setdefault(0, 0)
+d.setdefault(2, 3)
+
+# 3. insert or update key, return old value if exist, or None
+result = d.get(1)  # get if exist, or return None
+result = d.get(1, 5)  # get if exist, or return default
+d[1] = 1
+d[1] = 2
+
+# replace: if old value matches, update to new value
+if hashmap.get(1) == 2:
+    hashmap[1] = 3
+    result = True
+else:
+    result = False
+
+# replace without old value
+result = hashmap.get(1)
+if 1 in hashmap:
+    hashmap[1] = 2
+
+# getOrDefault
+v = hashmap.get(1, 0)
+hashmap[1] = v + 1
+
+# 4. get the value of a specific key
+print("The value of key 1 is:", hashmap.get(1))
+
+# 5. delete a key
+hashmap.pop(2, None)  # no error if key doesn't exist
+
+# 6. check if key exists
+if 2 not in hashmap:
+    print("Key 2 is not in the hash map.")
+
+# check if a value is in the hash map
+if 2 not in hashmap.values():
+    print("Value 2 is not in the hash map.")
+
+# 7. get the size of hash map
+print("The size of hash map is:", len(hashmap))
+
+# 8. iterate the hash map
+for k, v in hashmap.items():
+    print(f"({k},{v})", end=" ")
+
+print("\nKeys:", list(hashmap.keys()))
+print("Values:", list(hashmap.values()))
+print("are in the hash map.")
+
+# 9. clear the hash map
+hashmap.clear()
+
+# 10. check if the hash map is empty
+if not hashmap:
+    print("hash map is empty now!")
+
+```
+
+# HashSet
 
 ```java
    public static void main(String[] args) {
@@ -4734,7 +4914,7 @@ res = cars.difference(valid)
 
 
 
-**HashMap**
+# HashMap
 
 ```java
     // 1. initialize a hash map
@@ -4781,10 +4961,96 @@ res = cars.difference(valid)
 	
 ```
 
+## 136. Single Number
+Tag: Hash Table, Array
+```python
+class Solution:
+    # TC: O(n)
+    # SC: O(n)
+    def singleNumber(self, nums: List[int]) -> int:
+        s = set()
+        for ele in nums:
+            if ele in s:
+                s.remove(ele)
+            else:
+                s.add(ele)
+        return s.pop()
+```
+
+## 202.
+Tag: Hash Table
+```python
+class Solution:
+    def isHappy(self, n: int) -> bool:
+        # TC: O()
+        # SC: O()
+        st = set()
+        while n not in st:
+            st.add(n)
+            s = str(n)
+            n = 0
+            for i in s:
+                v = ord(i) - ord('0')
+                n += v**2
+            if n == 1:
+                return True
+        return False
+
+    def isHappy(self, n: int) -> bool:
+        # TC: O(n)
+        # SC: O(1)
+        slow = self.get_value(n)
+        fast = self.get_value(n)
+        fast = self.get_value(fast)
+        while slow != fast:
+            slow = self.get_value(slow)
+            fast = self.get_value(fast)
+            fast = self.get_value(fast)
+        return True if slow == 1 else False
+
+    def get_value(self, n: int) -> int:
+        sm = 0
+        while n:
+            tmp = n % 10
+            sm += tmp ** 2
+            n //= 10
+        return sm
+```
+
+## 217. Contains Duplicate
+Tag: Hash Table, Array
+```python
+class Solution:
+    # TC: O(n)
+    # SC: O(n)
+    def containsDuplicate(self, nums: List[int]) -> bool:
+        s = set()
+        for ele in nums:
+            if ele in s:
+                return True
+            else:
+                s.add(ele)
+        return False
+```
 
 
-
-
+## 349. Intersection of Two Arrays
+Tag: Hash Table, Array
+```python
+class Solution:
+    # TC: O(n)
+    # SC: O(n)
+    def intersection(self, nums1: List[int], nums2: List[int]) -> List[int]:
+        return list(set(nums1) & set(nums2))
+        s = set()
+        s2 = set()
+        for ele in nums1:
+            s.add(ele)
+        for ele in nums2:
+            if ele in s:
+                s2.add(ele)
+        return list(s2)
+```
 
 
 # TreeSet
