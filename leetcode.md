@@ -92,7 +92,11 @@
   - [202. Happy Number](#202-happy-number)
   - [205.](#205)
   - [217. Contains Duplicate](#217-contains-duplicate)
+  - [219. Contains Duplicate II](#219-contains-duplicate-ii)
   - [349. Intersection of Two Arrays](#349-intersection-of-two-arrays)
+  - [350. Intersection of Two Arrays II](#350-intersection-of-two-arrays-ii)
+  - [387. First Unique Character in a String](#387-first-unique-character-in-a-string)
+  - [599. Minimum Index Sum of Two Lists](#599-minimum-index-sum-of-two-lists)
 - [TreeSet](#treeset)
 - [Queue](#queue)
   - [BSF](#bsf)
@@ -5080,15 +5084,48 @@ class Solution:
         return False
 ```
 
+## 219. Contains Duplicate II
+Tag: Hash Table, Array, Sliding Window
+```python
+class Solution:
+    def containsNearbyDuplicate(self, nums: List[int], k: int) -> bool:
+        # TC: O(n)
+        # SC: O(n)
+        # dict
+        d = {}
+        n = len(nums)
+        for i in range(n):
+            if nums[i] in d and i - d[nums[i]] <= k:
+                return True
+            else:
+                d[nums[i]] = i
+        return False
+
+        
+        # TC: O(n)
+        # SC: O(n)
+        # set sliding window
+        s = set()
+        n = len(nums)
+        for i in range(n):
+            if i > k:
+                s.discard(nums[i - k - 1])
+            if nums[i] in s:
+                return True
+            else:
+                s.add(nums[i])
+        return False
+```
 
 ## 349. Intersection of Two Arrays
 Tag: Hash Table, Array
 ```python
 class Solution:
-    # TC: O(n)
-    # SC: O(n)
     def intersection(self, nums1: List[int], nums2: List[int]) -> List[int]:
         return list(set(nums1) & set(nums2))
+
+        # TC: O(n)
+        # SC: O(n)
         s = set()
         s2 = set()
         for ele in nums1:
@@ -5099,6 +5136,81 @@ class Solution:
         return list(s2)
 ```
 
+## 350. Intersection of Two Arrays II
+Tag: Hash Table, Array
+```python
+class Solution:
+    def intersect(self, nums1: List[int], nums2: List[int]) -> List[int]:
+        # TC: O(n)
+        # SC: O(n)
+        count = {}
+        for ele in nums1:
+            v = count.setdefault(ele, 0)
+            count[ele] = v+1
+        res = []
+        for ele in nums2:
+            v = count.get(ele, 0)
+            if v > 0:
+                res.append(ele)
+                count[ele] -= 1
+        return res
+```
+
+## 387. First Unique Character in a String
+Tag: Hash Table, String
+```python
+class Solution:
+        # TC: O(n)
+        # SC: O(1)
+        # lowercase letters as list
+        nums = [0]*26
+        n = len(s)
+        for i in range(n):
+            nums[ord(s[i]) - ord('a')] += 1
+        for i in range(n):
+            if nums[ord(s[i]) - ord('a')] == 1:
+        return i
+
+        # TC: O(n)
+        # SC: O(n)
+        # dict    def firstUniqChar(self, s: str) -> int:
+        d = {}
+        n = len(s)
+        for i in range(n):
+            if s[i] not in d:
+                d[s[i]] = 1
+            else:
+                d[s[i]] += 1
+        for i in range(n):
+            if d.get(s[i]) == 1:
+                return i
+        return -1
+```
+
+
+## 599. Minimum Index Sum of Two Lists
+Tag: Hash Table
+```python
+class Solution:
+    # TC: O(m + n)
+    # SC: O(m)
+    def findRestaurant(self, list1: List[str], list2: List[str]) -> List[str]:
+        d = {}
+        for i in range(len(list1)):
+            d[list1[i]] = i
+        m = len(list1) + len(list2)
+        res = []
+        for i in range(len(list2)):
+            idx1 = d.get(list2[i])
+            if idx1 is not None:
+                if i + idx1 < m:
+                    res.clear()
+                    res.append(list2[i])
+                    m = i + idx1
+                elif i+idx1 == m:
+                    res.append(list2[i])
+        return res
+```
 
 # TreeSet
 
