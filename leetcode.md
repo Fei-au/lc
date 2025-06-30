@@ -88,6 +88,7 @@
 - [HashSet](#hashset)
 - [HashMap](#hashmap)
   - [2. Tow Sum](#2-tow-sum)
+  - [49. Group Anagrams](#49-group-anagrams)
   - [136. Single Number](#136-single-number)
   - [202. Happy Number](#202-happy-number)
   - [205.](#205)
@@ -4980,6 +4981,46 @@ class Solution:
             else:
                 return [d.get(target - nums[i]), i]
         return []
+```
+
+## 49. Group Anagrams
+Tag: Hash Table, Array, String
+```python
+class Solution:
+    def groupAnagrams(self, strs: List[str]) -> List[List[str]]:
+        # TC: O(n * k log k) sort O(k log k)，其中k为要排序的字符串长度
+        # SC: O(nk)
+        res = []
+        d = {}
+        n = len(strs)
+        for i in range(n):
+            ele = strs[i]
+            s = ''.join(sorted(ele))
+            if s in d:
+                res[d.get(s)].append(ele)
+            else:
+                d[s] = len(res)
+                res.append([ele])
+        return res
+
+        # TC: O(n * k)
+        # SC: O(26 n) -> O(n)
+        res = []
+        d = {}
+        n = len(strs)
+        for i in range(n):
+            ele = strs[i]
+            temp = [0]*26
+            for char in ele:
+                temp[ord(char) - ord('a')] += 1
+            s = tuple(temp)
+            # s = ','.join([str(char) for char in temp])
+            if s in d:
+                res[d.get(s)].append(ele)
+            else:
+                d[s] = len(res)
+                res.append([ele])
+        return res
 ```
 
 ## 136. Single Number
