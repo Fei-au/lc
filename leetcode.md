@@ -88,6 +88,7 @@
 - [HashSet](#hashset)
 - [HashMap](#hashmap)
   - [2. Tow Sum](#2-tow-sum)
+  - [36. Valid Sudoku](#36-valid-sudoku)
   - [49. Group Anagrams](#49-group-anagrams)
   - [136. Single Number](#136-single-number)
   - [202. Happy Number](#202-happy-number)
@@ -4981,6 +4982,31 @@ class Solution:
             else:
                 return [d.get(target - nums[i]), i]
         return []
+```
+
+## 36. Valid Sudoku
+Tag: Array, Hash Table, Matrix
+```python
+class Solution:
+    def isValidSudoku(self, board: List[List[str]]) -> bool:
+        # TC: O(1)
+        # SC: O(1)
+        rows = [set() for _ in range(9)]
+        cols = [set() for _ in range(9)]
+        boxes = [set() for _ in range(9)]
+        for i in range(9):
+            for j in range(9):
+                v = board[i][j]
+                if v == '.':
+                    continue
+                box_idx = (i // 3) * 3 + j // 3
+                if v in rows[i]  or v in cols[j] or v in boxes[box_idx]:
+                    return False
+                rows[i].add(v)
+                cols[j].add(v)
+                boxes[box_idx].add(v)
+                
+        return True
 ```
 
 ## 49. Group Anagrams
