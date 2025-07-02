@@ -99,6 +99,7 @@
   - [350. Intersection of Two Arrays II](#350-intersection-of-two-arrays-ii)
   - [387. First Unique Character in a String](#387-first-unique-character-in-a-string)
   - [599. Minimum Index Sum of Two Lists](#599-minimum-index-sum-of-two-lists)
+- [Tree](#tree)
 - [TreeSet](#treeset)
 - [Queue](#queue)
   - [BSF](#bsf)
@@ -189,7 +190,22 @@
 - Hash Table
   - Check duplicate
   - Use space to optimize time
-  - 
+
+- Tree
+  - 前中后序：指根在哪个位置遍历
+    - 前序（Preorder Traversal）：根 → 左 → 右
+    - 中序（Inorder Traversal）：左 → 根 → 右
+    - 后序（Postorder Traversal）：左 → 右 → 根
+  - 唯一确定一棵树，即通过序列化后的结果，是否可以还原该树
+    - 中序+前序
+      - 前序第一个是根节点
+      - 在中序中找到根的位置 → 左右子树大小就确定了
+      - 然后递归划分即可
+    - 中序+后序
+      - 后序最后一个是根节点
+      - 在中序中找根的位置，同样能划分左右子树
+      - 再递归处理即可
+    - 当空节点在序列化中用`null`等表示的时候，则只前序，或后序序列化就可以唯一确定一棵树。通常用**前序**
   
 
 
@@ -5278,6 +5294,10 @@ class Solution:
                     res.append(list2[i])
         return res
 ```
+
+# Tree
+
+
 
 # TreeSet
 
