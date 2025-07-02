@@ -85,9 +85,12 @@
   - [707. Design Linked List](#707-design-linked-list)
 - [Set (Python)](#set-python)
 - [Hash Table (Python dict)](#hash-table-python-dict)
+  - [defaultdict](#defaultdict)
+  - [Counter](#counter)
 - [HashSet](#hashset)
 - [HashMap](#hashmap)
   - [2. Tow Sum](#2-tow-sum)
+  - [3. Longest Substring Without Repeating Characters](#3-longest-substring-without-repeating-characters)
   - [36. Valid Sudoku](#36-valid-sudoku)
   - [49. Group Anagrams](#49-group-anagrams)
   - [136. Single Number](#136-single-number)
@@ -98,19 +101,21 @@
   - [349. Intersection of Two Arrays](#349-intersection-of-two-arrays)
   - [350. Intersection of Two Arrays II](#350-intersection-of-two-arrays-ii)
   - [387. First Unique Character in a String](#387-first-unique-character-in-a-string)
+  - [454. 4Sum II](#454-4sum-ii)
   - [599. Minimum Index Sum of Two Lists](#599-minimum-index-sum-of-two-lists)
+  - [771. Jewels and Stones](#771-jewels-and-stones)
 - [Tree](#tree)
+  - [Heap](#heap)
+    - [PriorityQueue (Python)](#priorityqueue-python)
+    - [PriorityQueue](#priorityqueue)
+  - [347. Top K Frequent Elements](#347-top-k-frequent-elements)
   - [652. Find Duplicate Subtrees](#652-find-duplicate-subtrees)
 - [TreeSet](#treeset)
 - [Queue](#queue)
   - [BSF](#bsf)
-- [Deque or LinkedList](#deque-or-linkedlist)
+  - [Deque or LinkedList](#deque-or-linkedlist)
 - [Stack](#stack)
   - [DSF](#dsf)
-- [Heap](#heap)
-  - [PriorityQueue](#priorityqueue)
-  - [](#)
-  - [](#-1)
 - [Binary Search](#binary-search)
 - [Sorting 排序算法](#sorting-排序算法)
   - [快排 QuickSort](#快排-quicksort)
@@ -162,7 +167,12 @@
     - Get a valid window and process
     - Assign left pointer to right pointer position
   - Use the outer loop to iternate the right pointer
-    - Check if the range valid in every outer loop
+    - Method 1.
+      - While right < n:
+      - Move right pointer to add valid element
+      - Move left pointer to eliminate invalid element (This could use the outer while right < n loop)
+    - Method 2. 
+      - Check if the range valid in every outer loop
       - if not valid, then keep iterate the right pointer
       - if valid, inside the outer loop, loop left pointer 
   
@@ -649,7 +659,6 @@ print(arr[::-1])  # [50, 40, 30, 20, 10] 完整反转
 ```python
 list, tuple, str, set, dict, range, bytes, bytearray, file, zip, map, filter, enumerate, reversed, deque, frozenset
 ```
-
 
 # Array
 
@@ -4896,6 +4905,7 @@ if not hashmap:
 
 ```
 
+## defaultdict
 
 ```python
 # defaultdict
@@ -4904,6 +4914,19 @@ from collections import defaultdict
 d = defaultdict(int)
 
 ```
+
+## Counter
+```python
+# 1. Initialize
+counter = Counter('2113412345') # fill an iterable object
+>>> Counter({'2': 2, '1': 2, '3': 2, '4': 2, '5': 1}) # Return a dict like object, which has methods keys, values, items, get
+
+# 2. Get most k common elements
+# Return a list of tuples
+counter.most_common(3)
+>>> [('2', 2), ('1', 2), ('3', 2)]
+```
+
 
 # HashSet
 
@@ -5012,6 +5035,32 @@ class Solution:
                 return [d.get(target - nums[i]), i]
         return []
 ```
+
+## 3. Longest Substring Without Repeating Characters
+![image-20250702001](leetcode.assets/image-20250702001.png)
+Tag: Hash Table, Two Pointers, String, Sliding Window
+```python
+class Solution:
+    def lengthOfLongestSubstring(self, s: str) -> int:
+        # TC: O(n)
+        # SC: O(n)
+        start = 0
+        end = 0
+        res = 0
+        window = set()
+        n = len(s)
+        while end < n:
+            while end < n and s[end] not in window:
+                window.add(s[end])
+                end += 1
+            res = max(res, end - start)
+            # while end < n and  s[end] in window:
+            window.remove(s[start])
+            start += 1
+        return res
+                
+```
+
 
 ## 36. Valid Sudoku
 Tag: Array, Hash Table, Matrix
@@ -5283,6 +5332,26 @@ class Solution:
         return -1
 ```
 
+## 454. 4Sum II
+Tag: Hash Table, Array
+```python
+class Solution:
+    ## TC: O(n^2)
+    ## SC: O(n^2)
+    def fourSumCount(self, nums1: List[int], nums2: List[int], nums3: List[int], nums4: List[int]) -> int:
+        s = {}
+        for ele1 in nums3:
+            for ele2 in nums4:
+                v = ele1 + ele2
+                s[v] = s.setdefault(v, 0) + 1
+        res = 0
+        for ele1 in nums1:
+            for ele2 in nums2:
+                v = -(ele1+ele2)
+                if v  in s:
+                    res += s[v]
+        return res
+```
 
 ## 599. Minimum Index Sum of Two Lists
 Tag: Hash Table
@@ -5307,10 +5376,129 @@ class Solution:
                     res.append(list2[i])
         return res
 ```
+## 771. Jewels and Stones
+Tag: Hash Table
+```python
+class Solution:
+    # TC: O(n)
+    # SC: O(n)
+    def numJewelsInStones(self, jewels: str, stones: str) -> int:
+        s = set(jewels)
+        res = 0
+        for ele in stones:
+            if ele in s:
+                res += 1
+        return res
+```
+
 
 # Tree
 
 
+
+## Heap
+
+堆（Heap）是一种特殊的树形数据结构，通常是完全二叉树。它满足堆属性，即对于最大堆（Max-Heap），父节点的值总是大于或等于子节点的值；对于最小堆（Min-Heap），父节点的值总是小于或等于子节点的值
+
+### PriorityQueue (Python)
+```python
+# 默认最小堆
+import heapq
+# 1. Initialize
+l = []
+
+# 2. Push
+heapq.heappush(l, 5) # push element 5 into l, maintain heap feature
+
+# 3. Pop
+v = heapq.heappop() # pop the min element
+
+# 4. Peek
+l[0] # get the min element
+
+# 5. Get n largets / smallest element
+heapq.nsmallest(
+    n: int, 
+    iterable: Iterable[_S], 
+    key: (_S) -> SupportsDunderLT | SupportsDunderGT | None = None) # iterable是可iterable对象，key是比较的函数，与sorted里的key一样。
+```
+
+
+### PriorityQueue
+
+Java中没有直接命名为`Heap`的类，但提供了`PriorityQueue`类，它内部使用堆结构来实现。`PriorityQueue`默认是一个最小堆（Min-Heap），也可以通过自定义比较器（Comparator）来实现最大堆（Max-Heap）或其他顺序。
+
+```java
+// This is the default min-heap
+int comparator(a1, a2){
+	return a1-a2;
+}
+```
+
+```java
+import java.util.PriorityQueue;
+
+public class Main {
+    public static void main(String[] args) {
+        // 创建一个最小堆 (Min-Heap)
+        PriorityQueue<Integer> minHeap = new PriorityQueue<>();
+
+        // 插入元素
+        minHeap.add(10);
+        minHeap.add(4);
+        minHeap.add(15);
+
+        // 获取最小值（不删除）
+        System.out.println(minHeap.peek()); // 输出: 4
+
+        // 删除最小值
+        System.out.println(minHeap.poll()); // 输出: 4
+
+        // 现在的最小值
+        System.out.println(minHeap.peek()); // 输出: 10
+
+        // 创建一个最大堆 (Max-Heap)
+        PriorityQueue<Integer> maxHeap = new PriorityQueue<>((a, b) -> b - a);
+
+        maxHeap.add(10);
+        maxHeap.add(4);
+        maxHeap.add(15);
+
+        // 获取最大值
+        System.out.println(maxHeap.peek()); // 输出: 15
+    }
+}
+```
+
+offer/add
+
+poll/remove
+
+peek
+
+offer的时间复杂度为 `O(log(n))` n为queue的size
+
+## 347. Top K Frequent Elements
+Tag: Array, Hash Table, Heap (Priority Queue), Counting, Sorting, Bucket Sort, Quickselect, Divide and Conquer
+```python
+class Solution:
+    def topKFrequent(self, nums: List[int], k: int) -> List[int]:
+        # TC: O(n*logk)
+        # SC: O(m) # m is unique keys
+        counter = Counter(nums) # O(n) O(m)
+        return heapq.nlargest(k, counter, counter.get) # O(n*logk)
+        
+        # TC: O(n*logk)
+        # SC: O(m) # m is unique keys
+        d = {}
+        for ele in nums:
+            d[ele] = d.setdefault(ele, 0) + 1
+        v = list(d.values())
+        v.sort(reverse=True)
+        m = v[k-1]
+        res = [k for k,v in d.items() if v >= m]
+        return res
+```
 ## 652. Find Duplicate Subtrees
 Tag: Hash Table, Tree, Depth-First Search, Binary Tree
 ```python
@@ -5449,7 +5637,7 @@ int BFS(Node root, Node target) {
 
 
 
-# Deque or LinkedList
+## Deque or LinkedList
 
 ```java
 LinkedList<Integer> deque = new LinkedList<>();
@@ -5553,74 +5741,6 @@ boolean DFS(int root, int target) {
 ```
 
 
-
-# Heap
-
-堆（Heap）是一种特殊的树形数据结构，通常是完全二叉树。它满足堆属性，即对于最大堆（Max-Heap），父节点的值总是大于或等于子节点的值；对于最小堆（Min-Heap），父节点的值总是小于或等于子节点的值
-
-## PriorityQueue
-
-Java中没有直接命名为`Heap`的类，但提供了`PriorityQueue`类，它内部使用堆结构来实现。`PriorityQueue`默认是一个最小堆（Min-Heap），也可以通过自定义比较器（Comparator）来实现最大堆（Max-Heap）或其他顺序。
-
-```java
-// This is the default min-heap
-int comparator(a1, a2){
-	return a1-a2;
-}
-```
-
-```java
-import java.util.PriorityQueue;
-
-public class Main {
-    public static void main(String[] args) {
-        // 创建一个最小堆 (Min-Heap)
-        PriorityQueue<Integer> minHeap = new PriorityQueue<>();
-
-        // 插入元素
-        minHeap.add(10);
-        minHeap.add(4);
-        minHeap.add(15);
-
-        // 获取最小值（不删除）
-        System.out.println(minHeap.peek()); // 输出: 4
-
-        // 删除最小值
-        System.out.println(minHeap.poll()); // 输出: 4
-
-        // 现在的最小值
-        System.out.println(minHeap.peek()); // 输出: 10
-
-        // 创建一个最大堆 (Max-Heap)
-        PriorityQueue<Integer> maxHeap = new PriorityQueue<>((a, b) -> b - a);
-
-        maxHeap.add(10);
-        maxHeap.add(4);
-        maxHeap.add(15);
-
-        // 获取最大值
-        System.out.println(maxHeap.peek()); // 输出: 15
-    }
-}
-```
-
-
-
-
-
-## 
-
-offer/add
-
-poll/remove
-
-peek
-
-
-
-offer的时间复杂度为 `O(log(n))` n为queue的size
-
-## 
 
 # Binary Search
 
