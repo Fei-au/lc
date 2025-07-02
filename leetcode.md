@@ -100,6 +100,7 @@
   - [387. First Unique Character in a String](#387-first-unique-character-in-a-string)
   - [599. Minimum Index Sum of Two Lists](#599-minimum-index-sum-of-two-lists)
 - [Tree](#tree)
+  - [652. Find Duplicate Subtrees](#652-find-duplicate-subtrees)
 - [TreeSet](#treeset)
 - [Queue](#queue)
   - [BSF](#bsf)
@@ -178,6 +179,8 @@
   - N th from the end, Two pointers, one go n step first, and then another from start, the first one from where it is, this find the nth from the end 
 
 - Recursion
+  - Depth-First Search
+  
 
 - Matrix
   - Set from and start then loop, the row start, column start, row end, column end could be change to satisfy the condition
@@ -191,7 +194,7 @@
   - Check duplicate
   - Use space to optimize time
 
-- Tree
+- Binary Tree
   - 前中后序：指根在哪个位置遍历
     - 前序（Preorder Traversal）：根 → 左 → 右
     - 中序（Inorder Traversal）：左 → 根 → 右
@@ -207,7 +210,6 @@
       - 再递归处理即可
     - 当空节点在序列化中用`null`等表示的时候，则只前序，或后序序列化就可以唯一确定一棵树。通常用**前序**
   
-
 
 
 # Time Complexities
@@ -4832,9 +4834,11 @@ res = cars.difference(valid)
 # 1. initialize a dict
 d = {}
 
-# 2. insert a new (key, value) pair only if key not present
-d.setdefault(0, 0)
-d.setdefault(2, 3)
+# 2. insert a new (key, value) pair only if key not present, return original value if key exists, return default value if not exist
+value = d.setdefault(0, 0)
+>>> 0
+value = d.setdefault(0, 3)
+>>> 0
 
 # 3. insert or update key, return old value if exist, or None
 result = d.get(1)  # get if exist, or return None
@@ -4889,6 +4893,15 @@ hashmap.clear()
 # 10. check if the hash map is empty
 if not hashmap:
     print("hash map is empty now!")
+
+```
+
+
+```python
+# defaultdict
+from collections import defaultdict
+# 1. Initialize
+d = defaultdict(int)
 
 ```
 
@@ -5297,6 +5310,35 @@ class Solution:
 
 # Tree
 
+
+## 652. Find Duplicate Subtrees
+Tag: Hash Table, Tree, Depth-First Search, Binary Tree
+```python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    # TC: O(n^2)
+    # SC: O(n^2) # n is number of tree node
+    def findDuplicateSubtrees(self, root: Optional[TreeNode]) -> List[Optional[TreeNode]]:
+        hm = {}
+        res = []
+        self.traverse(hm,res,root)
+        return res
+
+    # preorder traverse
+    def traverse(self, hm: dict, res: List[Optional[TreeNode]], root: Optional[TreeNode]) -> str:
+        if root == None:
+            return 'None'
+        serializer = str(root.val) + ',' + self.traverse(hm, res, root.left) + ',' + self.traverse(hm, res, root.right)
+        if serializer in hm and hm.get(serializer) == 2:
+            res.append(root)
+        hm[serializer] =  hm.setdefault(serializer, 1) + 1
+        return serializer
+```
 
 
 # TreeSet
