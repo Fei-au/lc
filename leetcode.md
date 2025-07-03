@@ -106,7 +106,7 @@
   - [771. Jewels and Stones](#771-jewels-and-stones)
 - [Tree](#tree)
   - [Heap](#heap)
-    - [PriorityQueue (Python)](#priorityqueue-python)
+    - [Heap Queue (Python)](#heap-queue-python)
     - [PriorityQueue](#priorityqueue)
   - [347. Top K Frequent Elements](#347-top-k-frequent-elements)
   - [652. Find Duplicate Subtrees](#652-find-duplicate-subtrees)
@@ -114,8 +114,11 @@
 - [Queue](#queue)
   - [BSF](#bsf)
   - [Deque or LinkedList](#deque-or-linkedlist)
+  - [200. Number of Islands](#200-number-of-islands)
+  - [622. Design Circular Queue](#622-design-circular-queue)
 - [Stack](#stack)
   - [DSF](#dsf)
+  - [200. Number of Islands](#200-number-of-islands-1)
 - [Binary Search](#binary-search)
 - [Sorting 排序算法](#sorting-排序算法)
   - [快排 QuickSort](#快排-quicksort)
@@ -188,14 +191,10 @@
   - Find interaction point, Connect two linked list by loop one and then go another one.
   - N th from the end, Two pointers, one go n step first, and then another from start, the first one from where it is, this find the nth from the end 
 
-- Recursion
-  - Depth-First Search
-  
-
 - Matrix
   - Set from and start then loop, the row start, column start, row end, column end could be change to satisfy the condition
   - Use (row + column) to indicate diagnoses
-  - 
+  - Use dirs [[0,1], [0,-1], [1,0], [-1,0]] to indicate four directions
 
 - Dynamic Programming
   - 118 119 redo by using dynamic programming thoughts
@@ -220,7 +219,15 @@
       - 再递归处理即可
     - 当空节点在序列化中用`null`等表示的时候，则只前序，或后序序列化就可以唯一确定一棵树。通常用**前序**
   
+- DFS
+  - 
 
+- BFS
+  -
+
+- Stack
+
+- Queue
 
 # Time Complexities
 
@@ -5400,7 +5407,7 @@ class Solution:
 
 堆（Heap）是一种特殊的树形数据结构，通常是完全二叉树。它满足堆属性，即对于最大堆（Max-Heap），父节点的值总是大于或等于子节点的值；对于最小堆（Min-Heap），父节点的值总是小于或等于子节点的值
 
-### PriorityQueue (Python)
+### Heap Queue (Python)
 ```python
 # 默认最小堆
 import heapq
@@ -5580,6 +5587,44 @@ Add at the end of the queue
 
 Remove the first element
 
+```python
+from collections import deque
+# deque is a two ends queue
+# 1. Initialize
+q = deque()
+
+# 2. Add element (append at right)
+q.append(1)
+q.append(2)
+
+q.appendleft(2)
+
+# 3. Add and remove from left
+q.popleft() # Queue, FIFO
+
+# 4. Pop elemnt (remove from right)
+q.pop() # Stack, FILO
+
+# 5. Lenght
+len(q)
+
+# 6. Queue is empty
+not q
+
+# 7. Rotate n times
+q.rotate(n)
+
+# 8. Clear
+q.clear()
+
+# 9. Extend queue
+q.extend([4,5])
+q.extendleft([4,5])
+
+# 10. Set size of queue
+dq = deque(maxlen=3) # 最多保留3个元素，超出会自动从另一端(左边)弹出
+```
+
 ```java
 public class Main {
     public static void main(String[] args) {
@@ -5602,10 +5647,7 @@ public class Main {
 }
 ```
 
-
-
 ## BSF
-
 ```java
 /**
  * Return the length of the shortest path between root and target node.
@@ -5634,9 +5676,6 @@ int BFS(Node root, Node target) {
 ```
 
 
-
-
-
 ## Deque or LinkedList
 
 ```java
@@ -5651,6 +5690,92 @@ deque.removeFirst();
 deque.removeLast();
 ```
 
+## 200. Number of Islands
+Tag: BFS, Matrix, Array
+```python
+    def numIslands(self, grid: List[List[str]]) -> int:
+        q = deque()
+        islands = 0
+        dirs = [
+            [0,1],
+            [0,-1],
+            [1,0],
+            [-1,0],
+        ]
+
+        for i in range(len(grid)):
+            for j in range(len(grid[0])):
+                if grid[i][j] == '1':
+                    q.append([i,j])
+                    islands+=1
+                while len(q):
+                    size = len(q)
+                    for _ in range(size):
+                        node = q.popleft()
+                        for dir in dirs:
+                            x = dir[0] + node[0] 
+                            y = dir[1] + node[1]
+                            if x >= 0 and x < len(grid) and y >= 0 and y < len(grid[0]) and grid[x][y] == '1':
+                                grid[x][y] = '0'
+                                q.append([x,y])
+        return islands
+```
+
+## 622. Design Circular Queue
+Tag: Queue
+```java
+class MyCircularQueue {
+    private int[] queue;
+    private int size;
+    private int front;
+    private int rear;
+    public MyCircularQueue(int k) {
+        queue = new int[k+1];
+        size=k+1;
+        front=0;
+        rear=0;
+    }
+    
+    public boolean enQueue(int value) {
+        if(isFull()){
+            return false;
+        }
+        queue[rear] = value;
+        rear = (rear+1)%size;
+        return true;
+    }
+    
+    public boolean deQueue() {
+        if(isEmpty()){
+            return false;
+        }
+        front = (front+1)%size;
+        return true;
+    }
+    
+    public int Rear() {
+        if(isEmpty()){
+            return -1;
+        }
+        return queue[(rear-1+size)%size];
+    }
+    
+    public int Front() {
+        if(isEmpty()){
+            return -1;
+        }
+        return queue[front];
+    }
+    
+    public boolean isEmpty() {
+        return front==rear;
+    }
+    
+    public boolean isFull() {
+        return (rear+1)%size==front;
+    }
+}
+```
 
 
 # Stack
@@ -5740,6 +5865,35 @@ boolean DFS(int root, int target) {
 }
 ```
 
+## 200. Number of Islands
+Tag: DFS, Matrix, Array
+```python
+class Solution:
+    def numIslands(self, grid: List[List[str]]) -> int:
+        islands = 0
+        dirs = [
+            [0,1],
+            [0,-1],
+            [1,0],
+            [-1,0],
+        ]
+        for i in range(len(grid)):
+            for j in range(len(grid[0])):
+                if grid[i][j] == '1':
+                    self.dfs(grid, i, j, dirs)
+                    islands+=1
+        return islands
+
+    def dfs(self, grid: List[List[str]], i:int, j:int, dirs: List[List[int]]) -> None:
+        grid[i][j] = '0'
+        if i < 0 or i >= len(grid) or j < 0 or j >= len(grid[0]):
+            return
+        for dir in dirs:
+            x = dir[0] + i
+            y = dir[1] + j
+            if x >= 0 and x < len(grid) and y >= 0 and y < len(grid[0]) and grid[x][y] == '1':
+                self.dfs(grid, x, y, dirs)
+```
 
 
 # Binary Search
