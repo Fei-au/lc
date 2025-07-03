@@ -10,6 +10,7 @@
 - [Computation](#computation)
   - [Python](#python)
   - [Division and Modulus](#division-and-modulus)
+- [Random (Python)](#random-python)
 - [Random](#random)
   - [nextInt](#nextint)
 - [List (Python)](#list-python)
@@ -97,6 +98,7 @@
   - [219. Contains Duplicate II](#219-contains-duplicate-ii)
   - [349. Intersection of Two Arrays](#349-intersection-of-two-arrays)
   - [350. Intersection of Two Arrays II](#350-intersection-of-two-arrays-ii)
+  - [380. Insert Delete GetRandom O(1)](#380-insert-delete-getrandom-o1)
   - [387. First Unique Character in a String](#387-first-unique-character-in-a-string)
   - [599. Minimum Index Sum of Two Lists](#599-minimum-index-sum-of-two-lists)
 - [Tree](#tree)
@@ -487,6 +489,19 @@ Reminder / modulus operations
 ```
 
 
+# Random (Python)
+```python
+import random
+
+# 1. get rand int
+random.randint(a,b) # a, b inclusive
+
+# 2. get random element from non empty structure (list, tuple, string, etc.)
+random.choice(my_list)
+
+# 3. get value from [0, 1), return float
+v = random.random()
+```
 
 # Random
 
@@ -5250,6 +5265,41 @@ class Solution:
                 res.append(ele)
                 count[ele] -= 1
         return res
+```
+
+## 380. Insert Delete GetRandom O(1)
+Tag: Hash Table, Array, Randomized
+```python
+class RandomizedSet:
+    # All TC: O(1)
+    # SC: O(n)
+    def __init__(self):
+        self.l = []
+        self.d = {}
+
+    def insert(self, val: int) -> bool:
+        if val in self.d:
+            return False
+        else:
+            self.d[val] = len(self.l)
+            self.l.append(val)
+            return True
+
+    def remove(self, val: int) -> bool:
+        if val not in self.d:
+            return False
+        else:
+            val_idx = self.d[val]
+            last_v = self.l[-1]
+            self.l[val_idx] = last_v
+            self.d[last_v] = val_idx
+            self.l.pop()
+            self.d.pop(val)
+            return True
+
+    def getRandom(self) -> int:
+            return choice(self.l)
+
 ```
 
 ## 387. First Unique Character in a String
