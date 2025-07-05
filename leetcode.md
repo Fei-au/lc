@@ -122,6 +122,7 @@
 - [Stack](#stack)
   - [DSF](#dsf)
   - [20. Valid Parentheses](#20-valid-parentheses)
+  - [150. Evaluate Reverse Polish Notation](#150-evaluate-reverse-polish-notation)
   - [155. Min Stack](#155-min-stack)
   - [200. Number of Islands](#200-number-of-islands-1)
   - [739. Daily Temperatures](#739-daily-temperatures)
@@ -6011,6 +6012,31 @@ class Solution:
             else:
                 return False
         return True if len(stack) == 0 else False
+```
+## 150. Evaluate Reverse Polish Notation
+Tag: Stack, Math
+```python
+class Solution:
+    # TC: O(n)
+    # SC: O(n)
+    def evalRPN(self, tokens: List[str]) -> int:
+        stack = []
+        s = ['+', '-', '*', '/']
+        for ele in tokens:
+            if ele not in s:
+                stack.append(int(ele))
+            else:
+                var2 = stack.pop()
+                var1 = stack.pop()
+                if ele == '+':
+                    stack.append(var1 + var2)
+                elif ele == '-':
+                    stack.append(var1 - var2)
+                elif ele == '*':
+                    stack.append(var1 * var2)
+                elif ele == '/':
+                    stack.append(int(var1 / var2))
+        return stack[-1]
 ```
 
 ## 155. Min Stack
