@@ -117,6 +117,7 @@
   - [BSF](#bsf)
   - [Deque or LinkedList](#deque-or-linkedlist)
   - [200. Number of Islands](#200-number-of-islands)
+  - [279. Perfect Squares](#279-perfect-squares)
   - [622. Design Circular Queue](#622-design-circular-queue)
 - [Stack](#stack)
   - [DSF](#dsf)
@@ -198,6 +199,9 @@
   - Use (row + column) to indicate diagnoses
   - Use dirs [[0,1], [0,-1], [1,0], [-1,0]] to indicate four directions
 
+- Math
+  - Two Sum or sum questions, change the question to make reminder to 0, save each middiate value in a set, and check if (target - cur) in the set
+
 - Dynamic Programming
   - 118 119 redo by using dynamic programming thoughts
 
@@ -221,15 +225,15 @@
       - 再递归处理即可
     - 当空节点在序列化中用`null`等表示的时候，则只前序，或后序序列化就可以唯一确定一棵树。通常用**前序**
   
-- DFS
+- Stack
+  - DFS
   - 
 
-- BFS
-  -
-
-- Stack
-
 - Queue
+  - BFS
+    - in BFS, use queue to save each layer's value
+    - loop the layer by using get the size before loop
+    - check if valid in the loop, store next layer's value in the queue
 
 # Time Complexities
 
@@ -467,6 +471,18 @@ pow(5,2)
 ## Floor divide
 5 // 2 = 2
 4 // 2 = 2
+
+# Square root
+result = math.sqrt(16)
+>>> 4.0
+
+result = 16**0.5
+>>> 4.0
+
+# Float to int
+x = 5.2
+int(x)
+round(x)
 ```
 
 ## Division and Modulus
@@ -5769,6 +5785,35 @@ Tag: BFS, Matrix, Array
                                 grid[x][y] = '0'
                                 q.append([x,y])
         return islands
+```
+
+## 279. Perfect Squares
+Tag: Queue, Math
+```python
+class Solution:
+    # TC: O(n logn)
+    # SC: O(n)
+    def numSquares(self, n: int) -> int:
+        squares = [i**2 for i in range(1,n+1,1)]
+        visited = set()
+        step = 0
+        q = deque()
+        q.append(n)
+        while len(q):
+            size = len(q)
+            step += 1
+            for _ in range(size):
+                cur = q.popleft()
+                for square in squares:
+                    reminder = cur - square
+                    if reminder == 0:
+                        return step
+                    if reminder < 0:
+                        break
+                    if reminder not in visited:
+                        q.append(reminder)
+                        visited.add(reminder)
+        return -1
 ```
 
 ## 622. Design Circular Queue
