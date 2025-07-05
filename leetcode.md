@@ -121,7 +121,10 @@
   - [622. Design Circular Queue](#622-design-circular-queue)
 - [Stack](#stack)
   - [DSF](#dsf)
+  - [20. Valid Parentheses](#20-valid-parentheses)
+  - [155. Min Stack](#155-min-stack)
   - [200. Number of Islands](#200-number-of-islands-1)
+  - [739. Daily Temperatures](#739-daily-temperatures)
 - [Binary Search](#binary-search)
 - [Sorting 排序算法](#sorting-排序算法)
   - [快排 QuickSort](#快排-quicksort)
@@ -225,6 +228,9 @@
       - 再递归处理即可
     - 当空节点在序列化中用`null`等表示的时候，则只前序，或后序序列化就可以唯一确定一棵树。通常用**前序**
   
+- Node
+  - Define Node, integrate information in a node to save inforamtion at each node. Like min of current
+   
 - Stack
   - DFS
   - 
@@ -5887,6 +5893,29 @@ added at the end of the stack
 
 remove the last element
 
+```python
+# 1. Initialize stack
+stack = []
+
+# 2. Append element
+stack.append(1)
+stack.append(2)
+
+# 3. Pop element, return the poped item
+value = stack.pop()
+
+# 4. Peek element
+top = stack[-1]
+
+# 5. Length and empty
+len(stack)
+
+# 6. Search element
+len(stack) -1 - stack.index(value)
+
+```
+
+
 ```java
 // "static void main" must be defined in a public class.
 public class Main {
@@ -5959,6 +5988,62 @@ boolean DFS(int root, int target) {
     return false;
 }
 ```
+## 20. Valid Parentheses
+Tag: Stack
+```python
+class Solution:
+    # TC: O(n)
+    # SC: O(n)
+    def isValid(self, s: str) -> bool:
+        stack = []
+        d = {
+            "(": ")",
+            "[": "]",
+            "{": "}",
+        }
+        for char in s:
+            if char in d:
+                stack.append(char)
+            elif len(stack) == 0:
+                return False
+            elif d.get(stack[-1]) == char:
+                stack.pop()
+            else:
+                return False
+        return True if len(stack) == 0 else False
+```
+
+## 155. Min Stack
+Tag: Stack, Node
+```python
+class MinStack:
+    # TC: O(1)
+    # SC: O(1) if output does not count as space consume
+    def __init__(self):
+        self.head=None
+
+    def push(self, val: int) -> None:
+        if self.head == None:
+            self.head = Node(val, None, val)
+        else:
+            self.head = Node(val, self.head, min(val, self.head.min))
+
+    def pop(self) -> None:
+        self.head = self.head.next
+
+    def top(self) -> int:
+        return self.head.val
+
+    def getMin(self) -> int:
+        return self.head.min
+
+
+class Node:
+    def __init__(self, val: int, next: 'Node', min: int):
+        self.val = val
+        self.next = next
+        self.min = min
+```
 
 ## 200. Number of Islands
 Tag: DFS, Matrix, Array
@@ -5990,6 +6075,36 @@ class Solution:
                 self.dfs(grid, x, y, dirs)
 ```
 
+## 739. Daily Temperatures
+Tag: Stack
+```python
+class Solution:
+    # TC: O(n)
+    # SC: O(n)
+    def dailyTemperatures(self, temperatures: List[int]) -> List[int]:
+        # From front to end
+        stack = []
+        n = len(temperatures)
+        result = [0]*n
+        for i in range(n):
+            while len(stack) and temperatures[i] > temperatures[stack[-1]]:
+                index = stack.pop()
+                result[index] = i  - index
+            stack.append(i)
+        return result
+
+        # # From back to front
+        # stack = []
+        # n = len(temperatures)
+        # result = [0]*n
+        # for i in range(n-1, -1, -1):
+        #     while len(stack) and temperatures[stack[-1]] <= temperatures[i]:
+        #         index = stack.pop()
+        #     result[i] = stack[-1] - i if len(stack) else 0 
+        #     stack.append(i)
+
+        # return result
+```
 
 # Binary Search
 
