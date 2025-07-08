@@ -122,6 +122,7 @@
 - [Stack](#stack)
   - [DSF](#dsf)
   - [20. Valid Parentheses](#20-valid-parentheses)
+  - [133. Clone Graph](#133-clone-graph)
   - [150. Evaluate Reverse Polish Notation](#150-evaluate-reverse-polish-notation)
   - [155. Min Stack](#155-min-stack)
   - [200. Number of Islands](#200-number-of-islands-1)
@@ -6013,6 +6014,52 @@ class Solution:
                 return False
         return True if len(stack) == 0 else False
 ```
+
+## 133. Clone Graph
+Tag: DFS, Node
+```python
+from typing import Optional
+class Solution:
+    # TC: O(n*m)  n is node number, m is the most edge in nodes
+    # SC: O(1)
+    def cloneGraph(self, node: Optional['Node']) -> Optional['Node']:
+        d = [0]*101
+        
+        return self.dfs(node, d)
+    
+    def dfs(self, node:  Optional['Node'], d: list['Node']) -> Optional['Node']:
+        if node is None:
+            return node
+        
+        if d[node.val]:
+            return d[node.val]
+
+        cp_node = Node(node.val)
+        d[cp_node.val] = cp_node
+        for neighbor in node.neighbors:
+            cp_node.neighbors.append(self.dfs(neighbor, d))
+        return cp_node
+
+    # use dict
+    def cloneGraph(self, node: Optional['Node']) -> Optional['Node']:
+        d = {}
+        
+        return self.dfs(node, d)
+    
+    def dfs(self, node:  Optional['Node'], d: dict[int, str]) -> Optional['Node']:
+        if node is None:
+            return node
+        
+        if d.get(node.val):
+            return d.get(node.val)
+
+        cp_node = Node(node.val)
+        d[cp_node.val] = cp_node
+        for neighbor in node.neighbors:
+            cp_node.neighbors.append(self.dfs(neighbor, d))
+        return cp_node
+```
+
 ## 150. Evaluate Reverse Polish Notation
 Tag: Stack, Math
 ```python
