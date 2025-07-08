@@ -126,6 +126,9 @@
   - [150. Evaluate Reverse Polish Notation](#150-evaluate-reverse-polish-notation)
   - [155. Min Stack](#155-min-stack)
   - [200. Number of Islands](#200-number-of-islands-1)
+  - [225. Implement Stack using Queues](#225-implement-stack-using-queues)
+  - [232. Implement Queue using Stacks](#232-implement-queue-using-stacks)
+  - [394. Decode String](#394-decode-string)
   - [739. Daily Temperatures](#739-daily-temperatures)
 - [Binary Search](#binary-search)
 - [Sorting 排序算法](#sorting-排序算法)
@@ -232,7 +235,7 @@
   
 - Node
   - Define Node, integrate information in a node to save inforamtion at each node. Like min of current
-   
+  
 - Stack
   - DFS
   - 
@@ -6146,6 +6149,156 @@ class Solution:
             y = dir[1] + j
             if x >= 0 and x < len(grid) and y >= 0 and y < len(grid[0]) and grid[x][y] == '1':
                 self.dfs(grid, x, y, dirs)
+```
+
+## 225. Implement Stack using Queues
+Tag: Stack, Queue
+```python
+class MyStack:
+
+    def __init__(self):
+        self.q = deque()    
+    # TC: O(n)
+    # SC: O(1)
+    def push(self, x: int) -> None:
+        self.q.append(x)
+        for i in range(1, len(self.q), 1):
+            self.q.append(self.q.popleft())
+
+    def pop(self) -> int:
+        return self.q.popleft()
+
+    def top(self) -> int:
+        return self.q[0] if not self.empty() else None 
+
+    def empty(self) -> bool:
+        return False if len(self.q) else True
+```
+
+## 232. Implement Queue using Stacks
+Tag: Queue, Stack
+```python
+class MyQueue:
+    # SC: O(n)
+    def __init__(self):
+        self.s1 = []
+        self.s2 = []
+        self.front = None
+
+    # TC: O(1)
+    def push(self, x: int) -> None:
+        if len(self.s1) == 0:
+            self.front = x
+        self.s1.append(x)
+
+    # TC: O(n)
+    def pop(self) -> int:
+        if len(self.s2) == 0:
+            while len(self.s1):
+                self.s2.append(self.s1.pop())
+        return self.s2.pop()    
+
+    # TC: O(1)
+    def peek(self) -> int:
+        if len(self.s2):
+            return self.s2[-1]
+        return self.front
+
+    # TC: O(1)
+    def empty(self) -> bool:
+        return len(self.s1) == 0 and len(self.s2) == 0
+
+
+class MyQueue:
+    # SC: O(n) or O(1) if temp space does not count as complexity
+    def __init__(self):
+        self.s1 = []
+        self.s2 = []
+
+    # TC: O(n)
+    def push(self, x: int) -> None:
+        while len(self.s1):
+            self.s2.append(self.s1.pop())
+        self.s2.append(x)
+        while len(self.s2):
+            self.s1.append(self.s2.pop())
+
+    # TC: O(1)
+    def pop(self) -> int:
+        return self.s1.pop()        
+
+    # TC: O(1)
+    def peek(self) -> int:
+        return self.s1[-1]
+
+    # TC: O(1)
+    def empty(self) -> bool:
+        return len(self.s1) == 0 and len(self.s2) == 0
+```
+
+## 394. Decode String
+Tag: Stack, String
+
+![image-20250708145453405](./leetcode.assets/image-20250708145453405.png)
+
+```python
+class Solution:
+    # TC: O(n)  2n -> n
+    # SC: O(n)
+    def decodeString(self, s: str) -> str:
+        stack = []
+        for ele in s:
+            if ele != ']':
+                stack.append(ele)
+            else:
+                temp = ''
+                while stack[-1] != '[':
+                    temp = stack.pop() + temp
+                stack.pop()
+                times = ''
+                while len(stack) and len(stack[-1]) == 1 and ord('0') <= ord(stack[-1]) <= ord('9'):
+                    times = stack.pop() + times 
+                multi_temp = ''
+                for i in range(int(times)):
+                    multi_temp += temp
+                stack.append(multi_temp)
+        res = ''
+        while len(stack):
+            res = stack.pop() + res
+        return res
+```
+
+```java
+class Solution {
+    
+    StringBuilder sb = new StringBuilder();
+    
+    public String decodeString(String s) {
+        Queue<Character> queue = new LinkedList<>();
+        for(char c: s.toCharArray()) queue.offer(c);
+        return helper(queue);
+    }
+
+    String helper(Queue<Character> queue){
+        StringBuilder sb = new StringBuilder();
+        int num = 0;
+        while(!queue.isEmpty()){
+            char c = queue.poll();
+            if(Character.isDigit(c)){
+                num = num * 10 + c - '0';
+            }else if(c == '['){
+                String str = helper(queue);
+                for(int i = 0; i < num; i++) sb.append(str);
+                num = 0;
+            }else if(c == ']'){
+                break;
+            }else{
+                sb.append(c);
+            }
+        }
+        return sb.toString();
+    }
+}
 ```
 
 ## 739. Daily Temperatures
