@@ -1002,6 +1002,8 @@ class Solution {
 
 ## 35. Search Insert Position
 
+![image-20250709001237696](./leetcode.assets/image-20250709001237696.png)
+
 范围是 [0,...,len-1]的话，记住此时target是可以等于左右的
 
 所以当target<mid的时候，则target不在mid中，所以下一次right就是mid-1
@@ -1031,6 +1033,8 @@ class Solution {
 
 
 ## 48. Rotate Image
+
+![image-20250709001255051](./leetcode.assets/image-20250709001255051.png)
 
 ```java
 // 一下旋转只适用nxn矩阵    
@@ -1230,6 +1234,9 @@ public List<Integer> spiralOrder(int[][] matrix) {
 
 ## 66. Plus One
 Tag: Array
+
+![image-20250709001310163](./leetcode.assets/image-20250709001310163.png)
+
 ```python
 class Solution:
     def plusOne(self, digits: List[int]) -> List[int]:
@@ -1249,7 +1256,7 @@ class Solution:
 
 ## 73. Set Matrix Zeroes
 
-
+![image-20250709001332163](./leetcode.assets/image-20250709001332163.png)
 
 每一行的第一个记录该行的状态（有0则第一位置为0）
 
@@ -1472,6 +1479,8 @@ class Solution {
 ## 118. Pascal's Triangle
 Tag: Array, Dynamic Programming
 
+![image-20250709001351802](./leetcode.assets/image-20250709001351802.png)
+
 ```python
 class Solution:
     # TC: O(n^2)
@@ -1627,6 +1636,8 @@ class Solution:
 
 ## 209. Minimum Size Subarray Sum
 tag: Array, Two Pointers, Sliding Windows
+
+![image-20250709001419039](./leetcode.assets/image-20250709001419039.png)
 
 ```python
 class Solution:
@@ -1793,6 +1804,8 @@ class Solution(object):
 
 ## 414. Third Maximum Number
 Tag: Array
+
+![image-20250709001437210](./leetcode.assets/image-20250709001437210.png)
 
 ```python
 # TC: O(n)
@@ -2026,6 +2039,8 @@ class Solution(object):
 
 ## [485. Max Consecutive Ones](https://leetcode.com/problems/max-consecutive-ones/)
 tag: Array, Two Pointers, Sliding Window
+
+![image-20250709001457325](./leetcode.assets/image-20250709001457325.png)
 
 ```python
 # TC: O(n)
@@ -2265,6 +2280,8 @@ class Solution:
 ## 747.Largest Number At Least Twice of Others
 Tag: Array
 
+![image-20250709001525817](./leetcode.assets/image-20250709001525817.png)
+
 ```python
 class Solution:
     # TC: O(n)
@@ -2293,6 +2310,8 @@ class Solution:
 
 ## 905. Sort Array By Parity
 Tag: Array, Two Pointers
+
+![image-20250709001542586](./leetcode.assets/image-20250709001542586.png)
 
 ```python
 # TC: O(n)
@@ -2359,6 +2378,8 @@ class Solution(object):
 
 ## 941. Valid Mountain Array
 Tag: Array, Two Pointers
+
+![image-20250709001606788](./leetcode.assets/image-20250709001606788.png)
 
 ```python
 # TC: O(n)
@@ -2696,6 +2717,8 @@ class Solution3(object):
 ## [1295. Find Numbers with Even Number of Digits](https://leetcode.com/problems/find-numbers-with-even-number-of-digits/)
 
 Tag: Array
+
+![image-20250709001623086](./leetcode.assets/image-20250709001623086.png)
 
 
 ```python
@@ -3472,6 +3495,9 @@ Tag: Array, String
 
 ## 557. Reverse Words in a String III
 Tag: String, Two Pointers, Sliding Window
+
+![image-20250709001650950](./leetcode.assets/image-20250709001650950.png)
+
 ```python
 class Solution:
     # TC: O(n + n) O(n)
