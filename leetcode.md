@@ -118,7 +118,9 @@
   - [Deque or LinkedList](#deque-or-linkedlist)
   - [200. Number of Islands](#200-number-of-islands)
   - [279. Perfect Squares](#279-perfect-squares)
+  - [542. 01 Matrix](#542-01-matrix)
   - [622. Design Circular Queue](#622-design-circular-queue)
+  - [841. Keys and Rooms](#841-keys-and-rooms)
 - [Stack](#stack)
   - [DSF](#dsf)
   - [20. Valid Parentheses](#20-valid-parentheses)
@@ -129,6 +131,7 @@
   - [225. Implement Stack using Queues](#225-implement-stack-using-queues)
   - [232. Implement Queue using Stacks](#232-implement-queue-using-stacks)
   - [394. Decode String](#394-decode-string)
+  - [733. Flood Fill](#733-flood-fill)
   - [739. Daily Temperatures](#739-daily-temperatures)
 - [Binary Search](#binary-search)
 - [Sorting 排序算法](#sorting-排序算法)
@@ -5827,6 +5830,69 @@ class Solution:
         return -1
 ```
 
+## 542. 01 Matrix 
+Tag: Queue, Matrix
+```python
+class Solution:
+    # TC: O(m x n)
+    # SC: O(1)
+    def updateMatrix(self, mat: List[List[int]]) -> List[List[int]]:
+        m = len(mat)
+        n = len(mat[0])
+        res = [[float('inf')] * n for _ in range(m) ]
+        q = deque()
+        for i in range(m):
+            for j in range(n):
+                if mat[i][j] == 0:
+                    q.append([i, j])
+                else:
+                    mat[i][j] = -1
+        dirs = [
+            [0,1],
+            [0,-1],
+            [1,0],
+            [-1,0],
+        ]
+        while len(q):
+            size = len(q)
+            for _ in range(size):
+                node = q.popleft()
+                for i,j in dirs:
+                    x = node[0] + i
+                    y = node[1] + j
+                    if 0 <= x < m and 0 <= y < n and mat[x][y] == -1:
+                        mat[x][y] = mat[node[0]][node[1]] + 1
+                        q.append([x,y])
+        return mat
+
+# DFS timeout， 太多重复的地方，剪枝不够
+class Solution:
+    def updateMatrix(self, mat: List[List[int]]) -> List[List[int]]:
+        m = len(mat)
+        n = len(mat[0])
+        res = [[float('inf')] * n for _ in range(m) ]
+        for i in range(m):
+            for j in range(n):
+                if mat[i][j] == 0:
+                    res[i][j] = 0
+                    self.dfs(mat,i ,j, res)
+        return res
+
+    def dfs(self, mat, r, c, res):
+        dirs = [
+            [0,1],
+            [0,-1],
+            [1,0],
+            [-1,0],
+        ]
+        for dx, dy in dirs:
+            x = r + dx
+            y = c + dy
+            if x >= 0 and x < len(mat) and y >= 0 and y < len(mat[0]) and res[x][y] > res[r][c] + 1:
+                res[x][y] = res[r][c] + 1
+                self.dfs(mat, x, y, res)
+```
+
 ## 622. Design Circular Queue
 Tag: Queue
 ```java
@@ -5883,6 +5949,26 @@ class MyCircularQueue {
 }
 ```
 
+## 841. Keys and Rooms
+Tag: Queue
+```python
+class Solution:
+    # TC: O(n)
+    # SC: O(n)
+    def canVisitAllRooms(self, rooms: List[List[int]]) -> bool:
+        q = deque()
+        n = len(rooms)
+        res = [False] * n
+        q.append(0)
+
+        while len(q):
+            key = q.popleft()
+            res[key] = True
+            for k in rooms[key]:
+                if not res[k]:
+                    q.append(k)
+        return all(res)
+```
 
 # Stack
 
@@ -6299,6 +6385,40 @@ class Solution {
         return sb.toString();
     }
 }
+```
+
+## 733. Flood Fill
+Tag: Matrix, DFS
+```python
+class Solution:
+    # TC: O(m x n)
+    # SC: O(m x n) 1. stack, 2. visited
+    def floodFill(self, image: List[List[int]], sr: int, sc: int, color: int) -> List[List[int]]:
+        target = image[sr][sc]
+        dirs = [
+            [0,1],
+            [0,-1],
+            [1,0],
+            [-1,0],
+        ]
+        m = len(image)
+        n = len(image[0])
+        visited = []
+        for _ in range(m):
+            visited.append([False] * n)
+        
+        self.dfs(image, sr,sc, target, dirs, color,visited)
+        return image
+
+    def dfs(self, image, sr, sc, target, dirs, color,visited):
+        visited[sr][sc] = True
+        image[sr][sc] = color
+
+        for dir in dirs:
+            r = sr + dir[0]
+            c = sc + dir[1]
+            if r >= 0 and r < len(image) and c >= 0 and c < len(image[0]) and not visited[r][c] and image[r][c] == target:
+                self.dfs(image, r,c,target,dirs,color, visited)
 ```
 
 ## 739. Daily Temperatures
