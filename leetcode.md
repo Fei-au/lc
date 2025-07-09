@@ -110,6 +110,7 @@
   - [Heap](#heap)
     - [Heap Queue (Python)](#heap-queue-python)
     - [PriorityQueue](#priorityqueue)
+  - [23. Merge k Sorted Lists](#23-merge-k-sorted-lists)
   - [347. Top K Frequent Elements](#347-top-k-frequent-elements)
   - [652. Find Duplicate Subtrees](#652-find-duplicate-subtrees)
 - [TreeSet](#treeset)
@@ -1368,6 +1369,9 @@ Tag: Array, Two Pointers
 # TC: O(m+n)
 # SC: O(1)
 class Solution4(object):
+    # 从右往左
+
+    # 如果从左往右的话，即便加上两个数组中数字交换，也每次都sort nums2，来保证nums2是用最小数和nums1中的数字在做比较，复杂度高
     def merge(self, nums1, m, nums2, n):
         """
         :type nums1: List[int]
@@ -5491,7 +5495,7 @@ l = []
 heapq.heappush(l, 5) # push element 5 into l, maintain heap feature
 
 # 3. Pop
-v = heapq.heappop() # pop the min element
+v = heapq.heappop(l) # pop the min element
 
 # 4. Peek
 l[0] # get the min element
@@ -5557,6 +5561,105 @@ poll/remove
 peek
 
 offer的时间复杂度为 `O(log(n))` n为queue的size
+
+## 23. Merge k Sorted Lists
+Tag: Heap, Linked List, Divide and Conquer, Merge Sort
+```python
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution:
+    # Heapq
+    # TC: O(kn x logk) # k lists, the longest list length is n. Add and pop of priorityqueue is logk
+    # SC: O(k)
+    def mergeKLists(self, lists: List[Optional[ListNode]]) -> Optional[ListNode]:
+        q = []
+        h = ListNode(0)
+        dummy_h = h
+        counter = 0
+        for l in lists:
+            if l is not None:
+                heapq.heappush(q, (l.val, counter, l))
+                counter += 1
+        while len(q):
+            val, _, node = heapq.heappop(q)
+            h.next = node
+            h = h.next
+            if node.next is not None:
+                heapq.heappush(q, (node.next.val, counter, node.next))
+                counter += 1
+        return dummy_h.next
+
+    # Divide and Conquer
+    # TC: O(kn x logk) 2n, 4n, ---> 2n + ... + 4n total log k. (2n + 2/k n) log k / 2 = kn logk
+    # SC: O(logk)
+    def mergeKLists(self, lists: List[Optional[ListNode]]) -> Optional[ListNode]:
+        return self.merge(lists, 0, len(lists) - 1)
+
+    def merge(self, lists, l, r):
+        if l == r:
+            return lists[l]
+        if l > r:
+            return None
+        mid = (l + r) // 2
+        return self.mergeTwoLists(self.merge(lists, l, mid), self.merge(lists, mid+1, r))
+
+    def mergeTwoLists(self, list1: ListNode, list2: ListNode) -> ListNode:
+        dummy_h = ListNode(0)
+        h = dummy_h
+        while list1 is not None and list2 is not None:
+            if list1.val < list2.val:
+                h.next = list1
+                list1 = list1.next
+            else:
+                h.next = list2
+                list2 = list2.next
+            h = h.next
+
+        while list1 is not None:
+            h.next = list1
+            h = h.next
+            list1 = list1.next
+        while list2 is not None:
+            h.next = list2
+            h = h.next
+            list2 = list2.next
+        return dummy_h.next
+
+    # Merge each two lists
+    # TC: O(k^2 n) n, 2n, 3n, kn ---> (n + kn)k / 2 = kn + k^2 n = k^2 n
+    # SC: O(1)
+    def mergeKLists(self, lists: List[Optional[ListNode]]) -> Optional[ListNode]:
+        # h = ListNode(0)
+        cur = None
+        for l in lists:
+            cur = self.mergeTwoLists(l, cur)
+        return cur
+
+    def mergeTwoLists(self, list1: ListNode, list2: ListNode) -> ListNode:
+        dummy_h = ListNode(0)
+        h = dummy_h
+        while list1 is not None and list2 is not None:
+            if list1.val < list2.val:
+                h.next = list1
+                list1 = list1.next
+            else:
+                h.next = list2
+                list2 = list2.next
+            h = h.next
+
+        while list1 is not None:
+            h.next = list1
+            h = h.next
+            list1 = list1.next
+        while list2 is not None:
+            h.next = list2
+            h = h.next
+            list2 = list2.next
+        return dummy_h.next
+```
 
 ## 347. Top K Frequent Elements
 Tag: Array, Hash Table, Heap (Priority Queue), Counting, Sorting, Bucket Sort, Quickselect, Divide and Conquer
