@@ -119,13 +119,20 @@
   - [Deque or LinkedList](#deque-or-linkedlist)
   - [200. Number of Islands](#200-number-of-islands)
   - [279. Perfect Squares](#279-perfect-squares)
+  - [542. 01 Matrix](#542-01-matrix)
   - [622. Design Circular Queue](#622-design-circular-queue)
+  - [841. Keys and Rooms](#841-keys-and-rooms)
 - [Stack](#stack)
   - [DSF](#dsf)
   - [20. Valid Parentheses](#20-valid-parentheses)
+  - [133. Clone Graph](#133-clone-graph)
   - [150. Evaluate Reverse Polish Notation](#150-evaluate-reverse-polish-notation)
   - [155. Min Stack](#155-min-stack)
   - [200. Number of Islands](#200-number-of-islands-1)
+  - [225. Implement Stack using Queues](#225-implement-stack-using-queues)
+  - [232. Implement Queue using Stacks](#232-implement-queue-using-stacks)
+  - [394. Decode String](#394-decode-string)
+  - [733. Flood Fill](#733-flood-fill)
   - [739. Daily Temperatures](#739-daily-temperatures)
 - [Binary Search](#binary-search)
 - [Sorting 排序算法](#sorting-排序算法)
@@ -232,7 +239,7 @@
   
 - Node
   - Define Node, integrate information in a node to save inforamtion at each node. Like min of current
-   
+  
 - Stack
   - DFS
   - 
@@ -996,6 +1003,8 @@ class Solution {
 
 ## 35. Search Insert Position
 
+![image-20250709001237696](./leetcode.assets/image-20250709001237696.png)
+
 范围是 [0,...,len-1]的话，记住此时target是可以等于左右的
 
 所以当target<mid的时候，则target不在mid中，所以下一次right就是mid-1
@@ -1025,6 +1034,8 @@ class Solution {
 
 
 ## 48. Rotate Image
+
+![image-20250709001255051](./leetcode.assets/image-20250709001255051.png)
 
 ```java
 // 一下旋转只适用nxn矩阵    
@@ -1224,6 +1235,9 @@ public List<Integer> spiralOrder(int[][] matrix) {
 
 ## 66. Plus One
 Tag: Array
+
+![image-20250709001310163](./leetcode.assets/image-20250709001310163.png)
+
 ```python
 class Solution:
     def plusOne(self, digits: List[int]) -> List[int]:
@@ -1243,7 +1257,7 @@ class Solution:
 
 ## 73. Set Matrix Zeroes
 
-
+![image-20250709001332163](./leetcode.assets/image-20250709001332163.png)
 
 每一行的第一个记录该行的状态（有0则第一位置为0）
 
@@ -1469,6 +1483,8 @@ class Solution {
 ## 118. Pascal's Triangle
 Tag: Array, Dynamic Programming
 
+![image-20250709001351802](./leetcode.assets/image-20250709001351802.png)
+
 ```python
 class Solution:
     # TC: O(n^2)
@@ -1624,6 +1640,8 @@ class Solution:
 
 ## 209. Minimum Size Subarray Sum
 tag: Array, Two Pointers, Sliding Windows
+
+![image-20250709001419039](./leetcode.assets/image-20250709001419039.png)
 
 ```python
 class Solution:
@@ -1790,6 +1808,8 @@ class Solution(object):
 
 ## 414. Third Maximum Number
 Tag: Array
+
+![image-20250709001437210](./leetcode.assets/image-20250709001437210.png)
 
 ```python
 # TC: O(n)
@@ -2023,6 +2043,8 @@ class Solution(object):
 
 ## [485. Max Consecutive Ones](https://leetcode.com/problems/max-consecutive-ones/)
 tag: Array, Two Pointers, Sliding Window
+
+![image-20250709001457325](./leetcode.assets/image-20250709001457325.png)
 
 ```python
 # TC: O(n)
@@ -2262,6 +2284,8 @@ class Solution:
 ## 747.Largest Number At Least Twice of Others
 Tag: Array
 
+![image-20250709001525817](./leetcode.assets/image-20250709001525817.png)
+
 ```python
 class Solution:
     # TC: O(n)
@@ -2290,6 +2314,8 @@ class Solution:
 
 ## 905. Sort Array By Parity
 Tag: Array, Two Pointers
+
+![image-20250709001542586](./leetcode.assets/image-20250709001542586.png)
 
 ```python
 # TC: O(n)
@@ -2356,6 +2382,8 @@ class Solution(object):
 
 ## 941. Valid Mountain Array
 Tag: Array, Two Pointers
+
+![image-20250709001606788](./leetcode.assets/image-20250709001606788.png)
 
 ```python
 # TC: O(n)
@@ -2693,6 +2721,8 @@ class Solution3(object):
 ## [1295. Find Numbers with Even Number of Digits](https://leetcode.com/problems/find-numbers-with-even-number-of-digits/)
 
 Tag: Array
+
+![image-20250709001623086](./leetcode.assets/image-20250709001623086.png)
 
 
 ```python
@@ -3469,6 +3499,9 @@ Tag: Array, String
 
 ## 557. Reverse Words in a String III
 Tag: String, Two Pointers, Sliding Window
+
+![image-20250709001650950](./leetcode.assets/image-20250709001650950.png)
+
 ```python
 class Solution:
     # TC: O(n + n) O(n)
@@ -5926,6 +5959,69 @@ class Solution:
         return -1
 ```
 
+## 542. 01 Matrix 
+Tag: Queue, Matrix
+```python
+class Solution:
+    # TC: O(m x n)
+    # SC: O(1)
+    def updateMatrix(self, mat: List[List[int]]) -> List[List[int]]:
+        m = len(mat)
+        n = len(mat[0])
+        res = [[float('inf')] * n for _ in range(m) ]
+        q = deque()
+        for i in range(m):
+            for j in range(n):
+                if mat[i][j] == 0:
+                    q.append([i, j])
+                else:
+                    mat[i][j] = -1
+        dirs = [
+            [0,1],
+            [0,-1],
+            [1,0],
+            [-1,0],
+        ]
+        while len(q):
+            size = len(q)
+            for _ in range(size):
+                node = q.popleft()
+                for i,j in dirs:
+                    x = node[0] + i
+                    y = node[1] + j
+                    if 0 <= x < m and 0 <= y < n and mat[x][y] == -1:
+                        mat[x][y] = mat[node[0]][node[1]] + 1
+                        q.append([x,y])
+        return mat
+
+# DFS timeout， 太多重复的地方，剪枝不够
+class Solution:
+    def updateMatrix(self, mat: List[List[int]]) -> List[List[int]]:
+        m = len(mat)
+        n = len(mat[0])
+        res = [[float('inf')] * n for _ in range(m) ]
+        for i in range(m):
+            for j in range(n):
+                if mat[i][j] == 0:
+                    res[i][j] = 0
+                    self.dfs(mat,i ,j, res)
+        return res
+
+    def dfs(self, mat, r, c, res):
+        dirs = [
+            [0,1],
+            [0,-1],
+            [1,0],
+            [-1,0],
+        ]
+        for dx, dy in dirs:
+            x = r + dx
+            y = c + dy
+            if x >= 0 and x < len(mat) and y >= 0 and y < len(mat[0]) and res[x][y] > res[r][c] + 1:
+                res[x][y] = res[r][c] + 1
+                self.dfs(mat, x, y, res)
+```
+
 ## 622. Design Circular Queue
 Tag: Queue
 ```java
@@ -5982,6 +6078,26 @@ class MyCircularQueue {
 }
 ```
 
+## 841. Keys and Rooms
+Tag: Queue
+```python
+class Solution:
+    # TC: O(n)
+    # SC: O(n)
+    def canVisitAllRooms(self, rooms: List[List[int]]) -> bool:
+        q = deque()
+        n = len(rooms)
+        res = [False] * n
+        q.append(0)
+
+        while len(q):
+            key = q.popleft()
+            res[key] = True
+            for k in rooms[key]:
+                if not res[k]:
+                    q.append(k)
+        return all(res)
+```
 
 # Stack
 
@@ -6116,6 +6232,52 @@ class Solution:
                 return False
         return True if len(stack) == 0 else False
 ```
+
+## 133. Clone Graph
+Tag: DFS, Node
+```python
+from typing import Optional
+class Solution:
+    # TC: O(n*m)  n is node number, m is the most edge in nodes
+    # SC: O(1)
+    def cloneGraph(self, node: Optional['Node']) -> Optional['Node']:
+        d = [0]*101
+        
+        return self.dfs(node, d)
+    
+    def dfs(self, node:  Optional['Node'], d: list['Node']) -> Optional['Node']:
+        if node is None:
+            return node
+        
+        if d[node.val]:
+            return d[node.val]
+
+        cp_node = Node(node.val)
+        d[cp_node.val] = cp_node
+        for neighbor in node.neighbors:
+            cp_node.neighbors.append(self.dfs(neighbor, d))
+        return cp_node
+
+    # use dict
+    def cloneGraph(self, node: Optional['Node']) -> Optional['Node']:
+        d = {}
+        
+        return self.dfs(node, d)
+    
+    def dfs(self, node:  Optional['Node'], d: dict[int, str]) -> Optional['Node']:
+        if node is None:
+            return node
+        
+        if d.get(node.val):
+            return d.get(node.val)
+
+        cp_node = Node(node.val)
+        d[cp_node.val] = cp_node
+        for neighbor in node.neighbors:
+            cp_node.neighbors.append(self.dfs(neighbor, d))
+        return cp_node
+```
+
 ## 150. Evaluate Reverse Polish Notation
 Tag: Stack, Math
 ```python
@@ -6202,6 +6364,190 @@ class Solution:
             y = dir[1] + j
             if x >= 0 and x < len(grid) and y >= 0 and y < len(grid[0]) and grid[x][y] == '1':
                 self.dfs(grid, x, y, dirs)
+```
+
+## 225. Implement Stack using Queues
+Tag: Stack, Queue
+```python
+class MyStack:
+
+    def __init__(self):
+        self.q = deque()    
+    # TC: O(n)
+    # SC: O(1)
+    def push(self, x: int) -> None:
+        self.q.append(x)
+        for i in range(1, len(self.q), 1):
+            self.q.append(self.q.popleft())
+
+    def pop(self) -> int:
+        return self.q.popleft()
+
+    def top(self) -> int:
+        return self.q[0] if not self.empty() else None 
+
+    def empty(self) -> bool:
+        return False if len(self.q) else True
+```
+
+## 232. Implement Queue using Stacks
+Tag: Queue, Stack
+```python
+class MyQueue:
+    # SC: O(n)
+    def __init__(self):
+        self.s1 = []
+        self.s2 = []
+        self.front = None
+
+    # TC: O(1)
+    def push(self, x: int) -> None:
+        if len(self.s1) == 0:
+            self.front = x
+        self.s1.append(x)
+
+    # TC: O(n)
+    def pop(self) -> int:
+        if len(self.s2) == 0:
+            while len(self.s1):
+                self.s2.append(self.s1.pop())
+        return self.s2.pop()    
+
+    # TC: O(1)
+    def peek(self) -> int:
+        if len(self.s2):
+            return self.s2[-1]
+        return self.front
+
+    # TC: O(1)
+    def empty(self) -> bool:
+        return len(self.s1) == 0 and len(self.s2) == 0
+
+
+class MyQueue:
+    # SC: O(n) or O(1) if temp space does not count as complexity
+    def __init__(self):
+        self.s1 = []
+        self.s2 = []
+
+    # TC: O(n)
+    def push(self, x: int) -> None:
+        while len(self.s1):
+            self.s2.append(self.s1.pop())
+        self.s2.append(x)
+        while len(self.s2):
+            self.s1.append(self.s2.pop())
+
+    # TC: O(1)
+    def pop(self) -> int:
+        return self.s1.pop()        
+
+    # TC: O(1)
+    def peek(self) -> int:
+        return self.s1[-1]
+
+    # TC: O(1)
+    def empty(self) -> bool:
+        return len(self.s1) == 0 and len(self.s2) == 0
+```
+
+## 394. Decode String
+Tag: Stack, String
+
+![image-20250708145453405](./leetcode.assets/image-20250708145453405.png)
+
+```python
+class Solution:
+    # TC: O(n)  2n -> n
+    # SC: O(n)
+    def decodeString(self, s: str) -> str:
+        stack = []
+        for ele in s:
+            if ele != ']':
+                stack.append(ele)
+            else:
+                temp = ''
+                while stack[-1] != '[':
+                    temp = stack.pop() + temp
+                stack.pop()
+                times = ''
+                while len(stack) and len(stack[-1]) == 1 and ord('0') <= ord(stack[-1]) <= ord('9'):
+                    times = stack.pop() + times 
+                multi_temp = ''
+                for i in range(int(times)):
+                    multi_temp += temp
+                stack.append(multi_temp)
+        res = ''
+        while len(stack):
+            res = stack.pop() + res
+        return res
+```
+
+```java
+class Solution {
+    
+    StringBuilder sb = new StringBuilder();
+    
+    public String decodeString(String s) {
+        Queue<Character> queue = new LinkedList<>();
+        for(char c: s.toCharArray()) queue.offer(c);
+        return helper(queue);
+    }
+
+    String helper(Queue<Character> queue){
+        StringBuilder sb = new StringBuilder();
+        int num = 0;
+        while(!queue.isEmpty()){
+            char c = queue.poll();
+            if(Character.isDigit(c)){
+                num = num * 10 + c - '0';
+            }else if(c == '['){
+                String str = helper(queue);
+                for(int i = 0; i < num; i++) sb.append(str);
+                num = 0;
+            }else if(c == ']'){
+                break;
+            }else{
+                sb.append(c);
+            }
+        }
+        return sb.toString();
+    }
+}
+```
+
+## 733. Flood Fill
+Tag: Matrix, DFS
+```python
+class Solution:
+    # TC: O(m x n)
+    # SC: O(m x n) 1. stack, 2. visited
+    def floodFill(self, image: List[List[int]], sr: int, sc: int, color: int) -> List[List[int]]:
+        target = image[sr][sc]
+        dirs = [
+            [0,1],
+            [0,-1],
+            [1,0],
+            [-1,0],
+        ]
+        m = len(image)
+        n = len(image[0])
+        visited = []
+        for _ in range(m):
+            visited.append([False] * n)
+        
+        self.dfs(image, sr,sc, target, dirs, color,visited)
+        return image
+
+    def dfs(self, image, sr, sc, target, dirs, color,visited):
+        visited[sr][sc] = True
+        image[sr][sc] = color
+
+        for dir in dirs:
+            r = sr + dir[0]
+            c = sc + dir[1]
+            if r >= 0 and r < len(image) and c >= 0 and c < len(image[0]) and not visited[r][c] and image[r][c] == target:
+                self.dfs(image, r,c,target,dirs,color, visited)
 ```
 
 ## 739. Daily Temperatures
