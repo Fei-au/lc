@@ -111,6 +111,7 @@
     - [Heap Queue (Python)](#heap-queue-python)
     - [PriorityQueue](#priorityqueue)
   - [23. Merge k Sorted Lists](#23-merge-k-sorted-lists)
+  - [239. Sliding Window Maximum](#239-sliding-window-maximum)
   - [347. Top K Frequent Elements](#347-top-k-frequent-elements)
   - [652. Find Duplicate Subtrees](#652-find-duplicate-subtrees)
 - [TreeSet](#treeset)
@@ -5538,6 +5539,9 @@ heapq.nsmallest(
     n: int, 
     iterable: Iterable[_S], 
     key: (_S) -> SupportsDunderLT | SupportsDunderGT | None = None) # iterable是可iterable对象，key是比较的函数，与sorted里的key一样。
+
+# 6. Heapify，把一个数组转化为堆结构
+heapq.heapify(l) # 此后l[0] 就是最小的了
 ```
 
 
@@ -5692,6 +5696,73 @@ class Solution:
             h = h.next
             list2 = list2.next
         return dummy_h.next
+```
+
+## 239. Sliding Window Maximum
+Tag: Heap, 
+```python
+class Solution:
+    # Priority Queue, 首先放入 -nums[i] 形成最大堆， 放入tuple (-nums[i], i) 去判断index是否在window中
+    # TC: O(n logn)
+    # SC: O(n)
+    def maxSlidingWindow(self, nums: List[int], k: int) -> List[int]:
+        n = len(nums)
+        q = [(-nums[i], i) for i in range(k)]
+        heapq.heapify(q)
+        res = [-q[0][0]]
+        for i in range(k, n):
+            heapq.heappush(q, (-nums[i], i))
+            while q[0][1] < i-k+1:
+                heapq.heappop(q)
+            res.append(-q[0][0])
+        return res
+
+    # 维护一个windowrange内的单调双边队列，递减的。右边添加的时候，把小于该值的pop出去，然后左边把不在window内的也popleft出去。append 第一个元素即可
+    # TC: O(n)
+    # SC: O(k)
+    def maxSlidingWindow(self, nums: List[int], k: int) -> List[int]:
+        n = len(nums)
+        q = deque()
+        for i in range(k):
+            while q and nums[i] > nums[q[-1]]:
+                q.pop()
+            q.append(i)
+        res = [nums[q[0]]]
+
+        for i in range(k, n):
+            while q and nums[i] > nums[q[-1]]:
+                q.pop()
+            q.append(i)
+
+            while q[0] <= i - k:
+                q.popleft()
+            res.append(nums[q[0]])
+        return res
+
+    # 分块 + 预处理
+    # TC: O(n)
+    # SC: O(n)
+    def maxSlidingWindow(self, nums: List[int], k: int) -> List[int]:
+        n = len(nums)
+        prefix = [0] * n
+        suffix = [0] * n
+        
+        for i in range(0, n, k):
+            m1 = float('-inf')
+            m2 = float('-inf')
+            for j in range(i, min(i + k, n)):
+                m1 = max(m1, nums[j])
+                prefix[j] = m1
+            for j in range(min(i + k, n) - 1, i - 1, -1):
+                m2 = max(m2, nums[j])
+                suffix[j] = m2
+
+        res = []
+        for i in range(n - k + 1):
+            res.append(max(suffix[i], prefix[i + k - 1]))
+        return res
+
+
 ```
 
 ## 347. Top K Frequent Elements
