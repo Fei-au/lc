@@ -1,4 +1,12 @@
 - [Tag](#tag)
+- [Find upper bound to insert the target. The upper bound is the least value greater than target](#find-upper-bound-to-insert-the-target-the-upper-bound-is-the-least-value-greater-than-target)
+- [Find lower bound to insert the target. The lower bound is the largest value greater than or equal to the target](#find-lower-bound-to-insert-the-target-the-lower-bound-is-the-largest-value-greater-than-or-equal-to-the-target)
+- [The bound is where to insert the target to make the array keep sorted.](#the-bound-is-where-to-insert-the-target-to-make-the-array-keep-sorted)
+- [And when insert for example to index 2, it means the target now is inserted to index 2, and rest value from index 2, move right 1 position](#and-when-insert-for-example-to-index-2-it-means-the-target-now-is-inserted-to-index-2-and-rest-value-from-index-2-move-right-1-position)
+- [Upper bound \[-1,2,2,2,2,12\] target 2, and finally check left \> 0 and left - 1 == target](#upper-bound--1222212-target-2-and-finally-check-left--0-and-left---1--target)
+- [^](#)
+- [Lower bound \[-1,2,2,2,2,12\] target 2, and finally check left \< size and left == target](#lower-bound--1222212-target-2-and-finally-check-left--size-and-left--target)
+- [^](#-1)
 - [Time Complexities](#time-complexities)
   - [Constant Time — 𝑂(1)O(1)](#constant-time--𝑂1o1)
   - [Logarithmic Time — 𝑂(log⁡𝑛)](#logarithmic-time--𝑂log𝑛)
@@ -97,7 +105,7 @@
   - [49. Group Anagrams](#49-group-anagrams)
   - [136. Single Number](#136-single-number)
   - [202. Happy Number](#202-happy-number)
-  - [205.](#205)
+  - [205. Isomorphic Strings](#205-isomorphic-strings)
   - [217. Contains Duplicate](#217-contains-duplicate)
   - [219. Contains Duplicate II](#219-contains-duplicate-ii)
   - [349. Intersection of Two Arrays](#349-intersection-of-two-arrays)
@@ -138,10 +146,15 @@
   - [733. Flood Fill](#733-flood-fill)
   - [739. Daily Temperatures](#739-daily-temperatures)
 - [Binary Search](#binary-search)
+  - [33. Search in Rotated Sorted Array](#33-search-in-rotated-sorted-array)
+  - [69. Sqrt(x)](#69-sqrtx)
+  - [278. First Bad Version](#278-first-bad-version)
+  - [374. Guess Number Higher or Lower](#374-guess-number-higher-or-lower)
+  - [704. Binary Search](#704-binary-search)
+  - [1051. Height Checker](#1051-height-checker)
 - [Sorting 排序算法](#sorting-排序算法)
   - [快排 QuickSort](#快排-quicksort)
   - [Partition](#partition)
-  - [1051. Height Checker](#1051-height-checker)
     - [?couting sort？](#couting-sort)
 - [Bit manupulation (python)](#bit-manupulation-python)
 - [Bit manipulation](#bit-manipulation)
@@ -256,6 +269,21 @@
   - python默认最小堆，把数字乘 -1 存进去，就是最大堆
   - 可以存tuple进去，保存多个信息，也可以当数字相同时比较多组数据。比如存进去（数字+index），构成了一个排序的滑动窗口
   - 可以在tuple的信息前面使用一个count，来保证多存进去的信息即便不是comparable的，也可以在tuple里面
+  
+- Binary Search
+  # Find upper bound to insert the target. The upper bound is the least value greater than target
+  # Find lower bound to insert the target. The lower bound is the largest value greater than or equal to the target
+
+  # The bound is where to insert the target to make the array keep sorted.
+  # And when insert for example to index 2, it means the target now is inserted to index 2, and rest value from index 2, move right 1 position
+  
+  # Upper bound [-1,2,2,2,2,12] target 2, and finally check left > 0 and left - 1 == target
+  #                         ^
+  
+  # Lower bound [-1,2,2,2,2,12] target 2, and finally check left < size and left == target
+  #                 ^
+  - Left should always be mid + 1, only this the range could shrink
+  - right could be set to mid, and the position will be eliminate
 
 # Time Complexities
 
@@ -5290,7 +5318,7 @@ class Solution:
         return sm
 ```
 
-## 205. 
+## 205. Isomorphic Strings
 Tag: Hash Table, Array
 ```python
 class Solution:
@@ -6797,6 +6825,208 @@ int binarySearch(int[] nums, int target) {
 ```
 
 
+## 33. Search in Rotated Sorted Array
+Tag: Binary Search
+```python
+class Solution:
+    def search(self, nums: List[int], target: int) -> int:
+        # TC: O(logn)
+        # SC: O(1)
+        # find rotate point
+        left = 0
+        right = len(nums) -1
+        if nums[left] > nums[right]:
+            while left < right:
+                mid = left + (right - left) // 2
+                if nums[mid] >= nums[0]:
+                    left = mid + 1
+                elif nums[mid] < nums[0]:
+                    right = mid
+        start = left
+        left = 0
+        right = len(nums) - 1
+        if start != 0:
+            if target >= nums[left]:
+                right = start - 1
+            elif target < nums[left]:
+                left = start
+
+        while left <= right:
+            mid = left + (right - left) // 2
+            if nums[mid] == target:
+                return mid
+            elif nums[mid] < target:
+                left = mid + 1
+            else:
+                right = mid - 1
+        return -1
+```
+
+## 69. Sqrt(x)
+Tag: Binary Search
+```python
+class Solution:
+    # TC: O(logx)
+    # TC: O(1)
+    def mySqrt(self, x: int) -> int:
+        # upper bound
+        left = 0
+        right = x+1
+        while left < right:
+            mid = left + (right - left) // 2
+            if mid ** 2 == x:
+                return mid
+            elif mid ** 2 < x:
+                left = mid + 1
+            else:
+                right = mid
+        return left - 1
+```
+
+## 278. First Bad Version
+Tag: Binary Search
+```python
+class Solution:
+    # TC: O(logn)
+    # SC: O(1)
+    def firstBadVersion(self, n: int) -> int:
+        left = 0
+        right = n
+        while left < right:
+            mid = left + (right - left) // 2
+            if isBadVersion(mid):
+                right = mid
+            else:
+                left = mid + 1
+        return left
+```
+## 374. Guess Number Higher or Lower
+Tag: Binary Search
+```python
+class Solution:
+    # TC: O(logn)
+    # SC: O(1)
+    def guessNumber(self, n: int) -> int:
+        left = 1
+        right = n
+        while left <= right:
+            mid = left + (right - left) // 2
+            v = guess(mid)
+            if v == -1:
+                right = mid - 1
+            elif v == 1:
+                left = mid + 1
+            else:
+                return mid
+        return 0
+```
+
+## 704. Binary Search
+Tag: Binary Search, Array
+```python
+class Solution:
+    # TC: O(logn)
+    # SC: O(1)
+    def search(self, nums: List[int], target: int) -> int:
+        start = 0
+        end = len(nums) -1
+        while start <= end:
+            mid = ( start + end ) // 2
+            if nums[mid] == target:
+                return mid
+            elif nums[mid] > target:
+                end = mid -  1
+            else:
+                start = mid + 1
+        return -1
+
+    # Find upper bound to insert the target. The upper bound is the least value greater than target
+    # Find lower bound to insert the target. The lower bound is the largest value greater than or equal to the target
+
+    # The bound is where to insert the target to make the array keep sorted.
+    # And when insert for example to index 2, it means the target now is inserted to index 2, and rest value from index 2, move right 1 position
+    
+    # [-1,2,2,2,2,12] target 2
+    #             ^
+    def search(self, nums: List[int], target: int) -> int:
+        left = 0
+        right = len(nums)
+        while left < right:
+            mid = left + (right - left) // 2
+            if nums[mid] <= target:
+                left = mid + 1
+            else:
+                right = mid
+        # Now left == right and is at the upper bound index
+        # If upper bound is at 0, it means the target is smaller than the smallest value in the array
+        if  left > 0 and nums[left -1] == target:
+            return left - 1
+        return -1
+        
+    # The lower bound of insertion
+    # [-1,2,2,2,2,12] target 2
+    #     ^
+    def search(self, nums: List[int], target: int) -> int:
+        left = 0
+        right = len(nums) - 1
+        while left < right:
+            mid = left + (right - left) // 2
+            if nums[mid] < target:
+                left = mid + 1
+            else:
+                right = mid
+        if left < len(nums) and nums[left] == target:
+            return left
+        return -1
+```
+
+
+## 1051. Height Checker
+Tag: Array, Sort
+![image-20230614225500049](leetcode.assets/image-20230614225500049.png)
+
+```python
+# TC: O(max(sort, n))
+# SC: O(n)
+class Solution(object):
+    def heightChecker(self, heights):
+        """
+        :type heights: List[int]
+        :rtype: int
+        """
+        original_height = [ele for ele in heights]
+        heights.sort()
+        res = 0
+        for i in range(len(heights)):
+            if original_height[i] != heights[i]:
+                res += 1
+        return res
+```
+
+先sort，再比较
+
+```
+class Solution {
+    public int heightChecker(int[] heights) {
+                int[] originHeights = heights.clone();
+        Arrays.sort(originHeights);
+        int diffNum = 0;
+        for (int i = 0; i < heights.length; i++) {
+            if(heights[i] != originHeights[i]){
+                diffNum++;
+            }
+        }
+        return diffNum;
+    }
+}
+```
+
+
+
+```
+
+```
+
 
 
 
@@ -6845,58 +7075,7 @@ int partition(int left, int right){
 ```
 
 
-
-## 1051. Height Checker
-Tag: Array, Sort
-![image-20230614225500049](leetcode.assets/image-20230614225500049.png)
-
-```python
-# TC: O(max(sort, n))
-# SC: O(n)
-class Solution(object):
-    def heightChecker(self, heights):
-        """
-        :type heights: List[int]
-        :rtype: int
-        """
-        original_height = [ele for ele in heights]
-        heights.sort()
-        res = 0
-        for i in range(len(heights)):
-            if original_height[i] != heights[i]:
-                res += 1
-        return res
-```
-
-先sort，再比较
-
-```
-class Solution {
-    public int heightChecker(int[] heights) {
-                int[] originHeights = heights.clone();
-        Arrays.sort(originHeights);
-        int diffNum = 0;
-        for (int i = 0; i < heights.length; i++) {
-            if(heights[i] != originHeights[i]){
-                diffNum++;
-            }
-        }
-        return diffNum;
-    }
-}
-```
-
-
-
 ### ?couting sort？
-
-
-
-```
-
-```
-
-
 
 
 # Bit manupulation (python)
