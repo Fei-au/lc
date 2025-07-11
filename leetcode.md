@@ -10,6 +10,7 @@
 - [Computation](#computation)
   - [Python](#python)
   - [Division and Modulus](#division-and-modulus)
+  - [263. Ugly Number](#263-ugly-number)
 - [Random (Python)](#random-python)
 - [Random](#random)
   - [nextInt](#nextint)
@@ -112,6 +113,7 @@
     - [PriorityQueue](#priorityqueue)
   - [23. Merge k Sorted Lists](#23-merge-k-sorted-lists)
   - [239. Sliding Window Maximum](#239-sliding-window-maximum)
+  - [264. Ugly Number II](#264-ugly-number-ii)
   - [347. Top K Frequent Elements](#347-top-k-frequent-elements)
   - [652. Find Duplicate Subtrees](#652-find-duplicate-subtrees)
 - [TreeSet](#treeset)
@@ -250,6 +252,10 @@
     - in BFS, use queue to save each layer's value
     - loop the layer by using get the size before loop
     - check if valid in the loop, store next layer's value in the queue
+- Heap
+  - python默认最小堆，把数字乘 -1 存进去，就是最大堆
+  - 可以存tuple进去，保存多个信息，也可以当数字相同时比较多组数据。比如存进去（数字+index），构成了一个排序的滑动窗口
+  - 可以在tuple的信息前面使用一个count，来保证多存进去的信息即便不是comparable的，也可以在tuple里面
 
 # Time Complexities
 
@@ -537,6 +543,24 @@ Reminder / modulus operations
 5 % 2 = 1
 ```
 
+## 263. Ugly Number
+Tag: Math
+```python
+class Solution:
+    # TC: O(n)
+    # SC: O(1)
+    def isUgly(self, n: int) -> bool:
+        if n <= 0:
+            return False
+        while n % 2 == 0 or n % 3 == 0 or n % 5 == 0:
+            while n % 2 == 0:
+                n //= 2
+            while n % 3 == 0:
+                n //= 3
+            while n % 5 == 0:
+                n //= 5
+        return True if n == 1 else False
+```
 
 # Random (Python)
 ```python
@@ -5763,6 +5787,52 @@ class Solution:
         return res
 
 
+```
+
+## 264. Ugly Number II
+Tag: Heap, Hash Table, Math, Dynamic Programming
+
+![image-20250710230451564](./leetcode.assets/image-20250710230451564.png)
+
+```python
+class Solution:
+    # TC: O(n logn)
+    # SC: O(n)
+    def nthUglyNumber(self, n: int) -> int:
+        l = []
+        heapq.heappush(l, 1)
+        last = None
+        s = set()
+        while n > 0:
+            last = heapq.heappop(l)
+            if 2*last not in s:
+                heapq.heappush(l, 2*last)
+                s.add(2*last)
+            if 3*last not in s:
+                heapq.heappush(l, 3*last)
+                s.add(3*last)
+            if 5*last not in s:
+                heapq.heappush(l, 5*last)
+                s.add(5*last)
+            n -= 1
+        return last
+
+    # TC: O(n)
+    # SC: O(n)
+    def nthUglyNumber(self, n: int) -> int:
+        dp = [0] * (n+1)
+        dp[1] = 1
+        p2 = p3 = p5 = 1
+        for i in range(2, n+1):
+            m = min(dp[p2] * 2, dp[p3] * 3, dp[p5] * 5)
+            dp[i] = m
+            if m == dp[p2] * 2:
+                p2 += 1
+            if m == dp[p3] * 3:
+                p3 += 1
+            if m == dp[p5] * 5:
+                p5 += 1
+        return dp[n]
 ```
 
 ## 347. Top K Frequent Elements
