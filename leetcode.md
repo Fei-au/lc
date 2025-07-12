@@ -18,6 +18,7 @@
 - [Computation](#computation)
   - [Python](#python)
   - [Division and Modulus](#division-and-modulus)
+  - [50. Pow(x, n)](#50-powx-n)
   - [263. Ugly Number](#263-ugly-number)
 - [Random (Python)](#random-python)
 - [Random](#random)
@@ -147,10 +148,42 @@
   - [739. Daily Temperatures](#739-daily-temperatures)
 - [Binary Search](#binary-search)
   - [33. Search in Rotated Sorted Array](#33-search-in-rotated-sorted-array)
+  - [34. Find First and Last Position of Element in Sorted Array](#34-find-first-and-last-position-of-element-in-sorted-array)
   - [69. Sqrt(x)](#69-sqrtx)
+  - [153. Find Minimum in Rotated Sorted Array](#153-find-minimum-in-rotated-sorted-array)
+  - [154. Find Minimum in Rotated Sorted Array II](#154-find-minimum-in-rotated-sorted-array-ii)
   - [162. Find Peak Element](#162-find-peak-element)
   - [278. First Bad Version](#278-first-bad-version)
+  - [367. Valid Perfect Square](#367-valid-perfect-square)
   - [374. Guess Number Higher or Lower](#374-guess-number-higher-or-lower)
+  - [658. Find K Closest Elements](#658-find-k-closest-elements)
+  - [704. Binary Search](#704-binary-search)
+  - [744. Find Smallest Letter Greater Than Target](#744-find-smallest-letter-greater-than-target)
+  - [1051. Height Checker](#1051-height-checker)
+- [Sorting 排序算法](#sorting-排序算法)
+  - [快排 QuickSort](#快排-quicksort)
+  - [Partition](#partition)
+    - [?couting sort？](#couting-sort)
+- [Bit manupulation (python)](#bit-manupulation-python)
+- [Bit manipulation](#bit-manipulation)
+  - [进制](#进制)
+  - [计算机中的整数表示](#计算机中的整数表示)
+  - [位运算的概述和性质](#位运算的概述和性质)
+  - [Java中的二进制输出](#java中的二进制输出)
+  - [Java位运算](#java位运算)
+  - [137. Single Number II](#137-single-number-ii)
+  - [160. Intersection of Two Linked Lists](#160-intersection-of-two-linked-lists-1)
+  - [190. Reverse Bits](#190-reverse-bits)
+  - [191. Number of 1 Bits](#191-number-of-1-bits)
+  - [218. Bitwise AND of Numbers Range](#218-bitwise-and-of-numbers-range)
+    - [Brian Kernighan 算法](#brian-kernighan-算法)
+  - [371. Sum of Two Integers](#371-sum-of-two-integers)
+- [滑动窗口](#滑动窗口)
+  - [674. Longest Continuous Increasing Subsequ](#674-longest-continuous-increasing-subsequ)
+>>>>>>> Stashed changes
+  - [278. First Bad Version](#278-first-bad-version)
+  - [374. Guess Number Higher or Lower](#374-guess-number-higher-or-lower)
+  - [658. Find K Closest Elements](#658-find-k-closest-elements)
   - [704. Binary Search](#704-binary-search)
   - [1051. Height Checker](#1051-height-checker)
 - [Sorting 排序算法](#sorting-排序算法)
@@ -570,6 +603,35 @@ Reminder / modulus operations
 ```python
 5 % 3 = 2
 5 % 2 = 1
+```
+
+## 50. Pow(x, n)
+Tag: Math
+```python
+class Solution:
+    # TC: O(logn)
+    # SC: O(logn)
+    def myPow(self, x: float, n: int) -> float:
+        d = {}
+        if n < 0:
+            return 1/self.get_v(x, -n, d)
+        else:
+            return self.get_v(x, n, d)
+
+    def get_v(self, x, n, d):
+        if n == 0:
+            d[n] = 1
+            return 1
+        if n == 1:
+            d[n] = x
+            return x
+        if d.get(n):
+            return d.get(n)
+        big = self.get_v(x, n // 2, d)
+        residual = self.get_v(x, n % 2, d)
+        res = big * big * residual
+        d[n] = res
+        return res
 ```
 
 ## 263. Ugly Number
@@ -6863,12 +6925,47 @@ class Solution:
         return -1
 ```
 
+## 34. Find First and Last Position of Element in Sorted Array
+Tag: Binary Search
+```python
+class Solution:
+    # TC: O(logn)
+    # SC: O(1)
+    def searchRange(self, nums: List[int], target: int) -> List[int]:
+        n = len(nums)
+        if n == 0:
+            return [-1,-1]
+        # Upper bound
+        left = 0
+        right = n
+        while left < right:
+            mid = left + (right - left) // 2
+            if nums[mid] <= target:
+                left = mid + 1
+            else:
+                right = mid
+        upper = left
+        # Lower bound
+        left = 0
+        right = n - 1
+        while left < right:
+            mid = left + (right - left) // 2
+            if nums[mid] >= target:
+                right = mid
+            else:
+                left = mid + 1
+        lower = left
+        if nums[lower] != target:
+            return [-1,-1]
+        return [lower, upper-1]
+```
+
 ## 69. Sqrt(x)
 Tag: Binary Search
 ```python
 class Solution:
     # TC: O(logx)
-    # TC: O(1)
+    # SC: O(1)
     def mySqrt(self, x: int) -> int:
         # upper bound
         left = 0
@@ -6884,6 +6981,58 @@ class Solution:
         return left - 1
 ```
 
+## 153. Find Minimum in Rotated Sorted Array
+Tag: Binary Search
+```python
+    # TC: O(logn)
+    # SC: O(1)
+    def findMin(self, nums: List[int]) -> int:
+        left = 0
+        right = len(nums) - 1
+        while left < right:
+            mid = left + (right - left) // 2
+            if nums[mid] > nums[right]:
+                left = mid + 1
+            elif nums[mid] < nums[right]:
+                right = mid
+        return nums[left]
+
+
+    def findMin(self, nums: List[int]) -> int:
+        left = 0
+        right = len(nums) - 1
+        if nums[left] < nums[right]:
+            return nums[left]
+        while left < right:
+            mid = left + (right - left) // 2
+            if nums[mid] >= nums[0]:
+                left = mid + 1
+            else:
+                right = mid
+        return nums[left]
+```
+
+## 154. Find Minimum in Rotated Sorted Array II
+Tag: Binary Search
+```python
+class Solution:
+    # TC: O(n)
+    # SC: O(1)
+    def findMin(self, nums: List[int]) -> int:
+        n = len(nums)
+        left = 0
+        right = n - 1
+        while left < right:
+            mid = left + (right - left) // 2
+            if nums[mid] > nums[right]:
+                left = mid + 1
+            elif nums[mid] < nums[right]:
+                right = mid
+            else:
+                right -= 1
+
+        return nums[left]
+```
 ## 162. Find Peak Element
 Tag: Binary Search
 ```python
@@ -6926,6 +7075,28 @@ class Solution:
                 left = mid + 1
         return left
 ```
+
+## 367. Valid Perfect Square
+Tag: Binary Search
+```python
+class Solution:
+    # TC: O(log num)
+    # SC: O(1)
+    def isPerfectSquare(self, num: int) -> bool:
+        left = 0
+        right = num
+        while left <= right:
+            mid = left + (right - left) // 2
+            v = mid * mid
+            if v == num:
+                return True
+            elif v < num:
+                left = mid + 1
+            else:
+                right = mid - 1
+        return False if left * left != num else True
+```
+
 ## 374. Guess Number Higher or Lower
 Tag: Binary Search
 ```python
@@ -6945,6 +7116,59 @@ class Solution:
             else:
                 return mid
         return 0
+```
+
+## 658. Find K Closest Elements
+Tag: Binary Search, Two Pointers
+```python
+class Solution:
+    # TC: O(logn)
+    # SC: O(1)
+    def findClosestElements(self, arr: List[int], k: int, x: int) -> List[int]:
+        left, right = 0, len(arr) - k
+        while left<right:
+            mid = left + (right - left) // 2
+            if x - arr[mid] <= arr[mid + k] - x:
+                right = mid
+            else:
+                left = mid + 1
+        return arr[left: left + k]
+
+    # TC: O(logn + k)
+    # SC: O(1)
+    # Binary search and two pointer
+    def findClosestElements(self, arr: List[int], k: int, x: int) -> List[int]:
+        # Lower bound
+        left = 0
+        right = len(arr) - 1
+        while left < right:
+            mid = left + (right - left) // 2
+            if arr[mid] < x:
+                left = mid + 1
+            else:
+                right = mid
+        m = None
+        if left > 0 and abs(arr[left - 1] - x) <= abs(arr[left] - x):
+            m = left - 1
+        else:
+            m = left
+        l = m
+        r = m
+
+        while k > 1:
+            k -= 1
+            if l == 0:
+                r += 1
+                continue
+            if r == len(arr)-1:
+                l -= 1
+                continue
+            if abs(arr[l - 1] - x) <= abs(arr[r + 1] - x):
+                l -= 1
+            else:
+                r += 1
+        return arr[l: r+1]
+            
 ```
 
 ## 704. Binary Search
@@ -7006,6 +7230,29 @@ class Solution:
         return -1
 ```
 
+## 744. Find Smallest Letter Greater Than Target
+Tag: Binary Search
+```python
+class Solution:
+    # TC: O(logn)
+    # SC: O(1)
+    def nextGreatestLetter(self, letters: List[str], target: str) -> str:
+        n = len(letters)
+        target_v = ord(target)
+        if ord(letters[0]) >target_v or ord(letters[n-1]) <= target_v:
+            return letters[0]
+        
+        # Upper bound
+        left = 1
+        right = n-1
+        while left < right:
+            mid = left + (right - left) // 2
+            if ord(letters[mid]) <= target_v:
+                left = mid + 1
+            else:
+                right = mid
+        return letters[left]
+```
 
 ## 1051. Height Checker
 Tag: Array, Sort
