@@ -148,6 +148,7 @@
 - [Binary Search](#binary-search)
   - [33. Search in Rotated Sorted Array](#33-search-in-rotated-sorted-array)
   - [69. Sqrt(x)](#69-sqrtx)
+  - [162. Find Peak Element](#162-find-peak-element)
   - [278. First Bad Version](#278-first-bad-version)
   - [374. Guess Number Higher or Lower](#374-guess-number-higher-or-lower)
   - [704. Binary Search](#704-binary-search)
@@ -6881,6 +6882,31 @@ class Solution:
             else:
                 right = mid
         return left - 1
+```
+
+## 162. Find Peak Element
+Tag: Binary Search
+```python
+class Solution:
+    # TC: O(logn)
+    # SC: O(1)
+    def findPeakElement(self, nums: List[int]) -> int:
+        left = 0
+        n = len(nums)
+        right = n - 1
+        def get(i):
+            if i == -1 or i == n:
+                return float('-inf')
+            return nums[i]
+        while left <= right :
+            mid = left + (right - left) // 2
+            if get(mid - 1) < get(mid) > get(mid + 1):
+                return mid
+            if get(mid) < get(mid+1):
+                left = mid + 1
+            else:
+                right = mid - 1
+        return left
 ```
 
 ## 278. First Bad Version
