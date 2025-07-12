@@ -44,6 +44,7 @@
   - [119. Pascal's Triangle II](#119-pascals-triangle-ii)
   - [189. Rotate Array](#189-rotate-array)
   - [209. Minimum Size Subarray Sum](#209-minimum-size-subarray-sum)
+  - [287. Find the Duplicate Number](#287-find-the-duplicate-number)
   - [283. Move Zeroes](#283-move-zeroes)
   - [414. Third Maximum Number](#414-third-maximum-number)
   - [448. Find All Numbers Disappeared in an Array](#448-find-all-numbers-disappeared-in-an-array)
@@ -1844,7 +1845,28 @@ class Solution:
     }
 ```
 
+## 287. Find the Duplicate Number
+Tag: Array, Floyd’s Cycle Detection
+```python
+class Solution:
+    def findDuplicate(self, nums: List[int]) -> int:
+        # no change nums and const extra space
+        slow = 0
+        fast = 0
 
+        slow = nums[slow]
+        fast = nums[nums[fast]]
+
+        while nums[slow] != nums[fast]:
+            slow = nums[slow]
+            fast = nums[nums[fast]]
+
+        slow = 0
+        while nums[slow] != nums[fast]:
+            slow = nums[slow]
+            fast = nums[fast]
+        return nums[slow]
+```
 
 ## 283. Move Zeroes
 Tag: Array
