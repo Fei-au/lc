@@ -6917,6 +6917,10 @@ nums2_mid_lower_bound = total_left - nums1_upper_bound - 1
 nums2_upper_bound = total_left - nums1_upper_bound
 
 We want to find the nums2 lower bound value's upper bound, so we use BS upper bound search, where b4 as the target value. That's the nums1[mid] >= nums2[total_left - mid - 1] equal equation mean.
+
+i = l
+j = total_left - i
+There two are all upper bound index
 '''
 class Solution:
     def findMedianSortedArrays(self, nums1: List[int], nums2: List[int]) -> float:
@@ -6941,9 +6945,10 @@ class Solution:
         i_large = float('inf') if i == m else nums1[i] 
         j_small = float('-inf') if j == 0 else nums2[j-1] 
         j_large = float('inf') if j == n else nums2[j] 
-
+        # Find the middle two values' median
         if (m+n) % 2 == 0:
             return (max(i_small, j_small) + min(i_large, j_large)) / 2
+        # Find the largest among two smallest values
         else:
             return max(i_small, j_small)
         
