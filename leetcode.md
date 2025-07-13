@@ -1,12 +1,4 @@
 - [Tag](#tag)
-- [Find upper bound to insert the target. The upper bound is the least value greater than target](#find-upper-bound-to-insert-the-target-the-upper-bound-is-the-least-value-greater-than-target)
-- [Find lower bound to insert the target. The lower bound is the largest value greater than or equal to the target](#find-lower-bound-to-insert-the-target-the-lower-bound-is-the-largest-value-greater-than-or-equal-to-the-target)
-- [The bound is where to insert the target to make the array keep sorted.](#the-bound-is-where-to-insert-the-target-to-make-the-array-keep-sorted)
-- [And when insert for example to index 2, it means the target now is inserted to index 2, and rest value from index 2, move right 1 position](#and-when-insert-for-example-to-index-2-it-means-the-target-now-is-inserted-to-index-2-and-rest-value-from-index-2-move-right-1-position)
-- [Upper bound \[-1,2,2,2,2,12\] target 2, and finally check left \> 0 and left - 1 == target](#upper-bound--1222212-target-2-and-finally-check-left--0-and-left---1--target)
-- [^](#)
-- [Lower bound \[-1,2,2,2,2,12\] target 2, and finally check left \< size and left == target](#lower-bound--1222212-target-2-and-finally-check-left--size-and-left--target)
-- [^](#-1)
 - [Time Complexities](#time-complexities)
   - [Constant Time — 𝑂(1)O(1)](#constant-time--𝑂1o1)
   - [Logarithmic Time — 𝑂(log⁡𝑛)](#logarithmic-time--𝑂log𝑛)
@@ -148,6 +140,7 @@
   - [733. Flood Fill](#733-flood-fill)
   - [739. Daily Temperatures](#739-daily-temperatures)
 - [Binary Search](#binary-search)
+  - [4. Median of Two Sorted Arrays](#4-median-of-two-sorted-arrays)
   - [33. Search in Rotated Sorted Array](#33-search-in-rotated-sorted-array)
   - [34. Find First and Last Position of Element in Sorted Array](#34-find-first-and-last-position-of-element-in-sorted-array)
   - [69. Sqrt(x)](#69-sqrtx)
@@ -306,17 +299,16 @@
   - 可以在tuple的信息前面使用一个count，来保证多存进去的信息即便不是comparable的，也可以在tuple里面
   
 - Binary Search
-  # Find upper bound to insert the target. The upper bound is the least value greater than target
-  # Find lower bound to insert the target. The lower bound is the largest value greater than or equal to the target
+  > Find upper bound to insert the target. The upper bound is the least value greater than target
+  > Find lower bound to insert the target. The lower bound is the largest value greater than or equal to the target
 
-  # The bound is where to insert the target to make the array keep sorted.
-  # And when insert for example to index 2, it means the target now is inserted to index 2, and rest value from index 2, move right 1 position
+  > The bound is where to insert the target to make the array keep sorted.
+  > And when insert for example to index 2, it means the target now is inserted to index 2, and rest value from index 2, move right 1 position
   
-  # Upper bound [-1,2,2,2,2,12] target 2, and finally check left > 0 and left - 1 == target
-  #                         ^
+  > Upper bound [-1,2,2,2,2,*12*] target 2, and finally check left > 0 and left - 1 == target
   
-  # Lower bound [-1,2,2,2,2,12] target 2, and finally check left < size and left == target
-  #                 ^
+  > Lower bound [-1,*2*,2,2,2,12] target 2, and finally check left < size and left == target
+
   - Left should always be mid + 1, only this the range could shrink
   - right could be set to mid, and the position will be eliminate
 
@@ -6909,6 +6901,54 @@ int binarySearch(int[] nums, int target) {
 }
 ```
 
+## 4. Median of Two Sorted Arrays
+Tag: Binary Search, Array
+```python
+# TC: O(log(m + n))
+# SC: O(1)
+'''
+a0, a1, a2, a3, a4, | a5, a6, a7, a8
+b0, b1, b2, b3, b4, | b5, b6, b7, b8, b9
+
+nums1_upper_bound = (0 + m) // 2, find the upper bound of nums1
+total_left = m + ((n - m + 1) // 2)
+    we want the total left elements equal to or larger 1 than total right elements, so we add 1 here
+nums2_mid_lower_bound = total_left - nums1_upper_bound - 1
+nums2_upper_bound = total_left - nums1_upper_bound
+
+We want to find the nums2 lower bound value's upper bound, so we use BS upper bound search, where b4 as the target value. That's the nums1[mid] >= nums2[total_left - mid - 1] equal equation mean.
+'''
+class Solution:
+    def findMedianSortedArrays(self, nums1: List[int], nums2: List[int]) -> float:
+        if len(nums1) > len(nums2):
+            nums1, nums2 = nums2, nums1
+        m = len(nums1) # short
+        n = len(nums2) # long
+        l, r = 0, m
+        # After split two arrays, total left elements are equal to or more than 1 to the totall right elements 
+        total_left = m + ((n - m + 1) // 2)
+        while l < r:
+            mid = (l + r) // 2
+            # The equal maintains the upper bound restriction
+            if nums1[mid] >= nums2[total_left - mid - 1]:
+                r = mid
+            else:
+                l = mid + 1
+        i = l
+        j = total_left - i
+
+        i_small = float('-inf') if i == 0 else nums1[i-1] 
+        i_large = float('inf') if i == m else nums1[i] 
+        j_small = float('-inf') if j == 0 else nums2[j-1] 
+        j_large = float('inf') if j == n else nums2[j] 
+
+        if (m+n) % 2 == 0:
+            return (max(i_small, j_small) + min(i_large, j_large)) / 2
+        else:
+            return max(i_small, j_small)
+        
+        
+```
 
 ## 33. Search in Rotated Sorted Array
 Tag: Binary Search
