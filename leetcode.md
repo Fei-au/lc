@@ -177,6 +177,8 @@
   - [371. Sum of Two Integers](#371-sum-of-two-integers)
 - [滑动窗口](#滑动窗口)
   - [674. Longest Continuous Increasing Subsequ](#674-longest-continuous-increasing-subsequ)
+- [Recursion](#recursion)
+  - [24. Swap Nodes in Pairs](#24-swap-nodes-in-pairs)
 
 
 # Tag
@@ -7880,5 +7882,24 @@ class Solution {
     }
 ```
 
+# Recursion
+
+## 24. Swap Nodes in Pairs
+Tag: Recursion
+```python
+class Solution:
+    # TC: O(n)
+    # SC: O(n)
+    def swapPairs(self, head: Optional[ListNode]) -> Optional[ListNode]:
+        if head == None or head.next == None:
+            return head
+        
+        n_round = head.next.next
+
+        next = head.next
+        next.next = head
+        head.next = self.swapPairs(n_round)
+        return next
+```
 
 
