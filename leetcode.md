@@ -313,6 +313,9 @@
 
   - Left should always be mid + 1, only this the range could shrink
   - right could be set to mid, and the position will be eliminate
+  
+- Recursion
+  - 
 
 # Time Complexities
 
@@ -3611,6 +3614,13 @@ Tag: Array, String
         """
         Do not return anything, modify s in-place instead.
         """
+        l = 0
+        r = len(s) - 1
+        while l < r:
+            s[l],s[r] = s[r],s[l]
+            l += 1
+            r -= 1
+
         # TC: O(n)
         # SC: O(1)
         n = len(s)
