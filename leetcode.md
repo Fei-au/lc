@@ -152,6 +152,7 @@
   - [374. Guess Number Higher or Lower](#374-guess-number-higher-or-lower)
   - [658. Find K Closest Elements](#658-find-k-closest-elements)
   - [704. Binary Search](#704-binary-search)
+  - [719. Find K-th Smallest Pair Distance](#719-find-k-th-smallest-pair-distance)
   - [744. Find Smallest Letter Greater Than Target](#744-find-smallest-letter-greater-than-target)
   - [1051. Height Checker](#1051-height-checker)
 - [Sorting 排序算法](#sorting-排序算法)
@@ -7295,6 +7296,32 @@ class Solution:
         if left < len(nums) and nums[left] == target:
             return left
         return -1
+```
+
+## 719. Find K-th Smallest Pair Distance
+Tag: Binary Search, Array
+```python
+class Solution:
+    # TC: O(nlogn + nlogD) nlogn is nums.sort, nlogD: D is max nums value - min nums value. BS logD, inside it is O(n), so nlogD
+    # SC: O(nlogn)
+    def smallestDistancePair(self, nums: List[int], k: int) -> int:
+        n = len(nums)
+        nums.sort()
+        l = 0
+        r = nums[n-1]
+        while l < r:
+            mid = (l + r) // 2
+            cnt = 0
+            i = 0
+            for j in range(n):
+                while nums[j] - nums[i] > mid:
+                    i += 1
+                cnt += j - i
+            if cnt >= k:
+                r = mid
+            else:
+                l = mid + 1
+        return l
 ```
 
 ## 744. Find Smallest Letter Greater Than Target
