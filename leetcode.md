@@ -43,6 +43,7 @@
   - [485. Max Consecutive Ones](#485-max-consecutive-ones)
   - [487. Max Consecutive Ones II](#487-max-consecutive-ones-ii)
   - [498. Diagonal Traverse](#498-diagonal-traverse)
+  - [498. Diagonal Traverse](#498-diagonal-traverse-1)
   - [724. Find Pivot Index](#724-find-pivot-index)
   - [747.Largest Number At Least Twice of Others](#747largest-number-at-least-twice-of-others)
   - [905. Sort Array By Parity](#905-sort-array-by-parity)
@@ -155,32 +156,6 @@
   - [704. Binary Search](#704-binary-search)
   - [719. Find K-th Smallest Pair Distance](#719-find-k-th-smallest-pair-distance)
   - [744. Find Smallest Letter Greater Than Target](#744-find-smallest-letter-greater-than-target)
-  - [1051. Height Checker](#1051-height-checker)
-- [Sorting 排序算法](#sorting-排序算法)
-  - [快排 QuickSort](#快排-quicksort)
-  - [Partition](#partition)
-    - [?couting sort？](#couting-sort)
-- [Bit manupulation (python)](#bit-manupulation-python)
-- [Bit manipulation](#bit-manipulation)
-  - [进制](#进制)
-  - [计算机中的整数表示](#计算机中的整数表示)
-  - [位运算的概述和性质](#位运算的概述和性质)
-  - [Java中的二进制输出](#java中的二进制输出)
-  - [Java位运算](#java位运算)
-  - [137. Single Number II](#137-single-number-ii)
-  - [160. Intersection of Two Linked Lists](#160-intersection-of-two-linked-lists-1)
-  - [190. Reverse Bits](#190-reverse-bits)
-  - [191. Number of 1 Bits](#191-number-of-1-bits)
-  - [218. Bitwise AND of Numbers Range](#218-bitwise-and-of-numbers-range)
-    - [Brian Kernighan 算法](#brian-kernighan-算法)
-  - [371. Sum of Two Integers](#371-sum-of-two-integers)
-- [滑动窗口](#滑动窗口)
-  - [674. Longest Continuous Increasing Subsequ](#674-longest-continuous-increasing-subsequ)
->>>>>>> Stashed changes
-  - [278. First Bad Version](#278-first-bad-version)
-  - [374. Guess Number Higher or Lower](#374-guess-number-higher-or-lower)
-  - [658. Find K Closest Elements](#658-find-k-closest-elements)
-  - [704. Binary Search](#704-binary-search)
   - [1051. Height Checker](#1051-height-checker)
 - [Sorting 排序算法](#sorting-排序算法)
   - [快排 QuickSort](#快排-quicksort)
@@ -761,6 +736,16 @@ nums = ["abcd", "ac", "abc", "D"]
 >>> nums.sort(key=get_len)
 >>> nums
 >>> ["D", "ac", "abc", "abcd"]
+
+nums.reverse() # reverse itself, no return
+reversed_nums = nums[::-1] # slice reverse
+reversed_nums = list(reversed(arr)) # 返回迭代器, 配合list使用
+
+left, right = 0, len(arr) - 1
+while left < right:
+    arr[left], arr[right] = arr[right], arr[left]
+    left += 1
+    right -= 1
 
 nums.reverse() # reverse itself, no return
 reversed_nums = nums[::-1] # slice reverse
@@ -2311,6 +2296,7 @@ class Solution1(object):
 ```
 
 ## 498. Diagonal Traverse
+## 498. Diagonal Traverse
 Tag: Array, Matrix
 ![image-2025062649801](./leetcode.assets/image-2025062649801.png)
 
@@ -2346,6 +2332,7 @@ Tag: Array, Matrix
                 else:
                     i += 1
                     j -= 1
+        return res
         return res
 ```
 
@@ -3041,6 +3028,7 @@ s = int(s)
 >>> ord('a') - ord('0')
 >>> 0
 a = '0'
+ord(a) - ord('0') # 0
 ord(a) - ord('0') # 0
 # 9. Sort string
 # sorted and reversed return an iterator
