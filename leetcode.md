@@ -150,6 +150,7 @@
   - [278. First Bad Version](#278-first-bad-version)
   - [367. Valid Perfect Square](#367-valid-perfect-square)
   - [374. Guess Number Higher or Lower](#374-guess-number-higher-or-lower)
+  - [410. Split Array Largest Sum](#410-split-array-largest-sum)
   - [658. Find K Closest Elements](#658-find-k-closest-elements)
   - [704. Binary Search](#704-binary-search)
   - [719. Find K-th Smallest Pair Distance](#719-find-k-th-smallest-pair-distance)
@@ -7186,6 +7187,50 @@ class Solution:
         return 0
 ```
 
+## 410. Split Array Largest Sum
+Tag: Binary Search, Array 
+```python
+class Solution:
+    # TC: O(n logD) D is max to sum nums
+    # SC: O(1)
+    '''
+        1. 分割k份后，最小的和一定大于数组中最大的值，确定left
+        2. sum为right
+        3. 算出mid，为答案最大的和 mid，所以在is_larger中，每份的分数组的和必须 小于等于 mid
+        4. 其中，总份儿数小于 mid，说明每份的和加起来太大了，最后不够分了，mid应该缩小，right = mid
+        5. 总分数等于mid，则可能是正确答案，需要进一步收缩left right
+    '''
+    def splitArray(self, nums: List[int], k: int) -> int:
+        # The smallest largest sum is the largest value in the array
+        l = max(nums)
+        r = sum(nums)
+
+        while l < r:
+            mid = (l+r) //2
+            # The rightmost
+            if self.is_larger(nums, mid, k):
+                r = mid
+            else:
+                l = mid+1
+        return l
+
+    # Every sums must be smaller than the mid
+    def is_larger(self, nums, mid, k):
+        sums = 0
+        # After compute valid sums, the last part has been left, so add 1 to the cnt
+        cnt = 1
+        for ele in nums:
+            if sums + ele <= mid:
+                sums+=ele
+            else:
+                sums = ele
+                cnt += 1
+        if cnt <= k:
+            return True
+        else:
+            return False
+```
+
 ## 658. Find K Closest Elements
 Tag: Binary Search, Two Pointers
 ```python
@@ -7299,11 +7344,23 @@ class Solution:
 ```
 
 ## 719. Find K-th Smallest Pair Distance
-Tag: Binary Search, Array
+Tag: Binary Search, Array, Two Pointers
 ```python
 class Solution:
     # TC: O(nlogn + nlogD) nlogn is nums.sort, nlogD: D is max nums value - min nums value. BS logD, inside it is O(n), so nlogD
     # SC: O(nlogn)
+
+    '''
+        1. 先排序
+        2. 元素之间的距离，最小为0，最大为首尾两项的差
+        3. 我们通过二分查找，计算距离为mid的时候，一共有多少组元素小于等于它，那么mid就是第几个元素
+        4. 收缩l r
+            4.1 使用条件 cnt <= k
+                当cnt大于k的时候，当前mid仍有可能是答案，比如当前距离mid有很多组，这些组加起来刚好超过k了，但距离mid仍是答案，所以使用r = mid保留mid，所以不是r = mid - 1
+                    比如 1,2,3,4,5,6,7,100. k=4. 这里距离为1的很多，比如mid为1的时候，cnt统计出来为6，虽然它大于4，但是距离mid仍需要保留。等待进一步二分缩小即可
+                当cnt == k时，当前距离mid很有可能并没有在任何数组对中
+                    比如 1,100,500. k=2. 第一次的时候mid=250，虽然计算出来的cnt是1（1，100）.但是距离250不是任何数组对的距离。所以需要进一步缩小，而不要提前返回。即cnt==k的时候，仍继续所以 l 和 r
+    '''
     def smallestDistancePair(self, nums: List[int], k: int) -> int:
         n = len(nums)
         nums.sort()
