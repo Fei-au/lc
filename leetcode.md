@@ -119,6 +119,8 @@
   - [264. Ugly Number II](#264-ugly-number-ii)
   - [347. Top K Frequent Elements](#347-top-k-frequent-elements)
   - [652. Find Duplicate Subtrees](#652-find-duplicate-subtrees)
+  - [Binary Search Tree (BST)](#binary-search-tree-bst)
+  - [700. Search in a Binary Search Tree](#700-search-in-a-binary-search-tree)
 - [TreeSet](#treeset)
 - [Queue](#queue)
   - [BSF](#bsf)
@@ -179,6 +181,10 @@
   - [674. Longest Continuous Increasing Subsequ](#674-longest-continuous-increasing-subsequ)
 - [Recursion](#recursion)
   - [24. Swap Nodes in Pairs](#24-swap-nodes-in-pairs)
+  - [70. Climbing Stairs](#70-climbing-stairs)
+  - [104. Maximum Depth of Binary Tree](#104-maximum-depth-of-binary-tree)
+  - [509. Fibonacci Number](#509-fibonacci-number)
+  - [779. K-th Symbol in Grammar](#779-k-th-symbol-in-grammar)
 
 
 # Tag
@@ -584,6 +590,23 @@ Reminder / modulus operations
 Tag: Math
 ```python
 class Solution:
+    # TC: O(logn)
+    # SC: O(logn)
+    def myPow(self, x: float, n: int) -> float:
+        d = {}
+        d[0] = 1
+        if n >= 0:
+            return self.m_pow(x,n, d)
+        else:
+            return 1/self.m_pow(x,-n, d)
+
+    def m_pow(self, x, n, d):
+        if d.get(n) is not None:
+            return d.get(n)
+        r = 1 if n % 2 == 0 else x
+        d[n] = r * self.m_pow(x, n//2, d) * self.m_pow(x, n//2, d)
+        return d[n]
+
     # TC: O(logn)
     # SC: O(logn)
     def myPow(self, x: float, n: int) -> float:
@@ -5643,8 +5666,6 @@ class Solution:
 
 # Tree
 
-
-
 ## Heap
 
 堆（Heap）是一种特殊的树形数据结构，通常是完全二叉树。它满足堆属性，即对于最大堆（Max-Heap），父节点的值总是大于或等于子节点的值；对于最小堆（Min-Heap），父节点的值总是小于或等于子节点的值
@@ -5992,6 +6013,25 @@ class Solution:
         return serializer
 ```
 
+## Binary Search Tree (BST)
+
+## 700. Search in a Binary Search Tree
+Tag: BST, Recursion
+```python
+# TC: O(logn) n is the total nodes, normally balance tree. O(n) the worst case
+# SC: O(logn). O(n) the worst case
+class Solution:
+    def searchBST(self, root: Optional[TreeNode], val: int) -> Optional[TreeNode]:
+        if root == None:
+            return None
+        
+        if root.val == val:
+            return root
+        elif root.val < val:
+            return self.searchBST(root.right, val)
+        else:
+            return self.searchBST(root.left, val)
+```
 
 # TreeSet
 
@@ -7902,4 +7942,104 @@ class Solution:
         return next
 ```
 
+## 70. Climbing Stairs
+Tag: Recursion, Math, Dynamic Programming
 
+```python
+class Solution:
+
+    # TC: O(n)
+    # SC: O(1)
+    def climbStairs(self, n: int) -> int:
+        if n <= 2:
+            return n
+        d = [0] * 46
+        d[1] = 1
+        d[2] = 2
+        for i in range(3, n+1, 1):
+            d[i] = d[i-1] + d[i-2]
+        return d[n]
+    
+    # TC: O(n)
+    # SC: O(n)
+    def climbStairs(self, n: int) -> int:
+        if n == 1:
+            return 1
+        if n == 2:
+            return 2
+        d = {}
+        d[1] = 1
+        d[2] = 2
+        return self.climbStairs_d(n,d)
+
+    def climbStairs_d(self, n: int, d) -> int:
+        if d.get(n) is not None:
+            return d.get(n)
+        res = self.climbStairs_d(n-1, d)+self.climbStairs_d(n-2, d)
+        d[n]=res
+        return res
+```
+
+## 104. Maximum Depth of Binary Tree
+Tag: Recursion, Tree
+```python
+class Solution:
+    # TC: O(N) N is total node count
+    # SC: O(n) n is the max depth
+    def maxDepth(self, root: Optional[TreeNode]) -> int:
+        if root is None:
+            return 0
+        return 1 + max(self.maxDepth(root.left), self.maxDepth(root.right))
+```
+
+## 509. Fibonacci Number
+Tag: Recursion, Math, Dynamic Programming
+```python
+
+class Solution:
+    # TC: O(n)
+    # SC: O(1)
+    def fib(self, n: int) -> int:
+        d = [0] * 31
+        d[1] = 1
+        i = 2
+        while i <= n:
+            d[i] = d[i-1] + d[i-2]
+            i+=1
+        return d[n]
+
+    # TC: O(n)
+    # SC: O(n)
+    def fib(self, n: int) -> int:
+        if n <= 1:
+            return n
+        d = {}
+        d[0] = 0
+        d[1] = 1
+        return self.fib_d(n, d)
+
+    def fib_d(self, n, d):
+        if d.get(n) is not None:
+            return d.get(n)
+        res = self.fib_d(n-1,d) + self.fib_d(n-2,d)
+        d[n] = res
+        return res
+```
+
+## 779. K-th Symbol in Grammar
+Tag: Recursion, Math
+```python
+class Solution:
+    # TC: O(n)
+    # SC: O(n)
+    def kthGrammar(self, n: int, k: int) -> int:
+        if n == 1:
+            return 0
+        last_level = (k + 1) // 2
+        reminder = (k+1) % 2
+        last = self.kthGrammar(n-1, last_level)
+        if last == 0:
+            return 0 if reminder == 0 else 1
+        else:
+            return 1 if reminder ==0 else 0
+```
