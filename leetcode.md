@@ -182,6 +182,7 @@
 - [Recursion](#recursion)
   - [24. Swap Nodes in Pairs](#24-swap-nodes-in-pairs)
   - [70. Climbing Stairs](#70-climbing-stairs)
+  - [95. Unique Binary Search Trees II](#95-unique-binary-search-trees-ii)
   - [104. Maximum Depth of Binary Tree](#104-maximum-depth-of-binary-tree)
   - [509. Fibonacci Number](#509-fibonacci-number)
   - [779. K-th Symbol in Grammar](#779-k-th-symbol-in-grammar)
@@ -7977,6 +7978,38 @@ class Solution:
             return d.get(n)
         res = self.climbStairs_d(n-1, d)+self.climbStairs_d(n-2, d)
         d[n]=res
+        return res
+```
+
+## 95. Unique Binary Search Trees II
+Tag: Tree, Recursion
+```python
+class Solution:
+    # 卡特兰数（Catalan Number）
+    # Cn = (2n)! / (n+1)2n!
+    # TC: O(Cn)
+    # SC: O(Cn)
+    def generateTrees(self, n: int) -> List[Optional[TreeNode]]:
+        memo = {}
+        return self.generateTreess(1, n, memo)
+
+    def generateTreess(self, start, end, memo):
+        res = []
+        if start > end:
+            res.append(None)
+            return res
+        if (start,end) in memo:
+            return memo[(start,end)]
+        for i in range(start, end+1, 1):
+            left = self.generateTreess(start, i-1, memo)
+            right = self.generateTreess(i+1, end, memo)
+            for l in left:
+                for r in right:
+                    root = TreeNode(i)
+                    root.left = l
+                    root.right = r
+                    res.append(root)
+        memo[(start,end)]=res
         return res
 ```
 
