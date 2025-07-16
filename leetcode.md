@@ -123,7 +123,9 @@
   - [Binary Search Tree (BST)](#binary-search-tree-bst)
   - [94. Binary Tree Inorder Traversal](#94-binary-tree-inorder-traversal)
   - [102. Binary Tree Level Order Traversal](#102-binary-tree-level-order-traversal)
+  - [106. Construct Binary Tree from Inorder and Postorder Traversal](#106-construct-binary-tree-from-inorder-and-postorder-traversal)
   - [112. Path Sum](#112-path-sum)
+  - [116. Populating Next Right Pointers in Each Node](#116-populating-next-right-pointers-in-each-node)
   - [144. Binary Tree Preorder Traversal](#144-binary-tree-preorder-traversal)
   - [145. Binary Tree Postorder Traversal](#145-binary-tree-postorder-traversal)
   - [700. Search in a Binary Search Tree](#700-search-in-a-binary-search-tree)
@@ -6069,6 +6071,35 @@ class Solution:
             res.append(r)
         return res
 ```
+## 106. Construct Binary Tree from Inorder and Postorder Traversal
+Tag: Recursion, Binary Tree
+```python
+# 1. Use index instead of slice arrays in every round
+# 2. Use a dict to save the inorder values and index instead of index search everytime
+# TC: O(n)
+# SC: O()
+class Solution:
+    def buildTree(self, inorder: List[int], postorder: List[int]) -> Optional[TreeNode]:
+
+        def helper(in_left, in_right, post_left, post_right):
+            if in_left > in_right:
+                return None
+
+            root = postorder[post_right]
+            root_index = inorder_hashmap[root]
+            left_size = root_index - in_left
+            root_node = TreeNode(
+                val=root,
+                left=helper(in_left, root_index-1, post_left, post_left + left_size - 1),
+                right=helper(root_index+1, in_right, post_left + left_size, post_right-1)
+            )
+            return root_node
+        inorder_hashmap = {}
+        for i, v in enumerate(inorder):
+            inorder_hashmap[v] = i
+        return helper(0, len(inorder) - 1, 0, len(postorder) - 1)
+```
+
 ## 112. Path Sum
 Tag: Binary Tree, Math, Recursion
 ```python
@@ -6082,6 +6113,49 @@ class Solution:
             return True if targetSum == root.val else False
         return self.hasPathSum(root.left, targetSum - root.val) or self.hasPathSum(root.right, targetSum - root.val)
 ```
+## 116. Populating Next Right Pointers in Each Node
+Tag: Binary Tree, Queue
+```python
+class Solution:
+    # TC: O(n)
+    # SC: O(1)
+    def connect(self, root: 'Optional[Node]') -> 'Optional[Node]':
+        if root is None:
+            return root
+        head = root
+        while head.left:
+            leftmost = head
+            while head is not None:
+                head.left.next = head.right
+                if head.next:
+                    head.right.next = head.next.left
+                head = head.next
+            head = leftmost.left
+        return root
+        
+    # TC: O(n)
+    # SC: O(n)
+    def connect(self, root: 'Optional[Node]') -> 'Optional[Node]':
+        q = deque()
+        if root is None:
+            return root
+
+        q.append(root)
+        while len(q):
+            n = len(q)
+            start = None
+            for _ in range(n):
+                next = q.popleft()
+                if next.left is not None:
+                    q.append(next.left)
+                if next.right is not None:
+                    q.append(next.right)
+                if start is not None:
+                    start.next = next
+                start = next
+        return root
+```
+
 ## 144. Binary Tree Preorder Traversal
 Tag: Bianry Tree, Recursion
 ```python
