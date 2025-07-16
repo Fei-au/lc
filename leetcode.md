@@ -119,7 +119,13 @@
   - [264. Ugly Number II](#264-ugly-number-ii)
   - [347. Top K Frequent Elements](#347-top-k-frequent-elements)
   - [652. Find Duplicate Subtrees](#652-find-duplicate-subtrees)
+  - [Binary Tree](#binary-tree)
   - [Binary Search Tree (BST)](#binary-search-tree-bst)
+  - [94. Binary Tree Inorder Traversal](#94-binary-tree-inorder-traversal)
+  - [102. Binary Tree Level Order Traversal](#102-binary-tree-level-order-traversal)
+  - [112. Path Sum](#112-path-sum)
+  - [144. Binary Tree Preorder Traversal](#144-binary-tree-preorder-traversal)
+  - [145. Binary Tree Postorder Traversal](#145-binary-tree-postorder-traversal)
   - [700. Search in a Binary Search Tree](#700-search-in-a-binary-search-tree)
 - [TreeSet](#treeset)
 - [Queue](#queue)
@@ -183,6 +189,7 @@
   - [24. Swap Nodes in Pairs](#24-swap-nodes-in-pairs)
   - [70. Climbing Stairs](#70-climbing-stairs)
   - [95. Unique Binary Search Trees II](#95-unique-binary-search-trees-ii)
+  - [101. Symmetric Tree](#101-symmetric-tree)
   - [104. Maximum Depth of Binary Tree](#104-maximum-depth-of-binary-tree)
   - [509. Fibonacci Number](#509-fibonacci-number)
   - [779. K-th Symbol in Grammar](#779-k-th-symbol-in-grammar)
@@ -820,6 +827,11 @@ nums2 = [1]
 >>> nums1 is nums2
 >>> False
 
+# 13. Concat
+nums1 = [1]
+nums2 = [1]
+nums_total = nums1 + nums2
+nums_total = nums1.extend(nums2)
 ```
 
 ## Slice (Python)
@@ -6014,7 +6026,106 @@ class Solution:
         return serializer
 ```
 
+## Binary Tree
 ## Binary Search Tree (BST)
+
+## 94. Binary Tree Inorder Traversal
+Tag: Bianry Tree, Recursion
+```python
+class Solution:
+    # TC: O(n)
+    # SC: O(h)
+    def inorderTraversal(self, root: Optional[TreeNode]) -> List[int]:
+        res = []
+        if root == None:
+            return res
+        res.extend(self.inorderTraversal(root.left))
+        res.append(root.val)
+        res.extend(self.inorderTraversal(root.right))
+        return res
+```
+
+## 102. Binary Tree Level Order Traversal
+Tag: Bianry Tree, Recursion
+```python
+class Solution:
+    # TC: O(n)
+    # SC: O(n)
+    def levelOrder(self, root: Optional[TreeNode]) -> List[List[int]]:
+        res = []
+        q = deque()
+        if root is None:
+            return res
+        q.append(root)
+        while len(q):
+            r = []
+            for _ in range(len(q)):
+                node = q.popleft()
+                r.append(node.val)
+                if node.left is not None:
+                    q.append(node.left)
+                if node.right is not None:
+                    q.append(node.right)
+            res.append(r)
+        return res
+```
+## 112. Path Sum
+Tag: Binary Tree, Math, Recursion
+```python
+class Solution:
+    # TC: O(n)
+    # SC: O(h)
+    def hasPathSum(self, root: Optional[TreeNode], targetSum: int) -> bool:
+        if root is None:
+            return False
+        if root is not None and root.left is None and root.right is None:
+            return True if targetSum == root.val else False
+        return self.hasPathSum(root.left, targetSum - root.val) or self.hasPathSum(root.right, targetSum - root.val)
+```
+## 144. Binary Tree Preorder Traversal
+Tag: Bianry Tree, Recursion
+```python
+class Solution:
+    # TC: O(n) n is total node
+    # SC: O(h) h is the height of the tree
+    def preorderTraversal(self, root: Optional[TreeNode]) -> List[int]:
+        res = []
+        self.traverse(root,res)
+        return res
+
+    def traverse(self, root, res):
+        if root is None:
+            return
+        res.append(root.val)
+        self.traverse(root.left, res)
+        self.traverse(root.right, res)
+    # TC: O(n)
+    # SC: O(h)
+    def preorderTraversal(self, root: Optional[TreeNode]) -> List[int]:
+        res = []
+        if root is None:
+            return res
+        res.append(root.val)
+        res.extend(self.preorderTraversal(root.left))
+        res.extend(self.preorderTraversal(root.right))
+        return res
+```
+
+## 145. Binary Tree Postorder Traversal
+Tag: Bianry Tree, Recursion
+```python
+class Solution:
+    # TC: O(n)
+    # SC: O(h)
+    def postorderTraversal(self, root: Optional[TreeNode]) -> List[int]:
+        res = []
+        if root == None:
+            return res
+        res.extend(self.postorderTraversal(root.left))
+        res.extend(self.postorderTraversal(root.right))
+        res.append(root.val)
+        return res
+```
 
 ## 700. Search in a Binary Search Tree
 Tag: BST, Recursion
@@ -8011,6 +8122,27 @@ class Solution:
                     res.append(root)
         memo[(start,end)]=res
         return res
+```
+
+## 101. Symmetric Tree
+Tag: Binary Tree, Recursion
+```python
+class Solution:
+    # TC: O(n)
+    # SC: O(h)
+    def isSymmetric(self, root: Optional[TreeNode]) -> bool:
+        if root == None:
+            return True
+        return self.helper(root.left, root.right)
+    def helper(self, left, right):
+        if left is None and right is None:
+            return True
+        if left is None or right is None:
+            return False
+        if left.val == right.val:
+            return self.helper(left.left, right.right) and self.helper(left.right, right.left)
+        else:
+            return False
 ```
 
 ## 104. Maximum Depth of Binary Tree
