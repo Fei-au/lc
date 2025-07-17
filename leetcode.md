@@ -128,6 +128,8 @@
   - [116. Populating Next Right Pointers in Each Node](#116-populating-next-right-pointers-in-each-node)
   - [144. Binary Tree Preorder Traversal](#144-binary-tree-preorder-traversal)
   - [145. Binary Tree Postorder Traversal](#145-binary-tree-postorder-traversal)
+  - [236. Lowest Common Ancestor of a Binary Tree](#236-lowest-common-ancestor-of-a-binary-tree)
+  - [297. Serialize and Deserialize Binary Tree](#297-serialize-and-deserialize-binary-tree)
   - [700. Search in a Binary Search Tree](#700-search-in-a-binary-search-tree)
 - [TreeSet](#treeset)
 - [Queue](#queue)
@@ -6200,7 +6202,74 @@ class Solution:
         res.append(root.val)
         return res
 ```
+## 236. Lowest Common Ancestor of a Binary Tree
+Tag: Binary Tree, Recursion
+```python
+class Solution:
+    # If the func does not found any p q in root, return None
+    # If the func found one node, return the node
+    # If the func found two nodes, return their root
+    def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
+        if root == None or root == p or root == q:
+            return root
+        left = self.lowestCommonAncestor(root.left, p, q)
+        right = self.lowestCommonAncestor(root.right, p, q)
+        if left != None and right != None:
+            return root
+        return left if left is not None else right
+```
+## 297. Serialize and Deserialize Binary Tree
+Tag: Binary Tree, Recursion
+```python
+class Codec:
+    # TC: O(n)
+    # SC: O(h)
+    def serialize(self, root):
+        """Encodes a tree to a single string.
+        
+        :type root: TreeNode
+        :rtype: str
+        """
+        res = []
+        self.helper(root, res)
+        return ",".join(str(i) for i in res)
 
+    def helper(self, root, res):
+        if root is not None:
+            res.append(root.val)
+            self.helper(root.left, res)
+            self.helper(root.right, res)
+        else:
+            res.append(None)
+            return
+
+    # TC: O(n)
+    # SC: O(h)
+    def deserialize(self, data):
+        """Decodes your encoded data to tree.
+        
+        :type data: str
+        :rtype: TreeNode
+        """
+        idx = 0
+        data = data.split(",")
+        data = [int(i) if i != "None" else None for i in data]
+        
+        def helper():
+            nonlocal idx
+            if data[idx] is None:
+                idx += 1
+                return None
+            root = TreeNode(data[idx])
+            idx += 1
+            left = helper()
+            right = helper()
+            root.left = left
+            root.right = right
+            return root
+
+        return helper()
+```
 ## 700. Search in a Binary Search Tree
 Tag: BST, Recursion
 ```python
