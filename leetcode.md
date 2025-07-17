@@ -111,7 +111,7 @@
   - [599. Minimum Index Sum of Two Lists](#599-minimum-index-sum-of-two-lists)
   - [771. Jewels and Stones](#771-jewels-and-stones)
 - [Tree](#tree)
-  - [Heap](#heap)
+  - [^^Heap](#heap)
     - [Heap Queue (Python)](#heap-queue-python)
     - [PriorityQueue](#priorityqueue)
   - [23. Merge k Sorted Lists](#23-merge-k-sorted-lists)
@@ -119,8 +119,7 @@
   - [264. Ugly Number II](#264-ugly-number-ii)
   - [347. Top K Frequent Elements](#347-top-k-frequent-elements)
   - [652. Find Duplicate Subtrees](#652-find-duplicate-subtrees)
-  - [Binary Tree](#binary-tree)
-  - [Binary Search Tree (BST)](#binary-search-tree-bst)
+  - [^^Binary Tree](#binary-tree)
   - [94. Binary Tree Inorder Traversal](#94-binary-tree-inorder-traversal)
   - [102. Binary Tree Level Order Traversal](#102-binary-tree-level-order-traversal)
   - [106. Construct Binary Tree from Inorder and Postorder Traversal](#106-construct-binary-tree-from-inorder-and-postorder-traversal)
@@ -131,6 +130,9 @@
   - [236. Lowest Common Ancestor of a Binary Tree](#236-lowest-common-ancestor-of-a-binary-tree)
   - [297. Serialize and Deserialize Binary Tree](#297-serialize-and-deserialize-binary-tree)
   - [700. Search in a Binary Search Tree](#700-search-in-a-binary-search-tree)
+  - [^^Trie](#trie)
+  - [^^Binary Search Tree (BST)](#binary-search-tree-bst)
+  - [98. Validate Binary Search Tree](#98-validate-binary-search-tree)
 - [TreeSet](#treeset)
 - [Queue](#queue)
   - [BSF](#bsf)
@@ -5683,7 +5685,7 @@ class Solution:
 
 # Tree
 
-## Heap
+## ^^Heap
 
 堆（Heap）是一种特殊的树形数据结构，通常是完全二叉树。它满足堆属性，即对于最大堆（Max-Heap），父节点的值总是大于或等于子节点的值；对于最小堆（Min-Heap），父节点的值总是小于或等于子节点的值
 
@@ -6030,8 +6032,7 @@ class Solution:
         return serializer
 ```
 
-## Binary Tree
-## Binary Search Tree (BST)
+## ^^Binary Tree
 
 ## 94. Binary Tree Inorder Traversal
 Tag: Bianry Tree, Recursion
@@ -6287,6 +6288,78 @@ class Solution:
         else:
             return self.searchBST(root.left, val)
 ```
+
+## ^^Trie
+Typically, a trie is used to store strings, and it split the string part by part, Each Trie node represents a string (a prefix). Each node might have several children nodes while the paths to different children nodes represent different characters.
+![image.png](./leetcode.assets/image-20250717001.png)
+
+Also know as **prefix tree** cause all descendants of a node has common prefix
+```python
+class TrieNode:
+    N = 26
+    children = new TrieNode[N]
+
+from typing import Dict
+class TrieNode:
+    children: Dict[str, TrieNode] = {}
+    
+    // you might need some extra values according to different cases
+
+```
+
+
+## ^^Binary Search Tree (BST)
+A binary search tree (BST), a special form of a binary tree, satisfies the binary search property:
+
+- The value in each node must be greater than (or equal to) any values stored in its left subtree.
+- The value in each node must be less than (or equal to) any values stored in its right subtree.
+
+
+- Inorder of BST is sorted
+
+
+## 98. Validate Binary Search Tree
+Tag: Binary Search Tree, Recursion
+
+For method 1, the path is all the way up from left below to right above
+![image.png](./leetcode.assets/image-20250717002.png)
+And if there is right node, it works like this, the root of the right node has already been poped, and the right node is in between of it's left and parent of it's root
+![image.png](./leetcode.assets/image-20250717003.png)
+If only go right, it push one, pop one, check each node along the way
+![image.png](./leetcode.assets/image-20250717004.png)
+```python
+class Solution:
+    # TC: O(n)
+    # SC: O(n)
+    # Along the left nodes direction, all the way to the end
+    # and then go up, and right
+    def isValidBST(self, root: Optional[TreeNode]) -> bool:
+        smallest = float('-inf')
+        stack = []
+        while root is not None or len(stack):
+            while root is not None:
+                stack.append(root)
+                root = root.left
+            root = stack.pop()
+            if root.val <= smallest:
+                return False
+            smallest = root.val
+            root = root.right
+        return True
+
+    # TC: O(n)
+    # SC: O(h)
+    # The smallest and largest are defined by the nodes along the way to the specific node. That's also the defination of Binary Search Tree. Insert a new node to the left if it's less the root or right if larger than the root
+    def isValidBST(self, root: Optional[TreeNode]) -> bool:
+        return self.helper(root, float('-inf'), float('inf'))
+    def helper(self, root, smallest, largest):
+        if root is None:
+            return True
+        if root.val <= smallest or root.val >= largest:
+            return False
+        return self.helper(root.left, smallest, root.val) and self.helper(root.right, root.val, largest)
+```
+
 
 # TreeSet
 
