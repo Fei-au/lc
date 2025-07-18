@@ -129,10 +129,12 @@
   - [145. Binary Tree Postorder Traversal](#145-binary-tree-postorder-traversal)
   - [236. Lowest Common Ancestor of a Binary Tree](#236-lowest-common-ancestor-of-a-binary-tree)
   - [297. Serialize and Deserialize Binary Tree](#297-serialize-and-deserialize-binary-tree)
-  - [700. Search in a Binary Search Tree](#700-search-in-a-binary-search-tree)
   - [^^Trie](#trie)
   - [^^Binary Search Tree (BST)](#binary-search-tree-bst)
   - [98. Validate Binary Search Tree](#98-validate-binary-search-tree)
+  - [173. Binary Search Tree Iterator](#173-binary-search-tree-iterator)
+  - [700. Search in a Binary Search Tree](#700-search-in-a-binary-search-tree)
+  - [701. Insert into a Binary Search Tree](#701-insert-into-a-binary-search-tree)
 - [TreeSet](#treeset)
 - [Queue](#queue)
   - [BSF](#bsf)
@@ -6271,23 +6273,7 @@ class Codec:
 
         return helper()
 ```
-## 700. Search in a Binary Search Tree
-Tag: BST, Recursion
-```python
-# TC: O(logn) n is the total nodes, normally balance tree. O(n) the worst case
-# SC: O(logn). O(n) the worst case
-class Solution:
-    def searchBST(self, root: Optional[TreeNode], val: int) -> Optional[TreeNode]:
-        if root == None:
-            return None
-        
-        if root.val == val:
-            return root
-        elif root.val < val:
-            return self.searchBST(root.right, val)
-        else:
-            return self.searchBST(root.left, val)
-```
+
 
 ## ^^Trie
 Typically, a trie is used to store strings, and it split the string part by part, Each Trie node represents a string (a prefix). Each node might have several children nodes while the paths to different children nodes represent different characters.
@@ -6359,8 +6345,79 @@ class Solution:
             return False
         return self.helper(root.left, smallest, root.val) and self.helper(root.right, root.val, largest)
 ```
+## 173. Binary Search Tree Iterator
+Tag: Binary Search Tree, Recursion
+```python
+class BSTIterator:
+    # TC: O(n)
+    # SC: O(n)
+    def __init__(self, root: Optional[TreeNode]):
+        self.stack = []
+        self.root = root
 
+    def next(self) -> int:
+        while self.root:
+            self.stack.append(self.root)
+            self.root = self.root.left
+        next = self.stack.pop()
+        self.root = next.right
+        return next.val
 
+    def hasNext(self) -> bool:
+        return self.root is not None or len(self.stack) > 0
+```
+## 700. Search in a Binary Search Tree
+Tag: BST, Recursion
+```python
+# TC: O(logn) n is the total nodes, normally balance tree. O(n) the worst case
+# SC: O(logn). O(n) the worst case
+class Solution:
+    def searchBST(self, root: Optional[TreeNode], val: int) -> Optional[TreeNode]:
+        if root == None:
+            return None
+        
+        if root.val == val:
+            return root
+        elif root.val < val:
+            return self.searchBST(root.right, val)
+        else:
+            return self.searchBST(root.left, val)
+```
+## 701. Insert into a Binary Search Tree
+Tag: BST, Recursion
+```python
+class Solution:
+    # TC: O(n)
+    # SC: O(h)
+    def insertIntoBST(self, root: Optional[TreeNode], val: int) -> Optional[TreeNode]:
+        if root is None:
+            return TreeNode(val)
+        if root.val > val:
+                root.left = self.insertIntoBST(root.left,val)
+        else:
+                root.right = self.insertIntoBST(root.right, val)
+        return root
+
+    # TC: O(n)
+    # SC: O(1)
+    def insertIntoBST(self, root: Optional[TreeNode], val: int) -> Optional[TreeNode]:
+        if root is None:
+            return TreeNode(val)
+        parent = None
+        cur = root
+        while cur is not None:
+            parent = cur
+            if cur.val > val:
+                cur = cur.left
+            else:
+                cur = cur.right
+        node = TreeNode(val)
+        if parent.val > val:
+            parent.left = node
+        else:
+            parent.right = node
+        return root
+```
 # TreeSet
 
 ```java
