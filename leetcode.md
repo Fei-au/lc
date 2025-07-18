@@ -133,6 +133,7 @@
   - [^^Binary Search Tree (BST)](#binary-search-tree-bst)
   - [98. Validate Binary Search Tree](#98-validate-binary-search-tree)
   - [173. Binary Search Tree Iterator](#173-binary-search-tree-iterator)
+  - [450. Delete Node in a BST](#450-delete-node-in-a-bst)
   - [700. Search in a Binary Search Tree](#700-search-in-a-binary-search-tree)
   - [701. Insert into a Binary Search Tree](#701-insert-into-a-binary-search-tree)
 - [TreeSet](#treeset)
@@ -6366,8 +6367,37 @@ class BSTIterator:
     def hasNext(self) -> bool:
         return self.root is not None or len(self.stack) > 0
 ```
+## 450. Delete Node in a BST
+Tag: Binary Search Tree, Recursion
+```python
+class Solution:
+    # TC: O(n)
+    # SC: O(h)
+    def deleteNode(self, root: Optional[TreeNode], key: int) -> Optional[TreeNode]:
+        if root is None:
+            return root
+        if key < root.val:
+            root.left = self.deleteNode(root.left, key)
+        elif key > root.val:
+            root.right = self.deleteNode(root.right, key)
+        else:
+            if root.left is None:
+                return root.right
+            if root.right is None:
+                return root.left
+            node = self.get_successor(root.right)
+            root.val = node.val
+            root.right = self.deleteNode(root.right, node.val)
+        return root
+
+    def get_successor(self, root):
+        while root.left:
+            root = root.left
+        return root
+```
+
 ## 700. Search in a Binary Search Tree
-Tag: BST, Recursion
+Tag: Binary Search Tree, Recursion
 ```python
 # TC: O(logn) n is the total nodes, normally balance tree. O(n) the worst case
 # SC: O(logn). O(n) the worst case
