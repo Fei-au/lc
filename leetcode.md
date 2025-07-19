@@ -137,6 +137,7 @@
   - [450. Delete Node in a BST](#450-delete-node-in-a-bst)
   - [700. Search in a Binary Search Tree](#700-search-in-a-binary-search-tree)
   - [701. Insert into a Binary Search Tree](#701-insert-into-a-binary-search-tree)
+  - [703. Kth Largest Element in a Stream](#703-kth-largest-element-in-a-stream)
 - [TreeSet](#treeset)
 - [Queue](#queue)
   - [BSF](#bsf)
@@ -5717,6 +5718,12 @@ heapq.nsmallest(
 
 # 6. Heapify，把一个数组转化为堆结构
 heapq.heapify(l) # 此后l[0] 就是最小的了
+
+# 7. heappushpop(heap, item)
+# 当你需要将一个新元素加入堆，并且只保留堆中较大的元素时（常用于构建最大 N 个值的最小堆）。
+# 它的效率比单独调用 heappush() 和 heappop() 更高，因为只需调整一次堆结构。
+heapq.heappushpop(heap, item)
+res = heapq.heappushpop(heap, 2) 
 ```
 
 
@@ -6485,6 +6492,71 @@ class Solution:
             parent.right = node
         return root
 ```
+## 703. Kth Largest Element in a Stream
+Tag: Binary Search Tree, Recursion, Heap
+```python
+class KthLargest:
+    # TC: O(n) heapify, O(logn) push pop
+    # SC: O(k)
+    def __init__(self, k: int, nums: List[int]):
+        # TC: O(n) heapify On
+        heapq.heapify(nums)
+        self.k = k
+        self.minheap = nums
+        while len(self.minheap) > k:
+            heapq.heappop(self.minheap)
+        
+    def add(self, val: int) -> int:
+        if len(self.minheap) < self.k:
+            heapq.heappush(self.minheap, val)
+        else:
+            heapq.heappushpop(self.minheap, val)
+        return self.minheap[0]
+
+    # 使用二叉树，思路见 https://leetcode.com/explore/learn/card/introduction-to-data-structure-binary-search-tree/142/conclusion/1009/
+    # 当构成平衡二叉树的时候才可以，不平衡的时候会树结构不好，会超时
+#     def __init__(self, k: int, nums: List[int]):
+#         self.root = None
+#         self.k = k
+#         for i in range(len(nums)):
+#             self.root=self.insert(self.root, nums[i])
+
+#     def add(self, val: int) -> int:
+#         self.root = self.insert(self.root, val)
+#         return self.find(self.root, self.k)
+
+#     def find(self, head, k):
+#         right_count = head.right.count if head.right is not None else 0
+#         total_right_count = right_count + head.weight
+#         if right_count < k <= total_right_count:
+#             return head.val
+#         elif k > total_right_count:
+#             return self.find(head.left, k-total_right_count)
+#         else:
+#             return self.find(head.right, k)
+
+#     def insert(self, head, val):
+#         if head is None:
+#             return Node(val)
+#         head.count += 1
+#         if val < head.val:
+#             head.left = self.insert(head.left,val)
+#         elif val > head.val:
+#             head.right = self.insert(head.right,val)
+#         else:
+#             head.weight += 1
+#         return head
+
+
+# class Node:
+#     def __init__(self, val:int, count:int=1,weight:int=1,left:'Node'=None,right:'Node'=None):
+#         self.val = val
+#         self.count = count
+#         self.weight = weight
+#         self.left = left
+#         self.right = right
+```
+
 # TreeSet
 
 ```java
