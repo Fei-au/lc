@@ -133,6 +133,7 @@
   - [^^Binary Search Tree (BST)](#binary-search-tree-bst)
   - [98. Validate Binary Search Tree](#98-validate-binary-search-tree)
   - [173. Binary Search Tree Iterator](#173-binary-search-tree-iterator)
+  - [235. Lowest Common Ancestor of a Binary Search Tree](#235-lowest-common-ancestor-of-a-binary-search-tree)
   - [450. Delete Node in a BST](#450-delete-node-in-a-bst)
   - [700. Search in a Binary Search Tree](#700-search-in-a-binary-search-tree)
   - [701. Insert into a Binary Search Tree](#701-insert-into-a-binary-search-tree)
@@ -6367,6 +6368,42 @@ class BSTIterator:
     def hasNext(self) -> bool:
         return self.root is not None or len(self.stack) > 0
 ```
+## 235. Lowest Common Ancestor of a Binary Search Tree
+Tag: Binary Search Tree, Recursion
+```python
+class Solution:
+    # TC: O(n)
+    # SC: O(h)
+    def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
+        if root is None:
+            return root
+        if q.val < root.val and p.val < root.val:
+            return self.lowestCommonAncestor(root.left, p, q)
+        elif p.val > root.val and q.val > root.val:
+            return self.lowestCommonAncestor(root.right, p, q)
+        else:
+            return  root
+
+        # while True:
+        #     if q.val < root.val and p.val < root.val:
+        #         root = root.left
+        #     elif p.val > root.val and q.val > root.val:
+        #         root = root.right
+        #     else:
+        #         return  root
+
+    # TC: O(n)
+    # SC: O(h)
+    def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
+        if root is None or root == p or root == q:
+            return root
+        left = self.lowestCommonAncestor(root.left, p, q)
+        right = self.lowestCommonAncestor(root.right, p, q)
+        if left is not None and right is not None:
+            return root
+        return left if left is not None else right
+```
+
 ## 450. Delete Node in a BST
 Tag: Binary Search Tree, Recursion
 ```python
