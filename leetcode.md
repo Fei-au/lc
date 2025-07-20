@@ -103,6 +103,7 @@
   - [205. Isomorphic Strings](#205-isomorphic-strings)
   - [217. Contains Duplicate](#217-contains-duplicate)
   - [219. Contains Duplicate II](#219-contains-duplicate-ii)
+  - [220. Contains Duplicate III](#220-contains-duplicate-iii)
   - [349. Intersection of Two Arrays](#349-intersection-of-two-arrays)
   - [350. Intersection of Two Arrays II](#350-intersection-of-two-arrays-ii)
   - [380. Insert Delete GetRandom O(1)](#380-insert-delete-getrandom-o1)
@@ -5520,6 +5521,29 @@ class Solution:
                 return True
             else:
                 s.add(nums[i])
+        return False
+```
+## 220. Contains Duplicate III
+Tag: Math, HashMap, Bucket Sort, Sliding Window
+```python
+class Solution:
+    # TC: O(n)
+    # SC: O(indexDiff)
+    def containsNearbyAlmostDuplicate(self, nums: List[int], indexDiff: int, valueDiff: int) -> bool:
+        d = {}
+        size = valueDiff + 1
+        for i in range(len(nums)):
+            # Python // round to -inf
+            id = nums[i] // size
+            if id in d:
+                return True
+            if (id - 1) in d and nums[i] - d.get(id - 1) <= valueDiff:
+                return True
+            if (id + 1) in d and d.get(id + 1) - nums[i] <= valueDiff:
+                return True
+            d[id] = nums[i]
+            if len(d) > indexDiff:
+                d.pop((nums[i - indexDiff] // size), None)
         return False
 ```
 
