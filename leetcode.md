@@ -124,6 +124,7 @@
   - [94. Binary Tree Inorder Traversal](#94-binary-tree-inorder-traversal)
   - [102. Binary Tree Level Order Traversal](#102-binary-tree-level-order-traversal)
   - [106. Construct Binary Tree from Inorder and Postorder Traversal](#106-construct-binary-tree-from-inorder-and-postorder-traversal)
+  - [110. Balanced Binary Tree](#110-balanced-binary-tree)
   - [112. Path Sum](#112-path-sum)
   - [116. Populating Next Right Pointers in Each Node](#116-populating-next-right-pointers-in-each-node)
   - [144. Binary Tree Preorder Traversal](#144-binary-tree-preorder-traversal)
@@ -133,6 +134,7 @@
   - [^^Trie](#trie)
   - [^^Binary Search Tree (BST)](#binary-search-tree-bst)
   - [98. Validate Binary Search Tree](#98-validate-binary-search-tree)
+  - [108. Convert Sorted Array to Binary Search Tree](#108-convert-sorted-array-to-binary-search-tree)
   - [173. Binary Search Tree Iterator](#173-binary-search-tree-iterator)
   - [235. Lowest Common Ancestor of a Binary Search Tree](#235-lowest-common-ancestor-of-a-binary-search-tree)
   - [450. Delete Node in a BST](#450-delete-node-in-a-bst)
@@ -6137,7 +6139,23 @@ class Solution:
             inorder_hashmap[v] = i
         return helper(0, len(inorder) - 1, 0, len(postorder) - 1)
 ```
-
+## 110. Balanced Binary Tree
+Tag: Binary Tree, Recursion
+```python
+class Solution:
+    # TC: O(n)
+    # SC: O(h)
+    def isBalanced(self, root: Optional[TreeNode]) -> bool:
+        def dfs(node):
+            if node is None:
+                return 0
+            left = dfs(node.left)
+            right = dfs(node.right)
+            if abs(left - right)  > 1 or left == -1 or right == -1:
+                return -1
+            return 1 + max(left, right)
+        return dfs(root) != -1
+```
 ## 112. Path Sum
 Tag: Binary Tree, Math, Recursion
 ```python
@@ -6377,6 +6395,23 @@ class Solution:
         if root.val <= smallest or root.val >= largest:
             return False
         return self.helper(root.left, smallest, root.val) and self.helper(root.right, root.val, largest)
+```
+## 108. Convert Sorted Array to Binary Search Tree
+Tag: Binary Tree, Recursion
+```python
+class Solution:
+    # TC: O(n)
+    # SC: O(h)
+    def sortedArrayToBST(self, nums: List[int]) -> Optional[TreeNode]:
+        def helper(left, right):
+            if left > right:
+                return None
+            mid = (left + right) // 2
+            root = TreeNode(nums[mid])
+            root.left = helper(left, mid - 1)
+            root.right = helper(mid + 1, right)
+            return root
+        return helper(0, len(nums) - 1)
 ```
 ## 173. Binary Search Tree Iterator
 Tag: Binary Search Tree, Recursion
