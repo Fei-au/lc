@@ -133,6 +133,9 @@
   - [297. Serialize and Deserialize Binary Tree](#297-serialize-and-deserialize-binary-tree)
   - [^^Trie](#trie)
   - [208. Implement Trie (Prefix Tree)](#208-implement-trie-prefix-tree)
+  - [211. Design Add and Search Words Data Structure](#211-design-add-and-search-words-data-structure)
+  - [648. Replace Words](#648-replace-words)
+  - [677. Map Sum Pairs](#677-map-sum-pairs)
   - [^^Binary Search Tree (BST)](#binary-search-tree-bst)
   - [98. Validate Binary Search Tree](#98-validate-binary-search-tree)
   - [108. Convert Sorted Array to Binary Search Tree](#108-convert-sorted-array-to-binary-search-tree)
@@ -3087,7 +3090,45 @@ ord(a) - ord('0') # 0
 # sorted and reversed return an iterator
 "".join(sorted(s))
 "".join(reversed(s))
+# 10. format string
+'''
+{[变量]:[填充][对齐][宽度][,][.精度][类型]}
+填充：
+默认不填充
+- 0：填充0
 
+对齐：
+默认有对齐
+- <: 左对齐
+- ^: 居中
+- >: 有对齐
+
+宽度：
+默认原始宽度
+- 数字：总宽度，包括小数点，不包括千分位分隔
+
+分隔符：
+- .: 小数点分隔
+- ,: 千分位分隔
+
+精度：
+- 数字：小数点后保留的位数
+
+类型：
+- f：固定点（小数）
+- e / E：科学计数法
+- g / G：自动选择科学计数或浮点
+- d：整数
+- o/x/b：八进制/十六进制/二进制
+'''
+x = 3.14159
+print("{:.2f}".format(x))   # 输出: 3.14
+print(f"{x:.2f}")           # f-string 写法：3.14
+
+print(f"{x:08.2f}") # 00003.14 最后输出的总宽度，最少是8，包括小数点。如果整数过多，则会超出8位
+print(f"{'hi':*>6}")  # 输出: '****hi'。字符串的format中，可以用任意单个字符作为补充
+
+print(f"{5:031b}") # 0是补充，31是宽度，b是类型
 ```
 
 # String
@@ -6417,7 +6458,116 @@ class Trie:
             cur = cur.children[idx]
         return True
 ```
+## 211. Design Add and Search Words Data Structure
+Tag: Trie, Hash Map, Array, String
+```python
+class Trie:
+    def __init__(self):
+        self.children = {}
+        self.is_word = False
 
+class WordDictionary:
+
+    def __init__(self):
+        self.node = Trie()
+    
+    # TC: O(len(w))
+    # SC: O(len(w)*w count)
+    def addWord(self, word: str) -> None:
+        node = self.node
+        for w in word:
+            if w not in node.children:
+                node.children[w] = Trie()
+            node = node.children[w]
+        node.is_word = True
+
+    # TC: O() all added word characters count
+    def search(self, word: str) -> bool:
+        return self.search_with_node(word, self.node)
+
+    def search_with_node(self, word: str, node: Trie) -> bool:
+        for i in range(len(word)):
+            w = word[i]
+            if w == '.':
+                for v in node.children.values():
+                    if self.search_with_node(word[i+1:], v):
+                        return True
+            if w not in node.children:
+                return False
+            node = node.children[w]
+        return True if node.is_word else False
+```
+
+## 648. Replace Words
+Tag: Trie, Hash Map, Array, String
+```python
+class Trie:
+    def __init__(self):
+        self.children = {}
+        self.is_root = False
+
+class Solution:
+    # TC: O(dn) d is dict, s is sentence, n is average len of word
+    # SC: O(dn)
+    def replaceWords(self, dictionary: List[str], sentence: str) -> str:
+        dummy_h = Trie()
+        for root in dictionary:
+            head = dummy_h
+            for k in root:
+                if k not in head.children:
+                    head.children[k] = Trie()
+                head = head.children[k]
+            head.is_root = True
+
+        res = []
+        words = sentence.split(' ')
+        for word in words:
+            i = 0
+            head = dummy_h
+            for k in word:
+                if k not in head.children:
+                    i = len(word)
+                    break
+                head = head.children[k]
+                i += 1
+                if head.is_root:
+                    break
+            res.append(word[0:i])
+        return " ".join(res)
+```
+
+## 677. Map Sum Pairs
+Tag: Trie, Hash Map
+```python
+class TrieNode:
+    def __init__(self):
+        self.children = {}
+        self.total = 0
+
+class MapSum:
+    def __init__(self):
+        self.map = {}
+        self.trienode = TrieNode()
+    # TC: O(n) n is key len
+    # SC: O(n*k) k is total inserted k
+    def insert(self, key: str, val: int) -> None:
+        delta = val - self.map.get(key, 0)
+        trie = self.trienode
+        for k in key:
+            if k not in trie.children:
+                trie.children[k] = TrieNode()
+            trie = trie.children[k]
+            trie.total += delta
+        self.map[key] = val
+
+    def sum(self, prefix: str) -> int:
+        trie = self.trienode
+        for k in prefix:
+            if k not in trie.children:
+                return 0
+            trie = trie.children[k]
+        return trie.total
+```
 
 ## ^^Binary Search Tree (BST)
 A binary search tree (BST), a special form of a binary tree, satisfies the binary search property:
@@ -8201,6 +8351,40 @@ int partition(int left, int right){
 
 # Bit manupulation (python)
 
+```python
+
+# 二进制（0b 开头），值是 5
+print(0b101)  # 输出: 5
+
+# Java 中的 0e1011 是科学计数法（0 * 10^1011 = 0.0）
+# Python 中类似写法为：
+print(0e1011)  # 输出: 0.0
+
+# 八进制（0o 开头），011 在 Java 是八进制 11，即十进制 9
+print(0o11)  # 输出: 9
+
+# 十进制
+print(11)  # 输出: 11
+
+# 十六进制（0x 开头），0x11C 是十进制 284
+print(0x11C)  # 输出: 284
+
+# 格式化为 10 位宽度的十六进制，小写，左侧补 0
+print("{:010x}".format(7))  # 输出: 0000000007
+
+# 格式化为 10 位宽度的八进制，左侧补 0
+print("{:010o}".format(13))  # 输出: 0000000015
+
+# 普通十六进制格式化
+print("{:x}".format(7))  # 输出: 7
+
+# 普通八进制格式化
+print("{:o}".format(13))  # 输出: 15
+
+# 将整数转为二进制字符串
+print(bin(11)[2:])  # 输出: 1011
+
+```
 
 
 
