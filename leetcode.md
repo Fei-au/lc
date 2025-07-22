@@ -132,6 +132,7 @@
   - [236. Lowest Common Ancestor of a Binary Tree](#236-lowest-common-ancestor-of-a-binary-tree)
   - [297. Serialize and Deserialize Binary Tree](#297-serialize-and-deserialize-binary-tree)
   - [^^Trie](#trie)
+  - [208. Implement Trie (Prefix Tree)](#208-implement-trie-prefix-tree)
   - [^^Binary Search Tree (BST)](#binary-search-tree-bst)
   - [98. Validate Binary Search Tree](#98-validate-binary-search-tree)
   - [108. Convert Sorted Array to Binary Search Tree](#108-convert-sorted-array-to-binary-search-tree)
@@ -6331,6 +6332,7 @@ Typically, a trie is used to store strings, and it split the string part by part
 ![image.png](./leetcode.assets/image-20250717001.png)
 
 Also know as **prefix tree** cause all descendants of a node has common prefix
+Represent a Trie
 ```python
 class TrieNode:
     N = 26
@@ -6342,6 +6344,78 @@ class TrieNode:
     
     // you might need some extra values according to different cases
 
+```
+
+## 208. Implement Trie (Prefix Tree)
+Tag: Trie, Array, Hash Table
+```python
+# dict
+class Trie:
+    def __init__(self):
+        self.d = {}
+
+    # TC: O(n) # n is word len
+    # SC: O(s*n) # s is each word, n is len
+    def insert(self, word: str) -> None:
+        trie = self
+        for c in word:
+            if c not in trie.d:
+                trie.d[c] = Trie()
+            trie = trie.d[c]
+        trie.d['is_end'] = True
+
+    def search(self, word: str) -> bool:
+        trie = self
+        for c in word:
+            if c not in trie.d:
+                return False
+            trie = trie.d[c]
+        return True if trie.d.get('is_end') else False
+
+    def startsWith(self, prefix: str) -> bool:
+        trie = self
+        for c in prefix:
+            if c not in trie.d:
+                return False
+            trie = trie.d[c]
+        return True
+
+class Trie:
+    # TC: O(1)
+    # SC: O(1)
+    def __init__(self):
+        self.children = [0] * 26
+        self.is_word = False
+
+    # TC: O(n) # n is word len
+    # SC: O(s*n*26) # s is each word, n is len
+    def insert(self, word: str) -> None:
+        cur = self
+        for i in range(len(word)):
+            c = word[i]
+            idx = ord(c) - ord('a')
+            if cur.children[idx] == 0:
+                cur.children[idx] = Trie()
+            cur = cur.children[idx]
+        cur.is_word = True
+
+    def search(self, word: str) -> bool:
+        cur = self
+        for c in word:
+            idx = ord(c) - ord('a')
+            if cur.children[idx] == 0:
+                return False
+            cur = cur.children[idx]
+        return True if cur.is_word else False
+
+    def startsWith(self, prefix: str) -> bool:
+        cur = self
+        for c in prefix:
+            idx = ord(c) - ord('a')
+            if cur.children[idx] == 0:
+                return False
+            cur = cur.children[idx]
+        return True
 ```
 
 
