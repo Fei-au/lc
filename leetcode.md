@@ -6591,7 +6591,7 @@ class Solution:
                 if 0 <= x < m and 0 <= y < n:
                     dfs(nxt, x, y)
             board[i][j] = ch
-            # 当node检查完ch，剪枝
+            # 当node检查完ch，且该节点没用的时候，剪枝
             if len(nxt.children) == 0:
                 node.children.pop(ch, None)
 
