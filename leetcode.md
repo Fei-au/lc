@@ -134,6 +134,8 @@
   - [^^Trie](#trie)
   - [208. Implement Trie (Prefix Tree)](#208-implement-trie-prefix-tree)
   - [211. Design Add and Search Words Data Structure](#211-design-add-and-search-words-data-structure)
+  - [421. Maximum XOR of Two Numbers in an Array](#421-maximum-xor-of-two-numbers-in-an-array)
+  - [212. Word Search II](#212-word-search-ii)
   - [648. Replace Words](#648-replace-words)
   - [677. Map Sum Pairs](#677-map-sum-pairs)
   - [^^Binary Search Tree (BST)](#binary-search-tree-bst)
@@ -6550,6 +6552,65 @@ class Trie:
     def __init__(self):
         self.left = None
         self.right = None
+```
+## 212. Word Search II
+Tag: Trie, Recursion, DFS
+```python
+class Solution:
+    # TC: O(len(words)*len(word) + m*n*4^len(word))
+    # SC: O(len(words)*len(word) + len(word))
+    def findWords(self, board: List[List[str]], words: List[str]) -> List[str]:
+        root = Trie()
+        for word in words:
+            self.add(root, word)
+        m = len(board)
+        n = len(board[0])
+        dirs = [
+            [0,1],
+            [0,-1],
+            [1,0],
+            [-1,0],
+        ]
+
+        res = set()
+        def dfs(node, i, j):
+            if board[i][j] not in node.children:
+                return
+            # 记录i，j，设置#，结束后设置回来，去重
+            ch = board[i][j]
+            nxt = node.children.get(board[i][j])
+            if nxt.word is not None:
+                res.add(nxt.word)
+                # 剪枝
+                nxt.word = None
+                # 这里不return，也不remove nxt，是因为情况 abc , ab的时候，如果先走了ab，提前剪枝，会导致abc找不到
+            board[i][j] = "#"
+            for xi, yi in dirs:
+                x = i + xi
+                y = j + yi
+                if 0 <= x < m and 0 <= y < n:
+                    dfs(nxt, x, y)
+            board[i][j] = ch
+            # 当node检查完ch，剪枝
+            if len(nxt.children) == 0:
+                node.children.pop(ch, None)
+
+        for i in  range(m):
+            for j in range(n):
+                dfs(root, i, j)
+        return list(res)
+    
+    def add(self, node, word):
+        for w in word:
+            if w not in node.children:
+                node.children[w] = Trie()
+            node = node.children.get(w)
+        node.word = word
+
+class Trie:
+    def __init__(self):
+        self.children = {}
+        self.word = None
 ```
 
 ## 648. Replace Words
