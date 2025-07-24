@@ -6497,6 +6497,60 @@ class WordDictionary:
             node = node.children[w]
         return True if node.is_word else False
 ```
+## 421. Maximum XOR of Two Numbers in an Array
+Tag: Trie, Bit Manipulation
+```python
+class Solution:
+    # TC: O(n*31)
+    # SC: O(31*2 = 1)
+    def findMaximumXOR(self, nums: List[int]) -> int:
+        root = Trie()
+        self.add(root, nums[0])
+        res = 0
+        for i in range(1, len(nums), 1):
+            res = max(self.check(root, nums[i]), res)
+            self.add(root,nums[i])
+        return res
+
+    def add(self, node, num):
+        N = 30
+        for i in range(N, -1, -1):
+            cur_bit = num >> i & 1
+            if cur_bit == 1:
+                if node.left is None:
+                    node.left = Trie()
+                node = node.left
+            else:
+                if node.right is None:
+                    node.right = Trie()
+                node = node.right
+
+    def check(self, node, num):
+        N = 30
+        x = 0
+        for i in range(N, -1, -1):
+            cur_bit = num >> i & 1
+            if cur_bit == 1:
+                if node.right:
+                    node = node.right
+                    x = x * 2 + 1
+                else:
+                    node = node.left
+                    x = x * 2
+            else:
+                if node.left:
+                    node = node.left
+                    x = x * 2 + 1
+                else:
+                    node = node.right
+                    x = x * 2
+        return x
+
+class Trie:
+    def __init__(self):
+        self.left = None
+        self.right = None
+```
 
 ## 648. Replace Words
 Tag: Trie, Hash Map, Array, String
