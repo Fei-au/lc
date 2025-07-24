@@ -203,6 +203,7 @@
   - [218. Bitwise AND of Numbers Range](#218-bitwise-and-of-numbers-range)
     - [Brian Kernighan 算法](#brian-kernighan-算法)
   - [371. Sum of Two Integers](#371-sum-of-two-integers)
+  - [421. Maximum XOR of Two Numbers in an Array](#421-maximum-xor-of-two-numbers-in-an-array)
 - [滑动窗口](#滑动窗口)
   - [674. Longest Continuous Increasing Subsequ](#674-longest-continuous-increasing-subsequ)
 - [Recursion](#recursion)
@@ -8835,7 +8836,31 @@ class Solution {
     }
 ```
 
-
+## 421. Maximum XOR of Two Numbers in an Array
+Tag: Trie, Bit Manupulation, Hash Table
+```python
+class Solution:
+    # TC: O(31*n)
+    # SC: O(n)
+    def findMaximumXOR(self, nums: List[int]) -> int:
+        s = set()
+        x = 0
+        for i in range(30,-1,-1):
+            for num in nums:
+                s.add(num >> i)
+            xNext = x*2+1
+            found = False
+            for num in nums:
+                if (num >> i) ^ xNext in s:
+                    found = True
+                    break
+            if found:
+                x = xNext
+            else:
+                x = xNext - 1
+            s.clear()
+        return x
+```
 
 
 
