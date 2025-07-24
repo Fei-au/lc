@@ -45,7 +45,7 @@
   - [498. Diagonal Traverse](#498-diagonal-traverse)
   - [498. Diagonal Traverse](#498-diagonal-traverse-1)
   - [724. Find Pivot Index](#724-find-pivot-index)
-  - [747.Largest Number At Least Twice of Others](#747largest-number-at-least-twice-of-others)
+  - [747. Largest Number At Least Twice of Others](#747-largest-number-at-least-twice-of-others)
   - [905. Sort Array By Parity](#905-sort-array-by-parity)
   - [941. Valid Mountain Array](#941-valid-mountain-array)
   - [977. Squares of a Sorted Array](#977-squares-of-a-sorted-array)
@@ -134,6 +134,7 @@
   - [^^Trie](#trie)
   - [208. Implement Trie (Prefix Tree)](#208-implement-trie-prefix-tree)
   - [211. Design Add and Search Words Data Structure](#211-design-add-and-search-words-data-structure)
+  - [336. Palindrome Pairs](#336-palindrome-pairs)
   - [421. Maximum XOR of Two Numbers in an Array](#421-maximum-xor-of-two-numbers-in-an-array)
   - [212. Word Search II](#212-word-search-ii)
   - [648. Replace Words](#648-replace-words)
@@ -203,7 +204,7 @@
   - [218. Bitwise AND of Numbers Range](#218-bitwise-and-of-numbers-range)
     - [Brian Kernighan 算法](#brian-kernighan-算法)
   - [371. Sum of Two Integers](#371-sum-of-two-integers)
-  - [421. Maximum XOR of Two Numbers in an Array](#421-maximum-xor-of-two-numbers-in-an-array)
+  - [421. Maximum XOR of Two Numbers in an Array](#421-maximum-xor-of-two-numbers-in-an-array-1)
 - [滑动窗口](#滑动窗口)
   - [674. Longest Continuous Increasing Subsequ](#674-longest-continuous-increasing-subsequ)
 - [Recursion](#recursion)
@@ -2462,7 +2463,7 @@ class Solution:
     }
 ```
 
-## 747.Largest Number At Least Twice of Others
+## 747. Largest Number At Least Twice of Others
 Tag: Array
 
 ![image-20250709001525817](./leetcode.assets/image-20250709001525817.png)
@@ -6499,6 +6500,34 @@ class WordDictionary:
                 return False
             node = node.children[w]
         return True if node.is_word else False
+```
+
+## 336. Palindrome Pairs
+Tag: String, Array, Hash Table, Trie
+```python
+class Solution:
+
+    def is_palindrome(self, s):
+        return s == s[::-1]
+    
+    # TC: O(n*w*w) n len(words), w len(word), prefix = word[:j] O(w), is_palindrome O(w)
+    # SC: O(n)
+    def palindromePairs(self, words: List[str]) -> List[List[int]]:
+        res = set()
+        word_to_idx = {word: i for i, word in enumerate(words)}
+        for i, word in enumerate(words):
+            for j in range(len(word) + 1):
+                prefix = word[:j]
+                suffix = word[j:]
+                if self.is_palindrome(prefix):
+                    reversed_suffix = suffix[::-1]
+                    if reversed_suffix in word_to_idx and word_to_idx[reversed_suffix] != i:
+                        res.add(f'{word_to_idx[reversed_suffix]},{i}')
+                if self.is_palindrome(suffix):
+                    reversed_prefix = prefix[::-1]
+                    if reversed_prefix in word_to_idx and word_to_idx[reversed_prefix] != i:
+                        res.add(f'{i},{word_to_idx[reversed_prefix]}')
+        return [[int(part) for part in item.split(',')] for item in list(res)]
 ```
 ## 421. Maximum XOR of Two Numbers in an Array
 Tag: Trie, Bit Manipulation
