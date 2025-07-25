@@ -139,6 +139,11 @@
   - [212. Word Search II](#212-word-search-ii)
   - [648. Replace Words](#648-replace-words)
   - [677. Map Sum Pairs](#677-map-sum-pairs)
+  - [^^N-ary Tree](#n-ary-tree)
+  - [429. N-ary Tree Level Order Traversal](#429-n-ary-tree-level-order-traversal)
+  - [559. Maximum Depth of N-ary Tree](#559-maximum-depth-of-n-ary-tree)
+  - [589. N-ary Tree Preorder Traversal](#589-n-ary-tree-preorder-traversal)
+  - [590. N-ary Tree Postorder Traversal](#590-n-ary-tree-postorder-traversal)
   - [^^Binary Search Tree (BST)](#binary-search-tree-bst)
   - [98. Validate Binary Search Tree](#98-validate-binary-search-tree)
   - [108. Convert Sorted Array to Binary Search Tree](#108-convert-sorted-array-to-binary-search-tree)
@@ -6505,11 +6510,31 @@ class WordDictionary:
 ## 336. Palindrome Pairs
 Tag: String, Array, Hash Table, Trie
 ```python
+
+class Solution:
+    # TC: O(n*w*w) n len(words), w len(word), prefix = word[:j] O(w), is_palindrome O(w)
+    # SC: O(n)
+    def palindromePairs(self, words: List[str]) -> List[List[int]]:
+        backwords, res = {}, []
+        backwords = {word[::-1]: i for i,word in enumerate(words)}
+
+        for i, word in enumerate(words):
+            if word in backwords and i != backwords[word]:
+                res.append([i, backwords[word]])
+            if word != '' and '' in backwords and word == word[::-1]:
+                res.append([i, backwords['']])
+                res.append([backwords[''], i])
+            for j in range(len(word)):
+                if word[:j] in backwords and word[j:] == word[:j-1:-1]:
+                    res.append([i, backwords[word[:j]]])
+                if word[j:] in backwords and word[:j] == word[j-1::-1]:
+                    res.append([backwords[word[j:]], i])
+        return res
+
 class Solution:
 
     def is_palindrome(self, s):
         return s == s[::-1]
-    
     # TC: O(n*w*w) n len(words), w len(word), prefix = word[:j] O(w), is_palindrome O(w)
     # SC: O(n)
     def palindromePairs(self, words: List[str]) -> List[List[int]]:
@@ -6713,6 +6738,96 @@ class MapSum:
             trie = trie.children[k]
         return trie.total
 ```
+## ^^N-ary Tree
+```python
+# Definition for a Node.
+class Node:
+    def __init__(self, val: Optional[int] = None, children: Optional[List['Node']] = None):
+        self.val = val
+        self.children = children
+```
+
+## 429. N-ary Tree Level Order Traversal
+Tag: N-ary Tree, Recursion
+```python
+class Solution:
+    def levelOrder(self, root: 'Node') -> List[List[int]]:
+        res = []
+        q = deque()
+        if root is not None:
+            q.append(root)
+        while len(q):
+            size = len(q)
+            res.append([])
+            for _ in range(size):
+                node = q.popleft()
+                res[-1].append(node.val)
+                for c in node.children:
+                    q.append(c)
+        return res
+```
+## 559. Maximum Depth of N-ary Tree
+Tag: N-ary Tree, Recursion, Dynamic Programming, Top-down, Bottom-up
+```python
+class Solution:
+    # Bottom-up, calculation bottom node first, then up to the root
+    # TC: O(n)
+    # SC: O(h)
+    def maxDepth(self, root: 'Node') -> int:
+        if root is None:
+            return 0
+        return 1 + max((self.maxDepth(c) for c in root.children), default = 0)
+
+class Solution:
+    # Top-down
+    # TC: O(n)
+    # SC: O(h)
+    def maxDepth(self, root: 'Node') -> int:
+        self.ans = 0
+        def dfs(node, depth):
+            if node is None:
+                return
+            self.ans = max(self.ans, depth + 1)
+            for c in node.children:
+                dfs(c, depth + 1)
+        dfs(root, 0)
+        return self.ans
+```
+
+## 589. N-ary Tree Preorder Traversal
+Tag: N-ary Tree, Recursion
+```python
+class Solution:
+    # TC: O(n) # n is total node count
+    # SC: O(h) # h is tree height
+    def preorder(self, root: 'Node') -> List[int]:
+        res = []
+        def helper(node):
+            if node is None:
+                return
+            res.append(node.val)
+            for c in node.children:
+                helper(c)
+        helper(root)
+        return res
+```
+
+## 590. N-ary Tree Postorder Traversal
+Tag: N-ary Tree, Recursion
+```python
+class Solution:
+    def postorder(self, root: 'Node') -> List[int]:
+        res = []
+        def helper(node):
+            if node is None:
+                return
+            for c in node.children:
+                helper(c)
+            res.append(node.val)
+        helper(root)
+        return res
+```
+
 
 ## ^^Binary Search Tree (BST)
 A binary search tree (BST), a special form of a binary tree, satisfies the binary search property:
