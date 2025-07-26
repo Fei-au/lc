@@ -193,6 +193,8 @@
   - [1051. Height Checker](#1051-height-checker)
 - [Sorting 排序算法](#sorting-排序算法)
   - [快排 QuickSort](#快排-quicksort)
+  - [912. Sort an Array](#912-sort-an-array)
+  - [Merge Sort](#merge-sort)
   - [Partition](#partition)
     - [?couting sort？](#couting-sort)
 - [Bit manupulation (python)](#bit-manupulation-python)
@@ -333,7 +335,16 @@
   - right could be set to mid, and the position will be eliminate
   
 - Recursion
-  - 
+
+- Top down
+
+- Bottom up
+
+- Divide and conquer
+  - 1. Divide, Divide the problem into a set of subproblems
+    2. Conquer, Solve each subproblem recursively
+    3. Combine, Combine the results of each subproblem
+
 
 # Time Complexities
 
@@ -8568,7 +8579,44 @@ class Solution {
 ```
 ```
 
+## 912. Sort an Array
 
+## Merge Sort
+```python
+class Solution:
+    # Top down
+    # TC: O(n logn)
+    def sortArray(self, nums: List[int]) -> List[int]:
+        # Merge sort
+        n = len(nums)
+        if n <= 1:
+            return nums
+        mid = n // 2
+        merged_left = self.sortArray(nums[0: mid])
+        merged_right = self.sortArray(nums[mid: n])
+        return self.merge(merged_left, merged_right)
+
+    def merge(self, nums1, nums2):
+        m = len(nums1)
+        n = len(nums2)
+        p = 0
+        q = 0
+        res = []
+        while p<m and q<n:
+            if nums1[p] < nums2[q]:
+                res.append(nums1[p])
+                p += 1
+            else:
+                res.append(nums2[q])
+                q+=1
+        while p < m:
+            res.append(nums1[p])
+            p+=1
+        while q < n:
+            res.append(nums2[q])
+            q+=1
+        return res
+```
 
 ## Partition
 
