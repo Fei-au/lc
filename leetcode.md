@@ -220,6 +220,7 @@
   - [95. Unique Binary Search Trees II](#95-unique-binary-search-trees-ii)
   - [101. Symmetric Tree](#101-symmetric-tree)
   - [104. Maximum Depth of Binary Tree](#104-maximum-depth-of-binary-tree)
+  - [240. Search a 2D Matrix II](#240-search-a-2d-matrix-ii)
   - [509. Fibonacci Number](#509-fibonacci-number)
   - [779. K-th Symbol in Grammar](#779-k-th-symbol-in-grammar)
 
@@ -335,15 +336,27 @@
   - right could be set to mid, and the position will be eliminate
   
 - Recursion
+  - Use visited matrix to record processed place
+  - Set visited place as special value at the begaining of one round recursion, set it back after this round to restore the state. This is used when you want to use totally new visited matrix in every start point
+  - We can check the condition before call the recursion, like within `for dir in dirs`, we do if 0 < x < m and somecondition: recursion
+  - We can also check the condition at the start, and in `for dir in dirs`, we just check basic valid boundary and then start recursion, leave the consition check at the start. This is for the senario start the start point needs to be checked and possiblely be a solution
+  
 
 - Top down
+  - Usually use recursion
+  - One step one step to solve problem, final step get the solution
+
 
 - Bottom up
+  - Usually no recursion, use loop
+  - Dynamic programming mindset
+  - Solve basic problem first, find the connection to the larger problem, then solve that one, till the result
 
 - Divide and conquer
-  - 1. Divide, Divide the problem into a set of subproblems
-    2. Conquer, Solve each subproblem recursively
-    3. Combine, Combine the results of each subproblem
+  1. Divide, Divide the problem into a set of subproblems
+  2. Conquer, Solve each subproblem recursively
+  3. 
+  4. Combine, Combine the results of each subproblem
 
 
 # Time Complexities
@@ -8585,6 +8598,7 @@ class Solution {
 ```python
 class Solution:
     # Top down
+    # 假如有8个数字，先分成4个4个合并，然后分成2个2个合并，然后分成1个1个合并
     # TC: O(n logn)
     def sortArray(self, nums: List[int]) -> List[int]:
         # Merge sort
@@ -8595,6 +8609,43 @@ class Solution:
         merged_left = self.sortArray(nums[0: mid])
         merged_right = self.sortArray(nums[mid: n])
         return self.merge(merged_left, merged_right)
+
+    def merge(self, nums1, nums2):
+        m = len(nums1)
+        n = len(nums2)
+        p = 0
+        q = 0
+        res = []
+        while p<m and q<n:
+            if nums1[p] < nums2[q]:
+                res.append(nums1[p])
+                p += 1
+            else:
+                res.append(nums2[q])
+                q+=1
+        while p < m:
+            res.append(nums1[p])
+            p+=1
+        while q < n:
+            res.append(nums2[q])
+            q+=1
+        return res
+    # Bottom up
+    # 把每个数字看成一份，先1个1个合并，然后2个2个合并，然后4个4个合并
+    class Solution:
+    def sortArray(self, nums: List[int]) -> List[int]:
+        # Merge sort
+        width = 1
+        n = len(nums)
+        while width < n:
+            for i in range(0, n, width * 2):
+                mid = i + width
+                nums1 = nums[i: i + width]
+                nums2 = nums[i+ width: i + width * 2]
+                merged = self.merge(nums1, nums2)
+                nums[i: i+len(merged)] = merged
+            width *= 2
+        return nums
 
     def merge(self, nums1, nums2):
         m = len(nums1)
@@ -9217,7 +9268,28 @@ class Solution:
             return 0
         return 1 + max(self.maxDepth(root.left), self.maxDepth(root.right))
 ```
+## 240. Search a 2D Matrix II
+Tag: Recursion, Matrix, Divide and Conquer
+```python
+class Solution:
+    # TC: O(m + n)
+    # SC: O(1)
+    def searchMatrix(self, matrix: List[List[int]], target: int) -> bool:
+        m = len(matrix)
+        n = len(matrix[0])
+        x = 0
+        y = n-1
+        while x < m and y >= 0:
+            var = matrix[x][y]
+            if var == target:
+                return True
+            elif var < target:
+                x += 1
+            else:
+                y -= 1
+        return False
 
+```
 ## 509. Fibonacci Number
 Tag: Recursion, Math, Dynamic Programming
 ```python
