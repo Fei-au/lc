@@ -9288,6 +9288,30 @@ class Solution:
             else:
                 y -= 1
         return False
+    # Divide and conquer
+    # TC: O(m*n)
+    # SC: O(m+n)
+    def searchMatrix(self, matrix: List[List[int]], target: int) -> bool:
+        m = len(matrix) - 1
+        n = len(matrix[0]) - 1
+        m0 = 0
+        n0 = 0
+        return self.search(matrix, target, m0, m, n0, n)
+    
+    def search(self, matrix, target, m0, m, n0, n):
+        if m0>m or n0 > n:
+            return False
+        
+        x = m0
+        y = n0
+        while x <= m and y <= n and matrix[x][y] < target:
+            x += 1
+            y += 1
+        if x <= m and y <= n and matrix[x][y] == target:
+            return True
+        rightTop = (m0, x - 1, y, n)
+        leftBottom = (x, m, n0, y - 1)
+        return self.search(matrix, target, *rightTop) or self.search(matrix,target,*leftBottom)
 
 ```
 ## 509. Fibonacci Number
