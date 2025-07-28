@@ -195,7 +195,6 @@
   - [快排 QuickSort](#快排-quicksort)
   - [912. Sort an Array](#912-sort-an-array)
   - [Merge Sort](#merge-sort)
-  - [Partition](#partition)
     - [?couting sort？](#couting-sort)
 - [Bit manupulation (python)](#bit-manupulation-python)
 - [Bit manipulation](#bit-manipulation)
@@ -8578,18 +8577,43 @@ class Solution {
 
 
 
-```
-
-```
-
-
-
-
 # Sorting 排序算法
 
 ## 快排 QuickSort
 
-```
+**Partition**
+
+Find the kth most element
+
+1. 获取元素。如果是对本身大小比较，不用多余操作。如果是freq等相关联的判断，则通过hashmap 存储值和它对应的大小（freq等）
+2. 选定left，right，和中间的一个随机元素（random.nextInt），开始partition
+3. 将pivot index与right交换
+4. 从left到right -1 遍历，使用双指针，一个指向下一个小于pivot元素该放置的位置storeIndex，一个遍历i
+5. 小于pivot（freq）的移动到storeIndex，++
+6. 知道i到right-1
+7. right与storeIndex交换
+8. 实现了storeIndex 也就是 pivot元素左边（到left）比它小，右边（到right）比它大
+9. 此时storeIndex位置为n-k最大的位置
+
+```java
+
+int partition(int left, int right){
+	Random random = new Random();
+    int pivot_index = random.nextInt(right - left + 1) + left;
+    
+    // Optional: int value = hashmap.get(pivot_index);
+    swap(nums, pivot_index, right);
+    int storeIndex = left;
+    for(int i = left; i < right; i++){
+        if(hashmap.get(nums[i]) < value){
+            swap(i, storeIndex);
+            storeIndex ++;
+        }
+    }
+    
+    swap(right, storeIndex);
+    return storeIndex;
+}
 ```
 
 ## 912. Sort an Array
@@ -8667,43 +8691,31 @@ class Solution:
             res.append(nums2[q])
             q+=1
         return res
-```
-
-## Partition
-
-Find the kth most element
-
-1. 获取元素。如果是对本身大小比较，不用多余操作。如果是freq等相关联的判断，则通过hashmap 存储值和它对应的大小（freq等）
-2. 选定left，right，和中间的一个随机元素（random.nextInt），开始partition
-3. 将pivot index与right交换
-4. 从left到right -1 遍历，使用双指针，一个指向下一个小于pivot元素该放置的位置storeIndex，一个遍历i
-5. 小于pivot（freq）的移动到storeIndex，++
-6. 知道i到right-1
-7. right与storeIndex交换
-8. 实现了storeIndex 也就是 pivot元素左边（到left）比它小，右边（到right）比它大
-9. 此时storeIndex位置为n-k最大的位置
-
-```java
-
-int partition(int left, int right){
-	Random random = new Random();
-    int pivot_index = random.nextInt(right - left + 1) + left;
+        
+    # Quick sort
+    def sortArray(self, nums: List[int]) -> List[int]:
+        # Quick sort
+        self.qsort(nums, 0, len(nums) - 1)
+        return nums
     
-    // Optional: int value = hashmap.get(pivot_index);
-    swap(nums, pivot_index, right);
-    int storeIndex = left;
-    for(int i = left; i < right; i++){
-        if(hashmap.get(nums[i]) < value){
-            swap(i, storeIndex);
-            storeIndex ++;
-        }
-    }
+    def qsort(self, nums, lo, hi):
+        if lo < hi:
+            pivot = self.partition(nums, lo, hi)
+            self.qsort(nums, lo, pivot - 1)
+            self.qsort(nums, pivot + 1, hi)
     
-    swap(right, storeIndex);
-    return storeIndex;
-}
+    def partition(self, nums, lo, hi):
+        idx = random.randint(lo, hi)
+        nums[idx], nums[hi] = nums[hi], nums[idx]
+        target = nums[hi]
+        i = lo
+        for j in range(lo, hi):
+            if nums[j] < target:
+                nums[i], nums[j] = nums[j], nums[i]
+                i += 1
+        nums[i], nums[hi] = nums[hi], nums[i]
+        return i
 ```
-
 
 ### ?couting sort？
 
