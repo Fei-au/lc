@@ -215,6 +215,7 @@
   - [674. Longest Continuous Increasing Subsequ](#674-longest-continuous-increasing-subsequ)
 - [Recursion](#recursion)
   - [24. Swap Nodes in Pairs](#24-swap-nodes-in-pairs)
+  - [52. N-Queens II](#52-n-queens-ii)
   - [70. Climbing Stairs](#70-climbing-stairs)
   - [95. Unique Binary Search Trees II](#95-unique-binary-search-trees-ii)
   - [101. Symmetric Tree](#101-symmetric-tree)
@@ -350,6 +351,8 @@
   - Usually no recursion, use loop
   - Dynamic programming mindset
   - Solve basic problem first, find the connection to the larger problem, then solve that one, till the result
+
+- Backtracking
 
 - Divide and conquer
   1. Divide, Divide the problem into a set of subproblems
@@ -8691,12 +8694,12 @@ class Solution:
             res.append(nums2[q])
             q+=1
         return res
-        
+
     # Quick sort
     def sortArray(self, nums: List[int]) -> List[int]:
         # Quick sort
         self.qsort(nums, 0, len(nums) - 1)
-        return nums
+        
     
     def qsort(self, nums, lo, hi):
         if lo < hi:
@@ -9177,7 +9180,47 @@ class Solution:
         head.next = self.swapPairs(n_round)
         return next
 ```
+## 52. N-Queens II
+Tag: Recursion, Backtracking
+```python
+class Solution:
+    # TC: O(n!)
+    # SC: O(n)
+    def totalNQueens(self, n: int) -> int:
+        placed = set()
+        
+        def is_not_under_attack( row, col):
+            for queen in placed:
+                r = queen[0]
+                c = queen[1]
+                if row == r or col == c or r+c == row + col or r-row == c-col:
+                    return  False
+            return True
 
+        def place_queen( row, col):
+            placed.add((row,col,))
+
+        def remove_queen( row, col):
+            placed.remove((row,col,))
+
+        def backtrack_nqueen(row, count):
+            for col in range(n):
+                # iterate through columns at the curent row.
+                if is_not_under_attack(row, col):
+                    # explore this partial candidate solution, and mark the attacking zone
+                    place_queen(row, col)
+                    if row + 1 == n:
+                        # we reach the bottom, i.e. we find a solution!
+                        count += 1
+                    else:
+                        # we move on to the next row
+                        count = backtrack_nqueen(row + 1, count)
+                    # backtrack, i.e. remove the queen and remove the attacking zone.
+                    remove_queen(row, col)
+            return count
+
+        return backtrack_nqueen(0, 0)
+```
 ## 70. Climbing Stairs
 Tag: Recursion, Math, Dynamic Programming
 
