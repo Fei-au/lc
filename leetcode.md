@@ -214,6 +214,7 @@
 - [滑动窗口](#滑动窗口)
   - [674. Longest Continuous Increasing Subsequ](#674-longest-continuous-increasing-subsequ)
 - [Recursion](#recursion)
+  - [22. Generate Parentheses](#22-generate-parentheses)
   - [24. Swap Nodes in Pairs](#24-swap-nodes-in-pairs)
   - [37. Sudoku Solver](#37-sudoku-solver)
   - [51. N-Queens](#51-n-queens)
@@ -221,6 +222,7 @@
   - [70. Climbing Stairs](#70-climbing-stairs)
   - [77. Combinations](#77-combinations)
   - [95. Unique Binary Search Trees II](#95-unique-binary-search-trees-ii)
+  - [100. Same Tree](#100-same-tree)
   - [101. Symmetric Tree](#101-symmetric-tree)
   - [104. Maximum Depth of Binary Tree](#104-maximum-depth-of-binary-tree)
   - [240. Search a 2D Matrix II](#240-search-a-2d-matrix-ii)
@@ -9184,7 +9186,75 @@ class Solution:
 ```
 
 # Recursion
+## 22. Generate Parentheses
+Tag: Recursion, Backtracking
+```python
+class Solution:
+    # TC: O(2^n)
+    # OC: O(n)
+    def generateParenthesis(self, n: int) -> List[str]:
+        res = []
+        def generate(s, op, close):
+            if close == n:
+                res.append(s)
+                return
+            if op < n:
+                generate(s + '(', op + 1, close)
+            if close < op:
+                generate(s + ')', op, close + 1)
+        generate('', 0,0)
+        return res
 
+    def generateParenthesis(self, n: int) -> List[str]:
+        res = []
+        lst = []
+        def backtracking(openN, closeN):
+            if closeN == n:
+                res.append(''.join(lst))
+                return
+            if openN < n:
+                lst.append('(')
+                backtracking(openN + 1, closeN)
+                lst.pop()
+            if closeN < openN:
+                lst.append(')')
+                backtracking(openN, closeN+1)
+                lst.pop()
+        backtracking(0,0)
+        return res
+
+    def generateParenthesis(self, n: int) -> List[str]:
+        res = []
+        lst = []
+        options = ['(', ')']
+
+        self.left_count = 0
+        self.right_count = 0
+        def is_valid(parenthese):
+            if parenthese == '(':
+                return True if self.left_count < n else False
+            else:
+                return True if self.right_count < self.left_count else False
+        def backtracking():
+            if len(lst) == n*2:
+                res.append(''.join(lst))
+                return
+            for option in options:
+                if is_valid(option):
+                    lst.append(option)
+                    if option == '(':
+                        self.left_count += 1
+                    else:
+                        self.right_count += 1
+                    backtracking()
+                    if option == '(':
+                        self.left_count -= 1
+                    else:
+                        self.right_count -= 1
+                    lst.pop()
+        backtracking()
+        return res
+```
 ## 24. Swap Nodes in Pairs
 Tag: Recursion
 ```python
@@ -9479,6 +9549,47 @@ class Solution:
                     res.append(root)
         memo[(start,end)]=res
         return res
+```
+## 100. Same Tree
+Tag: Recursion, Tree
+```python
+
+class Solution:
+    # TC: O(n)
+    # SC: O(h) h is height of the tree
+    def isSameTree(self, p: Optional[TreeNode], q: Optional[TreeNode]) -> bool:
+        if p is None and q is None:
+            return True
+        if p is None or q is None:
+            return False
+        if p.val != q.val:
+            return False
+        return self.isSameTree(p.left, q.left) and self.isSameTree(p.right, q.right)
+
+    # TC: O(n)
+    # SC: O(max) max tree node in a layer
+    def isSameTree(self, p: Optional[TreeNode], q: Optional[TreeNode]) -> bool:
+        def check(p, q):
+            if p is None and q is None:
+                return True
+            if p is None or q is None:
+                return False
+            if p.val != q.val:
+                return False
+            return True
+        queue = deque()
+        queue.append((p,q))
+        while len(queue):
+            for _ in range(len(queue)):
+                pair = queue.popleft()
+                if check(pair[0], pair[1]):
+                    if pair[0] is not None:
+                        queue.append((pair[0].left, pair[1].left))
+                        queue.append((pair[0].right, pair[1].right))
+                else:
+                    return False
+        return True
+
 ```
 
 ## 101. Symmetric Tree
