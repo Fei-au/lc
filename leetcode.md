@@ -215,8 +215,11 @@
   - [674. Longest Continuous Increasing Subsequ](#674-longest-continuous-increasing-subsequ)
 - [Recursion](#recursion)
   - [24. Swap Nodes in Pairs](#24-swap-nodes-in-pairs)
+  - [37. Sudoku Solver](#37-sudoku-solver)
+  - [51. N-Queens](#51-n-queens)
   - [52. N-Queens II](#52-n-queens-ii)
   - [70. Climbing Stairs](#70-climbing-stairs)
+  - [77. Combinations](#77-combinations)
   - [95. Unique Binary Search Trees II](#95-unique-binary-search-trees-ii)
   - [101. Symmetric Tree](#101-symmetric-tree)
   - [104. Maximum Depth of Binary Tree](#104-maximum-depth-of-binary-tree)
@@ -9199,8 +9202,121 @@ class Solution:
         head.next = self.swapPairs(n_round)
         return next
 ```
+## 37. Sudoku Solver
+Tag: Recursion, Backtracking, Matrix
+```python
+class Solution:
+    # TC: O(9^k) k is empty box number
+    # SC: O(k)
+    def solveSudoku(self, board: List[List[str]]) -> None:
+        """
+        Do not return anything, modify board in-place instead.
+        """
+        rows = [set() for i in range(9)]
+        cols = [set() for i in range(9)]
+        blocks = [set() for i in range(9)]
+        for i in range(9):
+            for j in range(9):
+                if board[i][j] != '.':
+                    value = board[i][j]
+                    rows[i].add(value)
+                    cols[j].add(value)
+                    idx = i // 3 * 3 + j // 3
+                    blocks[idx].add(value)
+
+        def backtracking(i, j):
+            if i==9:
+                return True
+            if j==9:
+                return backtracking(i+1,0)
+            if board[i][j] != '.':
+                return backtracking(i, j+1)
+
+            idx = i // 3 * 3 + j // 3
+            for num in range(1, 10, 1):
+                str_num = str(num)
+                if str_num not in rows[i] and str_num not in cols[j] and str_num not in blocks[idx]:
+                    rows[i].add(str_num)
+                    cols[j].add(str_num)
+                    blocks[idx].add(str_num)
+                    board[i][j] = str_num
+
+                    res = backtracking(i, j + 1)
+                    if res == True:
+                        return True
+                    board[i][j] = '.'
+                    rows[i].remove(str_num)
+                    cols[j].remove(str_num)
+                    blocks[idx].remove(str_num)
+            return False
+
+        backtracking(0, 0)
+
+    def solveSudoku(self, board: List[List[str]]) -> None:
+        """
+        Do not return anything, modify board in-place instead.
+        """
+
+        def is_valid(i, j, num):
+            for k in range(9):
+                if num == board[i][k] or num == board[k][j] or board[i // 3 * 3 + (k // 3)][j // 3 * 3 + (k % 3)] == num:
+                    return False
+            return True
+
+        def backtracking(i, j):
+            if i==9:
+                return True
+            if j==9:
+                return backtracking(i+1,0)
+            if board[i][j] != '.':
+                return backtracking(i, j+1)
+
+            idx = i // 3 * 3 + j // 3
+            for num in range(1, 10, 1):
+                str_num = str(num)
+                if is_valid(i, j, str_num):
+                    board[i][j] = str_num
+                    res = backtracking(i, j + 1)
+                    if res == True:
+                        return True
+                    board[i][j] = '.'
+            return False
+
+        backtracking(0, 0)
+```
+## 51. N-Queens
+Tag: Recursion, Backtracking, Bit Manipulation
+```python
+class Solution:
+    def solveNQueens(self, n: int) -> List[List[str]]:
+        cols = set()
+        diag1 = set()
+        diag2 = set()
+        res = []
+
+        def backtracking(row, lst):
+            if row == n:
+                res.append(lst.copy())
+                return
+            for col in range(n):
+                if col not in cols and row + col not in diag1 and row - col not in diag2:
+                    cols.add(col)
+                    diag1.add(row + col)
+                    diag2.add(row - col)
+                    s = ''
+                    for i in range(n):
+                        s += 'Q' if i == col else '.'
+                    lst.append(s)
+                    backtracking(row + 1, lst)
+                    cols.remove(col)
+                    diag1.remove(row + col)
+                    diag2.remove(row - col)
+                    lst.pop()
+        backtracking(0, [])
+        return res
+```
 ## 52. N-Queens II
-Tag: Recursion, Backtracking
+Tag: Recursion, Backtracking, Bit Manipulation
 ```python
 class Solution:
     # TC: O(n!)
@@ -9316,7 +9432,23 @@ class Solution:
         d[n]=res
         return res
 ```
-
+## 77. Combinations
+Tag: Recursion, Backtracking
+```python
+class Solution:
+    def combine(self, n: int, k: int) -> List[List[int]]:
+        res = []
+        def backtracking(num, lst):
+            if len(lst) == k:
+                res.append(lst.copy())
+                return
+            for i in range(num, n+1):
+                lst.append(i)
+                backtracking(i+1, lst)
+                lst.pop()
+        backtracking(1, [])
+        return res
+```
 ## 95. Unique Binary Search Trees II
 Tag: Tree, Recursion
 ```python
