@@ -353,6 +353,8 @@
   - Solve basic problem first, find the connection to the larger problem, then solve that one, till the result
 
 - Backtracking
+  - Check valid at the beginning of the function
+  - Iterate next valid steps, place valid position, recursively call, remove valid position
 
 - Divide and conquer
   1. Divide, Divide the problem into a set of subproblems
@@ -8758,6 +8760,23 @@ print("{:o}".format(13))  # 输出: 15
 # 将整数转为二进制字符串
 print(bin(11)[2:])  # 输出: 1011
 
+# 得到最后一位1
+x & (-x)
+
+# 去除最低一位1
+x & (x-1)
+
+# 取反
+~x
+
+# 负数
+-x
+
+# 左移（乘以2）
+x << 1
+
+# 右移（除以2）
+x >> 1
 ```
 
 
@@ -9184,6 +9203,45 @@ class Solution:
 Tag: Recursion, Backtracking
 ```python
 class Solution:
+    # TC: O(n!)
+    # SC: O(1)
+    def totalNQueens(self, n: int) -> int:
+        def solve(row, cols, diag1, diag2):
+            if row == n:
+                return 1
+            count = 0
+            availablePositions = ((1<<n) - 1) & ~(cols | diag1 | diag2)
+            while availablePositions:
+                position =  availablePositions & (-availablePositions)
+                availablePositions = availablePositions & (availablePositions-1)
+                count += solve(row + 1, cols | position, (diag1 | position) << 1, (diag2 | position) >> 1)
+            return count
+        return solve(0, 0, 0, 0)
+
+    # TC: O(n!)
+    # SC: O(n)
+    def totalNQueens(self, n: int) -> int:
+        def backtrack_nqueen(row):
+            if row == n:
+                return 1
+            count = 0
+            for col in range(n):
+                # iterate through columns at the curent row.
+                if col not in columns and row - col not in diag1 and row + col not in diag2:
+                    # explore this partial candidate solution, and mark the attacking zone
+                    columns.add(col)
+                    diag1.add(row - col)
+                    diag2.add(row + col)
+                    count += backtrack_nqueen(row + 1)
+                    columns.remove(col)
+                    diag1.remove(row - col)
+                    diag2.remove(row + col)
+            return count
+        columns = set()
+        diag1 = set()
+        diag2 = set()
+        return backtrack_nqueen(0)
+
     # TC: O(n!)
     # SC: O(n)
     def totalNQueens(self, n: int) -> int:
