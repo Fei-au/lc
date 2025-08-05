@@ -165,6 +165,7 @@
 - [Stack](#stack)
   - [DSF](#dsf)
   - [20. Valid Parentheses](#20-valid-parentheses)
+  - [84. Largest Rectangle in Histogram](#84-largest-rectangle-in-histogram)
   - [133. Clone Graph](#133-clone-graph)
   - [150. Evaluate Reverse Polish Notation](#150-evaluate-reverse-polish-notation)
   - [155. Min Stack](#155-min-stack)
@@ -7620,7 +7621,30 @@ class Solution:
                 return False
         return True if len(stack) == 0 else False
 ```
-
+## 84. Largest Rectangle in Histogram
+Tag: Stack, Array
+```python
+class Solution:
+    # TC: O(n)
+    # SC: O(n)
+    def largestRectangleArea(self, heights: List[int]) -> int:
+        stack = []
+        n = len(heights)
+        res = 0
+        stack.append((0, -1))
+        for i in range(n):
+            height = heights[i]
+            left_idx = i
+            while height < stack[-1][0]:
+                top_value, left_idx  = stack.pop()
+                res = max(res, top_value * (i-left_idx))
+            stack.append((height, left_idx))
+        while len(stack) > 0:
+            top_value, left_idx  = stack.pop()
+            res = max(res, top_value * (n-left_idx))
+        return res
+        
+```
 ## 133. Clone Graph
 Tag: DFS, Node
 ```python
