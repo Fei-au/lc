@@ -215,9 +215,11 @@
 - [滑动窗口](#滑动窗口)
   - [674. Longest Continuous Increasing Subsequ](#674-longest-continuous-increasing-subsequ)
 - [Recursion](#recursion)
+  - [17. Letter Combinations of a Phone Number](#17-letter-combinations-of-a-phone-number)
   - [22. Generate Parentheses](#22-generate-parentheses)
   - [24. Swap Nodes in Pairs](#24-swap-nodes-in-pairs)
   - [37. Sudoku Solver](#37-sudoku-solver)
+  - [46. Permutations](#46-permutations)
   - [51. N-Queens](#51-n-queens)
   - [52. N-Queens II](#52-n-queens-ii)
   - [70. Climbing Stairs](#70-climbing-stairs)
@@ -361,6 +363,7 @@
 - Backtracking
   - Check valid at the beginning of the function
   - Iterate next valid steps, place valid position, recursively call, remove valid position
+  - Set the cur valid step to certain invalid value, and then recursive, after that, recover the value 
 
 - Divide and conquer
   1. Divide, Divide the problem into a set of subproblems
@@ -9222,6 +9225,38 @@ class Solution:
 ```
 
 # Recursion
+
+## 17. Letter Combinations of a Phone Number
+Tag: Recursion, Backtracking
+```python
+class Solution:
+    # TC: O(4^n)
+    # OC: O(n)
+    def letterCombinations(self, digits: str) -> List[str]:
+        d = {
+            '2': 'abc',
+            '3': 'def',
+            '4': 'ghi',
+            '5': 'jkl',
+            '6': 'mno',
+            '7': 'pqrs',
+            '8': 'tuv',
+            '9': 'wxyz',
+        }
+
+        res = []
+        n = len(digits)
+        if n == 0:
+            return res
+        def backtracking(index, s):
+            if len(s) == n:
+                res.append(s)
+                return
+            for c in d[digits[index]]:
+                backtracking(index + 1, s+c)
+        backtracking(0, '')
+        return res
+```
 ## 22. Generate Parentheses
 Tag: Recursion, Backtracking
 ```python
@@ -9389,6 +9424,30 @@ class Solution:
             return False
 
         backtracking(0, 0)
+```
+## 46. Permutations
+Tag: Recursion, Backtracking
+```python
+class Solution:
+    # TC: O(n!)
+    # SC: O(n)
+    def permute(self, nums: List[int]) -> List[List[int]]:
+        res = []
+        n = len(nums)
+        def backtracking(lst):
+            if len(lst) == n:
+                res.append(lst.copy())
+                return
+            for i in range(n):
+                if nums[i] != 11:
+                    value = nums[i]
+                    lst.append(value)
+                    nums[i] = 11
+                    backtracking(lst)
+                    nums[i] = value
+                    lst.pop()
+        backtracking([])
+        return res
 ```
 ## 51. N-Queens
 Tag: Recursion, Backtracking, Bit Manipulation
