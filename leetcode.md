@@ -7622,9 +7622,21 @@ class Solution:
         return True if len(stack) == 0 else False
 ```
 ## 84. Largest Rectangle in Histogram
-Tag: Stack, Array
+Tag: Stack, Array, Monotonic Stack
 ```python
 class Solution:
+    def largestRectangleArea(self, heights: List[int]) -> int:
+        n = len(heights)
+        left, right = [0] * n, [n] * n
+        mono_stack = []
+        for i in range(n):
+            while len(mono_stack) and heights[i] < heights[mono_stack[-1]]:
+                right[mono_stack[-1]] = i
+                mono_stack.pop()
+            left[i] = (mono_stack[-1] +1) if len(mono_stack) else 0
+            mono_stack.append(i)
+        res = max( ((right[i] - left[i])) * heights[i] for i in range(n) )
+        return res
     # TC: O(n)
     # SC: O(n)
     def largestRectangleArea(self, heights: List[int]) -> int:
