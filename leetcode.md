@@ -116,6 +116,7 @@
     - [Heap Queue (Python)](#heap-queue-python)
     - [PriorityQueue](#priorityqueue)
   - [23. Merge k Sorted Lists](#23-merge-k-sorted-lists)
+  - [218. The Skyline Problem](#218-the-skyline-problem)
   - [239. Sliding Window Maximum](#239-sliding-window-maximum)
   - [264. Ugly Number II](#264-ugly-number-ii)
   - [347. Top K Frequent Elements](#347-top-k-frequent-elements)
@@ -5993,7 +5994,39 @@ class Solution:
             list2 = list2.next
         return dummy_h.next
 ```
+## 218. The Skyline Problem
+Tag: Heap, Hash Table, Array Sort
+```python
+class Solution:
+    def getSkyline(self, buildings: List[List[int]]) -> List[List[int]]:
+        # heapq， []
+        ps = []
+        for bd in buildings:
+            ps.append([bd[0], -bd[2]])
+            ps.append([bd[1], bd[2]])
+        res = []
+        ps.sort(key=lambda x: (x[0], x[1]))
+        d = {}
+        lst = []
+        pre_height = 0
+        heapq.heappush(lst, 0)
+        for p in ps:
+            if p[1] < 0:
+                heapq.heappush(lst, p[1])
+            else:
+                d[-p[1]] = d.get(-p[1], 0) + 1
 
+            while len(lst) and d.get(lst[0]) and d.get(lst[0]) > 0:
+                d[lst[0]] -= 1
+                heapq.heappop(lst)
+            
+            cur_height = lst[0]
+            if pre_height != cur_height:
+                res.append([p[0], -cur_height])
+                pre_height = cur_height
+        
+        return res
+```
 ## 239. Sliding Window Maximum
 Tag: Heap, 
 ```python
