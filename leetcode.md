@@ -835,6 +835,20 @@ nums = ["abcd", "ac", "abc", "D"]
 >>> nums
 >>> ["D", "ac", "abc", "abcd"]
 
+# 传入key，为一个方程，会对该值进行处理，并使用方程的返回来比较
+# 方程的返回只要可以使用 < 来比较即可。如 1. 数字 2. tuple or list 3. Bool (True==1, False==2) 4. 实现了 __lt__ 的自定义类型
+nums.sort(key=func) 
+# eg:
+nums = [ [0,1], [5,3], [3,4] ]
+# 使用每个元素的第二位进行比较
+def func(x):
+    return x[1]
+# func还可以是 abs等
+# func也可以是 lambda
+nums.sort(key=lambda x: (x[0], x[1])) 
+
+
+# Reverse
 nums.reverse() # reverse itself, no return
 reversed_nums = nums[::-1] # slice reverse
 reversed_nums = list(reversed(arr)) # 返回迭代器, 配合list使用
@@ -5839,6 +5853,9 @@ heapq.heapify(l) # 此后l[0] 就是最小的了
 # 它的效率比单独调用 heappush() 和 heappop() 更高，因为只需调整一次堆结构。
 heapq.heappushpop(heap, item)
 res = heapq.heappushpop(heap, 2) 
+
+# 8. 最大堆
+# 一般把传入的值变成负数，则就变成了最大堆
 ```
 
 
