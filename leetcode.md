@@ -232,6 +232,9 @@
   - [240. Search a 2D Matrix II](#240-search-a-2d-matrix-ii)
   - [509. Fibonacci Number](#509-fibonacci-number)
   - [779. K-th Symbol in Grammar](#779-k-th-symbol-in-grammar)
+- [Greedy](#greedy)
+  - [376. Wiggle Subsequence](#376-wiggle-subsequence)
+  - [455. Assign Cookies](#455-assign-cookies)
 
 
 # Tag
@@ -371,6 +374,9 @@
   2. Conquer, Solve each subproblem recursively
   3. 
   4. Combine, Combine the results of each subproblem
+
+- Greedy
+  - Fullfill partial solution, finally reach the global solution
 
 
 # Time Complexities
@@ -9865,4 +9871,45 @@ class Solution:
             return 0 if reminder == 0 else 1
         else:
             return 1 if reminder ==0 else 0
+```
+
+# Greedy
+
+## 376. Wiggle Subsequence
+Tag: Greedy, Array
+```python
+class Solution:
+    # TC: O(n)
+    # SC: O(1)
+    def wiggleMaxLength(self, nums: List[int]) -> int:
+        if len(nums) == 1:
+            return 1
+        prediff = 0
+        curdiff = 0
+        res = 1
+        for i in range(len(nums) - 1):
+            curdiff = nums[i+1] - nums[i]
+            if (prediff >= 0 and curdiff < 0) or (prediff <= 0 and curdiff > 0):
+                res += 1
+                prediff = curdiff
+        return res
+```
+## 455. Assign Cookies
+Tag: Greedy, Array
+```python
+class Solution:
+    # TC: O(n)
+    # SC: O(1)
+    def findContentChildren(self, g: List[int], s: List[int]) -> int:
+        g.sort()
+        s.sort()
+        res = 0
+        i = len(g) - 1
+        j = len(s) - 1
+        while i >=0 and j >= 0:
+            if s[j] >= g[i]:
+                res += 1
+                j-=1
+            i-=1
+        return res
 ```
