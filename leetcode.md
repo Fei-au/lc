@@ -233,6 +233,7 @@
   - [509. Fibonacci Number](#509-fibonacci-number)
   - [779. K-th Symbol in Grammar](#779-k-th-symbol-in-grammar)
 - [Greedy](#greedy)
+  - [53. Maximum Subarray](#53-maximum-subarray)
   - [376. Wiggle Subsequence](#376-wiggle-subsequence)
   - [455. Assign Cookies](#455-assign-cookies)
 
@@ -9875,6 +9876,32 @@ class Solution:
 
 # Greedy
 
+## 53. Maximum Subarray
+Tag: Dynamic Programming, Greedy, Array
+```python
+class Solution:
+    # TC: O(n)
+    # SC: O(1)
+    def maxSubArray(self, nums: List[int]) -> int:
+        # Greedy
+        res = float(-inf)
+        total = 0
+        for i in range (len(nums)):
+            total = nums[i] + total
+            if total > res:
+                res = total
+            if total < 0:
+                total = 0
+        return res
+    def maxSubArray(self, nums: List[int]) -> int:
+        # dp, update value in place to make SC O(1)
+        n = len(nums)
+        arr = [0] * n
+        arr[0] = nums[0]
+        for i in range(1, n, 1):
+            arr[i] = max(nums[i], arr[i-1] + nums[i])
+        return max(arr)
+```
 ## 376. Wiggle Subsequence
 Tag: Greedy, Array
 ```python
