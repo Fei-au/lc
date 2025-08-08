@@ -233,9 +233,13 @@
   - [509. Fibonacci Number](#509-fibonacci-number)
   - [779. K-th Symbol in Grammar](#779-k-th-symbol-in-grammar)
 - [Greedy](#greedy)
+  - [45. Jump Game II](#45-jump-game-ii)
   - [53. Maximum Subarray](#53-maximum-subarray)
+  - [55. Jump Game](#55-jump-game)
+  - [122. Best Time to Buy and Sell Stock II](#122-best-time-to-buy-and-sell-stock-ii)
   - [376. Wiggle Subsequence](#376-wiggle-subsequence)
   - [455. Assign Cookies](#455-assign-cookies)
+  - [1005. Maximize Sum Of Array After K Negations](#1005-maximize-sum-of-array-after-k-negations)
 
 
 # Tag
@@ -9875,6 +9879,29 @@ class Solution:
 ```
 
 # Greedy
+## 45. Jump Game II
+Tag: Greedy, Array
+```python
+class Solution:
+    # TC: O(n)
+    # SC: O(1)
+    def jump(self, nums: List[int]) -> int:
+        n = len(nums)
+        if n <= 1:
+            return 0
+        max_cover = 0
+        step = 0
+        i = 0
+        while i < n:
+            last_range = max_cover
+            while i <= last_range:
+                max_cover = max(nums[i] + i, max_cover)
+                i+=1
+            step += 1
+            if max_cover >= n-1:
+                return step
+        return -1
+```
 
 ## 53. Maximum Subarray
 Tag: Dynamic Programming, Greedy, Array
@@ -9901,6 +9928,57 @@ class Solution:
         for i in range(1, n, 1):
             arr[i] = max(nums[i], arr[i-1] + nums[i])
         return max(arr)
+```
+## 55. Jump Game
+Tag: Greedy, Array, Dynamic Programming
+```python
+class Solution:
+    # TC: O(n)
+    # SC: O(1)
+    # As long as it can reach last_step from the start, that a valid solution
+    def canJump(self, nums: List[int]) -> bool:
+        n = len(nums)
+        last_step = n - 1
+        for i in range(n-2, -1, -1):
+            if nums[i] + i >= last_step:
+                last_step = i
+        return True if last_step == 0 else False
+    # Each index get the max cover range
+    def canJump(self, nums: List[int]) -> bool:
+        n = len(nums)
+        if n == 1:
+            return True
+        max_cover = 0
+        i = 0
+        while i <= max_cover:
+            max_cover = max(max_cover, nums[i] + i)
+            if max_cover >= n-1:
+                return True
+            i+=1
+        return False
+```
+## 122. Best Time to Buy and Sell Stock II
+Tag: Greedy, Array
+```python
+class Solution:
+    # TC: O(n)
+    # SC: O(1)
+    def maxProfit(self, prices: List[int]) -> int:
+        fake_hold = float(inf)
+        profit = 0
+        for i in range(len(prices)):
+            if prices[i] < fake_hold:
+                fake_hold = prices[i]
+            else:
+                profit += (prices[i] - fake_hold)
+                fake_hold = prices[i]
+        return profit
+    def maxProfit(self, prices: List[int]) -> int:
+        profit = 0
+        for i in range(1, len(prices), 1):
+            if prices[i] > prices[i-1]:
+                profit += (prices[i] -  prices[i-1])
+        return profit
 ```
 ## 376. Wiggle Subsequence
 Tag: Greedy, Array
@@ -9939,4 +10017,26 @@ class Solution:
                 j-=1
             i-=1
         return res
+```
+
+## 1005. Maximize Sum Of Array After K Negations
+Tag: Greedy, Array
+```python
+class Solution:
+    # TC: O(nlogn)
+    # SC: O(1)
+    def largestSumAfterKNegations(self, nums: List[int], k: int) -> int:
+        nums.sort()
+        i = 0
+        n = len(nums)
+        while i < n and k > 0:
+            if nums[i] < 0:
+                nums[i] = -nums[i]
+                k-=1
+            i+=1
+
+        if k > 0 and k % 2 == 1:
+            m = min(nums)
+            return sum(nums) - 2*m
+        return sum(nums)
 ```
