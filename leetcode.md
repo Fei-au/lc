@@ -239,7 +239,9 @@
   - [122. Best Time to Buy and Sell Stock II](#122-best-time-to-buy-and-sell-stock-ii)
   - [135. Candy](#135-candy)
   - [376. Wiggle Subsequence](#376-wiggle-subsequence)
+  - [406. Queue Reconstruction by Height](#406-queue-reconstruction-by-height)
   - [455. Assign Cookies](#455-assign-cookies)
+  - [860 Lemonade Change](#860-lemonade-change)
   - [1005. Maximize Sum Of Array After K Negations](#1005-maximize-sum-of-array-after-k-negations)
 
 
@@ -10017,6 +10019,19 @@ class Solution:
                 prediff = curdiff
         return res
 ```
+## 406. Queue Reconstruction by Height
+Tag: Greedy, Array
+```python
+class Solution:
+    # TC: O(n logn)
+    # SC: O(1)
+    def reconstructQueue(self, people: List[List[int]]) -> List[List[int]]:
+        res = []
+        people.sort(key=lambda x: (-x[0], x[1]))
+        for p in people:
+            res.insert(p[1], p)
+        return res
+```
 ## 455. Assign Cookies
 Tag: Greedy, Array
 ```python
@@ -10035,6 +10050,34 @@ class Solution:
                 j-=1
             i-=1
         return res
+```
+
+## 860 Lemonade Change
+Tag: Greedy, Array
+```python
+class Solution:
+    # TC: O(n)
+    # SC: O(1)
+    def lemonadeChange(self, bills: List[int]) -> bool:
+        changes = {
+            5: 0,
+            10: 0,
+            20: 0
+        }
+        for bill in bills:
+            rest = bill - 5
+            if bill != 5:
+                while rest > 0:
+                    if changes[10] and rest >= 10:
+                        changes[10] -= 1
+                        rest -= 10
+                    elif changes[5] and rest >= 5:
+                        changes[5] -= 1
+                        rest -= 5
+                    else:
+                        return False
+            changes[bill] += 1
+        return True
 ```
 
 ## 1005. Maximize Sum Of Array After K Negations
