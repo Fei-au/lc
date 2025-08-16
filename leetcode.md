@@ -237,6 +237,7 @@
   - [53. Maximum Subarray](#53-maximum-subarray)
   - [55. Jump Game](#55-jump-game)
   - [122. Best Time to Buy and Sell Stock II](#122-best-time-to-buy-and-sell-stock-ii)
+  - [135. Candy](#135-candy)
   - [376. Wiggle Subsequence](#376-wiggle-subsequence)
   - [455. Assign Cookies](#455-assign-cookies)
   - [1005. Maximize Sum Of Array After K Negations](#1005-maximize-sum-of-array-after-k-negations)
@@ -9979,6 +9980,23 @@ class Solution:
             if prices[i] > prices[i-1]:
                 profit += (prices[i] -  prices[i-1])
         return profit
+```
+## 135. Candy
+Tag: Greedy, Array
+```python
+class Solution:
+    # TC: O(n)
+    # SC: O(n)
+    def candy(self, ratings: List[int]) -> int:
+        n = len(ratings)
+        candy = [1] * n
+        for i in range(n-1):
+            if ratings[i+1] > ratings[i]:
+                candy[i+1] = candy[i] + 1
+        for i in range(n-1, 0, -1):
+            if ratings[i-1] > ratings[i]:
+                candy[i-1] = max(candy[i] + 1, candy[i-1])
+        return sum(candy)
 ```
 ## 376. Wiggle Subsequence
 Tag: Greedy, Array
