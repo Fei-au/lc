@@ -237,6 +237,7 @@
   - [53. Maximum Subarray](#53-maximum-subarray)
   - [55. Jump Game](#55-jump-game)
   - [122. Best Time to Buy and Sell Stock II](#122-best-time-to-buy-and-sell-stock-ii)
+  - [134. Gas Station](#134-gas-station)
   - [135. Candy](#135-candy)
   - [376. Wiggle Subsequence](#376-wiggle-subsequence)
   - [406. Queue Reconstruction by Height](#406-queue-reconstruction-by-height)
@@ -9982,6 +9983,36 @@ class Solution:
             if prices[i] > prices[i-1]:
                 profit += (prices[i] -  prices[i-1])
         return profit
+```
+## 134. Gas Station
+Tag: Greedy, Array
+```python
+# - As long as the total gas is larger than total cost, there will be a solution
+# - If x --- y is not valid, then every point between x and y are not valid. Cause points between x y even holds previous remainings and are still not valid to y
+# so keep check y+1
+# - When check round, if x --- y already check and not valid, we donot need to check points between them anymore, as it is impossible to have the solution
+# - One example, if n = 10, if 1 --- 5 is invalid, then we start from 6, and when check points from 6, if the remaining oil to 10 is negative, there will not be any solution
+# if it's positive, we donot need the keep checking 6 --- 10 --- (2 or 5 or any points (1---5)) the second parts, as if the total is negative, it justifies from 6 --- 10 --- (1,5)
+# is invalid, and with 1---5 is already invalid, we get there will not be a valid solution for this. So checking till n is enough, combining with total oil is greater or equal to cost
+# we get the solution gas station
+class Solution:
+    # TC: O(n)
+    # SC: O(1)
+    def canCompleteCircuit(self, gas: List[int], cost: List[int]) -> int:
+        n = len(gas)
+        total = 0
+        ans = 0
+        temp = 0
+        for i in range(n):
+            total += (gas[i] - cost[i])
+            temp += (gas[i] - cost[i]) 
+            if total < 0:
+                total = 0
+                ans = i+1
+        if temp < 0:
+            return -1
+        return ans
+            
 ```
 ## 135. Candy
 Tag: Greedy, Array
