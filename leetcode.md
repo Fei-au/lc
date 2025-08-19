@@ -241,6 +241,8 @@
   - [135. Candy](#135-candy)
   - [376. Wiggle Subsequence](#376-wiggle-subsequence)
   - [406. Queue Reconstruction by Height](#406-queue-reconstruction-by-height)
+  - [435. Non-overlapping Intervals](#435-non-overlapping-intervals)
+  - [452. Minimum Number of Arrows to Burst Balloons](#452-minimum-number-of-arrows-to-burst-balloons)
   - [455. Assign Cookies](#455-assign-cookies)
   - [860 Lemonade Change](#860-lemonade-change)
   - [1005. Maximize Sum Of Array After K Negations](#1005-maximize-sum-of-array-after-k-negations)
@@ -10062,6 +10064,54 @@ class Solution:
         for p in people:
             res.insert(p[1], p)
         return res
+```
+## 435. Non-overlapping Intervals
+Tag: Greedy, Array
+```python
+class Solution:
+    # TC: O(n logn)
+    # SC: O(1)
+    def eraseOverlapIntervals(self, intervals: List[List[int]]) -> int:
+        intervals.sort(key=lambda x: (x[1], x[0]))
+        res = 0
+        last = intervals[0][1]
+        for i in range(1, len(intervals), 1):
+            if intervals[i][0] < last:
+                res += 1
+            else:
+                last = intervals[i][1]
+        return res
+```
+## 452. Minimum Number of Arrows to Burst Balloons
+Tag: Greedy, Array
+```python
+class Solution:
+    # Sort by the end point, and try to use the end point as an arrow, greedy
+    # TC: O(n logn)
+    # SC: O(1)
+    def findMinArrowShots(self, points: List[List[int]]) -> int:
+        res = 1
+        points.sort(key=lambda x: x[1])
+        arrow = points[0][1]
+        for start, end in points:
+            if arrow < start:
+                res += 1
+                arrow = end
+        return res
+    # TC: O(n logn)
+    # SC: O(1)
+    def findMinArrowShots(self, points: List[List[int]]) -> int:
+        res = 0
+        points.sort()
+        last = points[0]
+        for i in range(len(points)):
+            point = points[i]
+            if point[0] <= last[1]:
+                last = [max(point[0], last[0]), min(point[1], last[1])]
+            else:
+                res += 1
+                last = point
+        return res + 1 if last else res
 ```
 ## 455. Assign Cookies
 Tag: Greedy, Array
