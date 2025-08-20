@@ -244,6 +244,7 @@
   - [435. Non-overlapping Intervals](#435-non-overlapping-intervals)
   - [452. Minimum Number of Arrows to Burst Balloons](#452-minimum-number-of-arrows-to-burst-balloons)
   - [455. Assign Cookies](#455-assign-cookies)
+  - [738. Monotone Increasing Digits](#738-monotone-increasing-digits)
   - [763. Partition Labels](#763-partition-labels)
   - [860 Lemonade Change](#860-lemonade-change)
   - [1005. Maximize Sum Of Array After K Negations](#1005-maximize-sum-of-array-after-k-negations)
@@ -10150,6 +10151,24 @@ class Solution:
                 j-=1
             i-=1
         return res
+```
+## 738. Monotone Increasing Digits
+Tag: Greedy, Array
+```python
+class Solution:
+    # TC: O(n)
+    # SC: O(1)
+    def monotoneIncreasingDigits(self, n: int) -> int:
+        w = [i for i in str(n)]
+        l = len(w)
+        marker = l
+        for i in range(l-1, 0, -1):
+            if w[i] < w[i-1]:
+                marker = i
+                w[i-1] = str(int(w[i-1]) - 1)
+        for i in range(marker, l):
+            w[i] = '9'
+        return int(''.join(w))
 ```
 ## 763. Partition Labels
 Tag: Greedy, Array
