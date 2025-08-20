@@ -244,6 +244,7 @@
   - [435. Non-overlapping Intervals](#435-non-overlapping-intervals)
   - [452. Minimum Number of Arrows to Burst Balloons](#452-minimum-number-of-arrows-to-burst-balloons)
   - [455. Assign Cookies](#455-assign-cookies)
+  - [763. Partition Labels](#763-partition-labels)
   - [860 Lemonade Change](#860-lemonade-change)
   - [1005. Maximize Sum Of Array After K Negations](#1005-maximize-sum-of-array-after-k-negations)
 
@@ -10132,7 +10133,26 @@ class Solution:
             i-=1
         return res
 ```
-
+## 763. Partition Labels
+Tag: Greedy, Array
+```python
+class Solution:
+    # TC: O(n)
+    # SC: O(1)
+    def partitionLabels(self, s: str) -> [int]:
+        occurrence = {}
+        for i, ch in enumerate(s):
+            occurrence[ch] = i
+        start = 0
+        end = 0
+        res = []
+        for i, ch in enumerate(s):
+            end = max(end, occurrence[ch])
+            if end == i:
+                res.append(end - start + 1)
+                start = end + 1
+        return res
+```
 ## 860 Lemonade Change
 Tag: Greedy, Array
 ```python
