@@ -1431,7 +1431,7 @@ public List<Integer> spiralOrder(int[][] matrix) {
 
 
 ## 56. Merge Intervals
-
+Tag: Greedy, Array
 ![image-20230622153539388](./leetcode.assets/image-20230622153539388.png)
 
 ```java
@@ -1445,6 +1445,24 @@ public List<Integer> spiralOrder(int[][] matrix) {
 从左往右，下一个的0位比上一位的1位低的时候，可以纳入进来。所有可以纳入进来的，1值取最大
 
 （所以前提就是，首位要排序，这样得到的0位是最小的）
+
+```python
+class Solution:
+    # TC: O(n)
+    # SC: O(1)
+    def merge(self, intervals: List[List[int]]) -> List[List[int]]:
+        intervals.sort()
+        res = []
+        start = intervals[0][0]
+        end = intervals[0][1]
+        for temp_start, temp_end in intervals:
+            if temp_start > end:
+                res.append([start, end])
+                start = temp_start
+            end = max(end, temp_end)
+        res.append([start, end])
+        return res
+```
 
 ```java
     public int[][] merge(int[][] intervals) {
