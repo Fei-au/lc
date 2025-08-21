@@ -248,6 +248,9 @@
   - [763. Partition Labels](#763-partition-labels)
   - [860 Lemonade Change](#860-lemonade-change)
   - [1005. Maximize Sum Of Array After K Negations](#1005-maximize-sum-of-array-after-k-negations)
+- [Dynamic Programming](#dynamic-programming)
+  - [62. Unique Paths](#62-unique-paths)
+  - [746. Min Cost Climbing Stairs](#746-min-cost-climbing-stairs)
 
 
 # Tag
@@ -307,6 +310,8 @@
   - Two Sum or sum questions, change the question to make reminder to 0, save each middiate value in a set, and check if (target - cur) in the set
 
 - Dynamic Programming
+  - dp table
+  - 
   - 118 119 redo by using dynamic programming thoughts
 
 - Hash Table
@@ -10238,4 +10243,51 @@ class Solution:
             m = min(nums)
             return sum(nums) - 2*m
         return sum(nums)
+```
+
+# Dynamic Programming
+
+## 62. Unique Paths
+Tag: Dynamic Programming, Grid, Array
+```python
+class Solution:
+    # TC: O(m x n)
+    # SC: O(m x n)
+    def uniquePaths(self, m: int, n: int) -> int:
+        dp = [1] * m
+        for i in range(m):
+            dp[i] = [1] * n
+        for i in range(1, m):
+            for j in range(1, n):
+                dp[i][j] = dp[i-1][j] + dp[i][j-1]
+        return dp[m - 1][n - 1]
+```
+## 746. Min Cost Climbing Stairs
+Tag: Dynamic Programming
+```python
+class Solution:
+    # TC: O(n)
+    # SC: O(1)
+    def minCostClimbingStairs(self, cost: List[int]) -> int:
+        cost.append(0)
+        for i in range(2, len(cost), 1):
+            cost[i] += min(cost[i-1], cost[i-2])
+        return cost[-1]
+class Solution:
+    # TC: O(n)
+    # SC: O(n)
+    def minCostClimbingStairs(self, cost: List[int]) -> int:
+        # top is index n
+        # dp is the total cost to step i
+        # dp[0] = 0
+        # dp[1] = 0
+        # dp[2] = min(dp[0] + cost[0], dp[1] + cost[1])
+        # dp[3] = min(dp[1] + cost[1], dp[2] + cost[2])
+        # dp[n] = min(dp[n-1], dp[n-2])
+        n = len(cost)
+        dp = [0] * (n + 1)
+        for i in range(2, n+1):
+            dp[i] = min(dp[i-1] + cost[i-1], dp[i-2] + cost[i-2])
+        return dp[n]
+        
 ```
