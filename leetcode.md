@@ -250,6 +250,7 @@
   - [1005. Maximize Sum Of Array After K Negations](#1005-maximize-sum-of-array-after-k-negations)
 - [Dynamic Programming](#dynamic-programming)
   - [62. Unique Paths](#62-unique-paths)
+  - [63. Unique Paths II](#63-unique-paths-ii)
   - [746. Min Cost Climbing Stairs](#746-min-cost-climbing-stairs)
 
 
@@ -10261,6 +10262,33 @@ class Solution:
             for j in range(1, n):
                 dp[i][j] = dp[i-1][j] + dp[i][j-1]
         return dp[m - 1][n - 1]
+```
+## 63. Unique Paths II
+Tag: Dynamic Programming, Grid, Array
+```python
+class Solution:
+    # TC: O(m x n)
+    # SC: O(m x n)
+    def uniquePathsWithObstacles(self, obstacleGrid: List[List[int]]) -> int:
+        m = len(obstacleGrid)
+        n = len(obstacleGrid[0])
+        dp = [([0] * n) for _ in range(m)]
+        for i in range(m):
+            if obstacleGrid[i][0] != 1:
+                dp[i][0] = 1
+            else:
+                break
+        for i in range(n):
+            if obstacleGrid[0][i] != 1:
+                dp[0][i] = 1
+            else:
+                break
+        for i in range(1, m):
+            for j in range(1, n):
+                if obstacleGrid[i][j] == 1:
+                    continue
+                dp[i][j] = dp[i-1][j] + dp[i][j-1]
+        return dp[m-1][n-1]
 ```
 ## 746. Min Cost Climbing Stairs
 Tag: Dynamic Programming
