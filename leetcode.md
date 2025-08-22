@@ -251,6 +251,7 @@
 - [Dynamic Programming](#dynamic-programming)
   - [62. Unique Paths](#62-unique-paths)
   - [63. Unique Paths II](#63-unique-paths-ii)
+  - [343. Integer Break](#343-integer-break)
   - [746. Min Cost Climbing Stairs](#746-min-cost-climbing-stairs)
 
 
@@ -10289,6 +10290,27 @@ class Solution:
                     continue
                 dp[i][j] = dp[i-1][j] + dp[i][j-1]
         return dp[m-1][n-1]
+```
+## 343. Integer Break
+Tag: Dynamic Programming, Number
+```python
+class Solution:
+    # TC: O(n*n)
+    # SC: O(n)
+    def integerBreak(self, n: int) -> int:
+        cache = [0] * (n+1)
+        cache[1] = 1
+        def helper(x: int):
+            if cache[x] != 0:
+                return cache[x]
+            temp = 0
+            for i in range(1, x):
+                h = helper(i)
+                r = max(h * (x-i), i * (x-i))
+                temp = max(r, temp)
+            cache[x] = temp
+            return temp
+        return helper(n)
 ```
 ## 746. Min Cost Climbing Stairs
 Tag: Dynamic Programming
