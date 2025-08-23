@@ -251,6 +251,7 @@
 - [Dynamic Programming](#dynamic-programming)
   - [62. Unique Paths](#62-unique-paths)
   - [63. Unique Paths II](#63-unique-paths-ii)
+  - [96. Unique Binary Search Trees](#96-unique-binary-search-trees)
   - [343. Integer Break](#343-integer-break)
   - [746. Min Cost Climbing Stairs](#746-min-cost-climbing-stairs)
 
@@ -10291,9 +10292,45 @@ class Solution:
                 dp[i][j] = dp[i-1][j] + dp[i][j-1]
         return dp[m-1][n-1]
 ```
+## 96. Unique Binary Search Trees
+Tag: Dynamic Programming, Binary Search Tree
+```python
+class Solution:
+    # Imagine n number, each number act as head, and rest of them will split in left and right tree
+    # The left and right tree nodes count are smaller than n
+    # And dp[left] * dp[right] is the total combination of one head
+    # So each number go to act as head, and sum all of the left right product combinations
+    # TC: O(n * n)
+    # SC: O(n)
+    def numTrees(self, n: int) -> int:\
+        dp = [0] * (n + 1)
+        dp[0] = 1
+        dp[1] = 1
+        for i in range(2, n+1):
+            for j in range(i):
+                dp[i] += (dp[j] * dp[i-j-1])
+        return dp[n]
+```
+
 ## 343. Integer Break
 Tag: Dynamic Programming, Number
 ```python
+class Solution:
+    # Divided into more 3 is the largest product
+    # As 2*2*2 < 3*3
+    # TC: O(n)
+    # SC: O(1)
+    def integerBreak(self, n: int) -> int:
+        res = 1
+        if n <= 2:
+            return 1
+        if n == 3:
+            return 2
+        while n >= 5:
+            res *= 3
+            n -= 3
+        res *= n
+        return res
 class Solution:
     # TC: O(n*n)
     # SC: O(n)
