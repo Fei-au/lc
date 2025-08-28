@@ -252,6 +252,7 @@
   - [62. Unique Paths](#62-unique-paths)
   - [63. Unique Paths II](#63-unique-paths-ii)
   - [343. Integer Break](#343-integer-break)
+  - [416. Partition Equal Subset Sum](#416-partition-equal-subset-sum)
   - [746. Min Cost Climbing Stairs](#746-min-cost-climbing-stairs)
 
 
@@ -10321,6 +10322,126 @@ class Solution:
             cache[x] = temp
             return temp
         return helper(n)
+```
+## 416. Partition Equal Subset Sum
+Tag: Dynamic Programming, 0/1 knapsack
+```python
+    # TC: O(n*sum(n))
+    # SC: O(sum(n))
+    def canPartition(self, nums: List[int]) -> bool:
+        s = sum(nums)
+        if s % 2 != 0:
+            return False
+        target = s // 2
+        dp = [False] * (target + 1)
+        dp[0] = True
+        # dp[i] means that capacity can be reached
+        '''
+            first row is all False except dp[num]
+            [1,0,0,0,...,0,0,1,0,0,..,0]
+            [1,0,0,1,...,0,0,1,0,0,1,0..0]
+            [1,0,0,1,.,1,0,0,1,0,0,1,0,1,0]
+        '''
+        for num in nums:
+            for j in range(target, num-1, -1):
+                dp[j] = dp[j] or dp[j-num]
+            if dp[target]:
+                return True
+        return False
+
+    # TC: O(n*sum(n))
+    # SC: O(sum(n))
+    def canPartition(self, nums: List[int]) -> bool:
+        s = sum(nums)
+        if s % 2 != 0:
+            return False
+        target = s // 2
+        l = len(nums)
+        dp = [0] * (target + 1)
+        for i in range(l):
+            for j in range(target, nums[i]-1, -1):
+                '''
+                as we already have last level data, we can loop from end to start
+                dp[14]=0,14
+                dp[15]=0,14
+                dp[28]=0,14+14 # here we count dp[14] twice
+                ...
+                
+                if we reverse
+                dp[30]=0,14
+                dp[29]=0,14
+                dp[14]=0,14
+                
+                second round
+                
+                if j is smaller than nums[i], that will be the same as dp[i], so we skip those
+                '''
+                dp[j] = max(dp[j], nums[i] + dp[j-nums[i]])
+            if dp[-1] == target:
+                return True
+        return False
+    # TC: O(n*sum(n))
+    # SC: O(n*sum(n))
+    def canPartition(self, nums: List[int]) -> bool:
+        '''
+        two bags
+        total = sum(nums)
+
+        bag's capacity is sum/2
+
+        the maximum value of all items
+
+        dp[i][j]
+
+        i is priority item in the bag
+        j is bag capacity
+
+        dp[0][0] = 0
+        dp[0][1] = 1
+        dp[0][2] = 1
+        ...
+        dp[0][sum/2] = 1
+        
+        
+        dp[1][0] = 0
+        dp[1][1] = 1
+        ...
+        dp[5][0] = 5 (max(dp[i-1][j], value[i] + dp[i-1][j-value[i]]))
+        dp[5][1] = 6
+        ...
+        dp[5][sum/2] = 6
+
+
+        loop item first, from first item to the end
+        then loop bag, from 0 to sum/2
+        dp[i][j] = 
+        if j < nums[i]:
+            dp[i][j] = dp[i-1][j]
+        else:
+            dp[i][j] = max(dp[i-1][j], nums[i] + dp[i-1][j-nums[i]])
+
+        initial:
+        # sort nums. no need to sort nums
+        dp[0][j] = 0 if j < nums[j] else nums[j]
+        dp[i][0] = 0
+        '''
+        s = sum(nums)
+        if s % 2 != 0:
+            return False
+        target = s // 2
+        l = len(nums)
+        dp = [[0] * (target+1) for _ in ([0] * l)]
+        for j in range(nums[0], target+1):
+            dp[0][j] = nums[0]
+        for i in range(1, l):
+            for j in range(target + 1):
+                if j < nums[i]:
+                    dp[i][j] = dp[i-1][j]
+                else:
+                    dp[i][j] = max(dp[i-1][j], nums[i] + dp[i-1][j-nums[i]])
+            if dp[i][target] == target:
+                return True
+        return False
 ```
 ## 746. Min Cost Climbing Stairs
 Tag: Dynamic Programming
