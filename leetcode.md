@@ -255,6 +255,7 @@
   - [343. Integer Break](#343-integer-break)
   - [416. Partition Equal Subset Sum](#416-partition-equal-subset-sum)
   - [746. Min Cost Climbing Stairs](#746-min-cost-climbing-stairs)
+  - [1049. Last Stone Weight II](#1049-last-stone-weight-ii)
 
 
 # Tag
@@ -312,11 +313,6 @@
 
 - Math
   - Two Sum or sum questions, change the question to make reminder to 0, save each middiate value in a set, and check if (target - cur) in the set
-
-- Dynamic Programming
-  - dp table
-  - 
-  - 118 119 redo by using dynamic programming thoughts
 
 - Hash Table
   - Check duplicate
@@ -399,6 +395,20 @@
 
 - Greedy
   - Fullfill partial solution, finally reach the global solution
+
+- Dynamic Programming
+  - Normal DP question can also use the method below, the difference part is the formula
+  - Knapsack Problem
+    `dp[i][j]`
+    `dp[j]`
+    1. Define the meaning of indices, normally i indicates ith item, j is the capacity of the bag
+    2. Define the formula, usually it's dp[j] = max(dp[j], weights[i] + dp[j - weights[i]])
+            Be careful that the second loop on j is looping reverse, from [capacity, weights[i]], include both ends
+    3. Define the result, in most cases, we are not using the dp[-1] or dp[capacity] as our result, but do some small convertion to get the result of the question
+    4. Initialize, normally the capacity is from [0, capacity] including both ends
+ 
+  - 
+  - 118 119 redo by using dynamic programming thoughts
 
 
 # Time Complexities
@@ -10361,7 +10371,7 @@ class Solution:
         return helper(n)
 ```
 ## 416. Partition Equal Subset Sum
-Tag: Dynamic Programming, 0/1 knapsack
+Tag: Dynamic Programming, Knapsack Problem
 ```python
     # TC: O(n*sum(n))
     # SC: O(sum(n))
@@ -10507,5 +10517,38 @@ class Solution:
         for i in range(2, n+1):
             dp[i] = min(dp[i-1] + cost[i-1], dp[i-2] + cost[i-2])
         return dp[n]
-        
+```
+
+## 1049. Last Stone Weight II
+Tag: Dynamic Programming, Knapsack Problem
+```python
+class Solution:
+    # TC: O(n * sum(stones))
+    # SC: O(sum(stones))
+    ```
+        dp[i][j]
+        i is the stone, with value and weight as stones[i]
+        j is the capacity of the bag
+
+        所以这里我算出了固定重量下，可以装的石头的重量
+        那么还有剩余的石头，他们两组相减，就是剩余的重量
+
+        还是先只装一个石头
+        然后装连个
+        一直到装完
+
+        capacity is sum // 2
+
+        结果是 (sum - dp[-1]) - dp[-1]
+    ```
+    def lastStoneWeightII(self, stones: List[int]) -> int:
+        total = sum(stones)
+        capacity = total // 2
+        dp = [0] * (capacity + 1)
+        result = total
+        for stone in stones:
+            for j in range(capacity, stone-1, -1):
+                dp[j] = max(dp[j], stone + dp[j-stone])
+        result = total - dp[-1] - dp[-1]
+        return result
 ```
