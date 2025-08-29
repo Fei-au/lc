@@ -10525,7 +10525,7 @@ Tag: Dynamic Programming, Knapsack Problem
 class Solution:
     # TC: O(n * sum(stones))
     # SC: O(sum(stones))
-    ```
+    '''
         dp[i][j]
         i is the stone, with value and weight as stones[i]
         j is the capacity of the bag
@@ -10540,7 +10540,7 @@ class Solution:
         capacity is sum // 2
 
         结果是 (sum - dp[-1]) - dp[-1]
-    ```
+    '''
     def lastStoneWeightII(self, stones: List[int]) -> int:
         total = sum(stones)
         capacity = total // 2
