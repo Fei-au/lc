@@ -254,6 +254,7 @@
   - [96. Unique Binary Search Trees](#96-unique-binary-search-trees)
   - [343. Integer Break](#343-integer-break)
   - [416. Partition Equal Subset Sum](#416-partition-equal-subset-sum)
+  - [494. Target Sum](#494-target-sum)
   - [746. Min Cost Climbing Stairs](#746-min-cost-climbing-stairs)
   - [1049. Last Stone Weight II](#1049-last-stone-weight-ii)
 
@@ -402,7 +403,12 @@
     `dp[i][j]`
     `dp[j]`
     1. Define the meaning of indices, normally i indicates ith item, j is the capacity of the bag
-    2. Define the formula, usually it's dp[j] = max(dp[j], weights[i] + dp[j - weights[i]])
+    2. Define the formula, usually it's 
+            dp[j] = max(dp[j], weights[i] + dp[j - weights[i]]). Or
+
+            dp[i][j] = dp[i-1][j] + dp[i-1][j-nums[i]], which is
+            dp[j] = dp[j] + dp[j-num]
+
             Be careful that the second loop on j is looping reverse, from [capacity, weights[i]], include both ends
     3. Define the result, in most cases, we are not using the dp[-1] or dp[capacity] as our result, but do some small convertion to get the result of the question
     4. Initialize, normally the capacity is from [0, capacity] including both ends
@@ -10490,6 +10496,44 @@ Tag: Dynamic Programming, Knapsack Problem
                 return True
         return False
 ```
+
+## 494. Target Sum
+Tag: Dynamic Programming
+```python
+class Solution:
+    '''
+    S = sum(nums)
+
+    P = sum of positive nums
+    N = sum of nagetive nums
+
+    P-N = target
+    P+N = S
+
+    2P = target + S
+    P = (target + S) / 2
+
+    So I have target, S, I get the P. Means the total positive items added to capacity P
+
+    dp[j] means the number of ways fill the knacpsack to exactly weight j using the first i items
+    dp[i][j] = dp[i-1][j] + dp[i-1][j-nums[i]]
+    dp[j] = dp[j] + dp[j-num]
+    '''
+    # TC: O(l * sum(nums))
+    # SC: O(sum(nums))
+    def findTargetSumWays(self, nums: List[int], target: int) -> int:
+        s = sum(nums)
+        if ((s + target) % 2) != 0 or (s+target) < 0:
+            return 0
+        p = (s + target) // 2
+        dp = [0] * (p+1)
+        dp[0] = 1
+        for num in nums:
+            for j in range(p, num-1, -1):
+                dp[j] += dp[j - num]
+        return dp[p]
+```
+
 ## 746. Min Cost Climbing Stairs
 Tag: Dynamic Programming
 ```python
