@@ -254,6 +254,7 @@
   - [96. Unique Binary Search Trees](#96-unique-binary-search-trees)
   - [343. Integer Break](#343-integer-break)
   - [416. Partition Equal Subset Sum](#416-partition-equal-subset-sum)
+  - [474. Ones and Zeroes](#474-ones-and-zeroes)
   - [494. Target Sum](#494-target-sum)
   - [746. Min Cost Climbing Stairs](#746-min-cost-climbing-stairs)
   - [1049. Last Stone Weight II](#1049-last-stone-weight-ii)
@@ -10495,6 +10496,24 @@ Tag: Dynamic Programming, Knapsack Problem
             if dp[i][target] == target:
                 return True
         return False
+```
+
+## 474. Ones and Zeroes
+Tag: Dynamic Programming
+```python
+class Solution:
+    # TC: O(m*n*l)
+    # SC: O(m*n)
+    def findMaxForm(self, strs: List[str], m: int, n: int) -> int:
+        dp = [0] * (m+1)
+        dp = [[0] * (n+1) for _ in dp]
+        for str in strs:
+            zeros = str.count('0')
+            ones = len(str) - zeros
+            for i in range(m, zeros-1, -1):
+                for j in range(n, ones-1, -1):
+                    dp[i][j] = max(dp[i][j], dp[i-zeros][j-ones] + 1)
+        return dp[m][n]
 ```
 
 ## 494. Target Sum
