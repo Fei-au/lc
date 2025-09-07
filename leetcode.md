@@ -256,6 +256,7 @@
   - [416. Partition Equal Subset Sum](#416-partition-equal-subset-sum)
   - [474. Ones and Zeroes](#474-ones-and-zeroes)
   - [494. Target Sum](#494-target-sum)
+  - [518. Coin Change II](#518-coin-change-ii)
   - [746. Min Cost Climbing Stairs](#746-min-cost-climbing-stairs)
   - [1049. Last Stone Weight II](#1049-last-stone-weight-ii)
 
@@ -10378,7 +10379,7 @@ class Solution:
         return helper(n)
 ```
 ## 416. Partition Equal Subset Sum
-Tag: Dynamic Programming, Knapsack Problem
+Tag: Dynamic Programming, 0/1 Knapsack Problem
 ```python
     # TC: O(n*sum(n))
     # SC: O(sum(n))
@@ -10499,7 +10500,7 @@ Tag: Dynamic Programming, Knapsack Problem
 ```
 
 ## 474. Ones and Zeroes
-Tag: Dynamic Programming
+Tag: Dynamic Programming, 0/1 Knapsack Problem
 ```python
 class Solution:
     # TC: O(m*n*l)
@@ -10517,7 +10518,7 @@ class Solution:
 ```
 
 ## 494. Target Sum
-Tag: Dynamic Programming
+Tag: Dynamic Programming, 0/1 Knapsack Problem
 ```python
 class Solution:
     '''
@@ -10552,7 +10553,21 @@ class Solution:
                 dp[j] += dp[j - num]
         return dp[p]
 ```
-
+## 518. Coin Change II
+Tag: Dynamic Programming, Unbounded Knapsack
+```python
+class Solution:
+    # TC: O(l * amount)
+    # SC: O(amount)
+    def change(self, amount: int, coins: List[int]) -> int:
+        dp = [0] * (amount + 1)
+        dp[0] = 1
+        for coin in coins:
+            for j in range(amount+1):
+                if j >= coin:
+                    dp[j] += dp[j-coin]
+        return dp[amount]
+```
 ## 746. Min Cost Climbing Stairs
 Tag: Dynamic Programming
 ```python
@@ -10583,7 +10598,7 @@ class Solution:
 ```
 
 ## 1049. Last Stone Weight II
-Tag: Dynamic Programming, Knapsack Problem
+Tag: Dynamic Programming, 0/1 Knapsack Problem
 ```python
 class Solution:
     # TC: O(n * sum(stones))
