@@ -253,6 +253,7 @@
   - [63. Unique Paths II](#63-unique-paths-ii)
   - [96. Unique Binary Search Trees](#96-unique-binary-search-trees)
   - [343. Integer Break](#343-integer-break)
+  - [377. Combination Sum IV](#377-combination-sum-iv)
   - [416. Partition Equal Subset Sum](#416-partition-equal-subset-sum)
   - [474. Ones and Zeroes](#474-ones-and-zeroes)
   - [494. Target Sum](#494-target-sum)
@@ -10377,6 +10378,33 @@ class Solution:
             cache[x] = temp
             return temp
         return helper(n)
+```
+
+## 377. Combination Sum IV
+Tag: Dynamic Programming, Unbounded Knapsack
+```python
+class Solution:
+    # 如果求组合数就是外层for循环遍历物品，内层for遍历背包。
+    #如果求排列数就是外层for遍历背包，内层for循环遍历物品。
+    # TC: O(l * target)
+    # SC: O(target)
+    def combinationSum4(self, nums: List[int], target: int) -> int:
+        '''
+            dp[j] use number i, the number of combinations to the target j
+            dp[0] = 1
+            dp[1] = dp[1-1] + dp[1]
+            ...
+            ...
+            dp[2] = dp[2-2] + dp[2]
+            dp[3] = dp[3-2] + dp[3]
+        '''
+        dp = [0] * (target + 1)
+        dp[0] = 1
+        for j in range(target + 1):
+            for num in nums:
+                if j>=num:
+                    dp[j] += dp[j-num]
+        return dp[target]
 ```
 ## 416. Partition Equal Subset Sum
 Tag: Dynamic Programming, 0/1 Knapsack Problem
