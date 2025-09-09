@@ -427,7 +427,7 @@
                 dp[j] += dp[j-num]
         return dp[capacity]
     ```
-  - Unbounded knapsack
+  - Unbounded Knapsack
     1. Define dp meaning
     2. Define formula
        - If the problem is about the maximum value, then use dp[j] = max(dp[j], weights[i] + dp[j-weights[i]]), loop sequence does not matter, the loop on capacity is [0,capacity] including both ends
@@ -7479,7 +7479,7 @@ Tag: BFS, Matrix, Array
 ```
 
 ## 279. Perfect Squares
-Tag: Queue, Math
+Tag: Queue, Math, Dynamic Programming, Unbounded Knapsack
 ```python
 class Solution:
     # TC: O(n logn)
@@ -7505,6 +7505,26 @@ class Solution:
                         q.append(reminder)
                         visited.add(reminder)
         return -1
+    # TC: O(n * log(n))
+    # SC: O(n)
+    def numSquares(self, n: int) -> int:
+        end = round(math.sqrt(n))
+        dp = [n] * (n + 1)
+        dp[0] = 0
+        '''
+            dp[j]
+            dp[0] = 0
+            dp[1] = 1
+            dp[2] = 2
+            
+            dp[j] = min(dp[j], dp[j-num] + 1)
+        '''
+        for num in range(1, end + 1):
+            for j in range(n + 1):
+                num_pow = num*num
+                if j >= num_pow:
+                    dp[j] = min(dp[j], dp[j-num_pow] + 1)
+        return dp[n]
 ```
 
 ## 542. 01 Matrix 
