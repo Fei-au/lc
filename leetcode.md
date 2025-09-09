@@ -407,7 +407,7 @@
     `dp[j]`
     1. Define the meaning of indices, normally i indicates ith item, j is the capacity of the bag
     2. Define the formula, usually it's 
-            dp[j] = max(dp[j], weights[i] + dp[j - weights[i]]). Or
+            dp[j] = max(dp[j], weights[i] + dp[j-weights[i]]). Or
 
             dp[i][j] = dp[i-1][j] + dp[i-1][j-nums[i]], which is
             dp[j] = dp[j] + dp[j-num]
@@ -415,8 +415,49 @@
             Be careful that the second loop on j is looping reverse, from [capacity, weights[i]], include both ends
     3. Define the result, in most cases, we are not using the dp[-1] or dp[capacity] as our result, but do some small convertion to get the result of the question
     4. Initialize, normally the capacity is from [0, capacity] including both ends
- 
-  - 
+    ```python
+        dp = [0] * [capacity + 1]
+        # dp[0] = 1 if find how many combinations
+        for num in nums:
+            for j in range(capacity, num-1, -1):
+                # Find the max value use
+                dp[j] = max(dp[j], num + dp[j-num])
+                # or find how many combinations use. With dp[0] = 1 initialize
+                dp[j] += dp[j-num]
+        return dp[capacity]
+    ```
+  - Unbounded knapsack
+    1. Define dp meaning
+    2. Define formula
+       - If the problem is about the maximum value, then use dp[j] = max(dp[j], weights[i] + dp[j-weights[i]]), loop sequence does not matter, the loop on capacity is [0,capacity] including both ends
+       - If the problem is about how many combinations, then use dp[j] += dp[j-num], loop items then loop capacity, the capacity range is [0,capacity]
+       - If the problem is about how many disinct ways, then use dp[j] += dp[j-num], loop capacity then loop items, the capacity range is [0,capacity]
+    3. Define the result
+    4. Initialize
+    ```python
+        dp = [0] * (capacity + 1)
+        # find max capacity
+        for num in nums:
+            for j in range(capacity + 1):
+                if j >= num:
+                    dp[j] = max(dp[j], num + dp[j-num])
+        return dp[capacity]
+
+        # find how many combinations:
+        dp[0] = 1
+        for num in nums:
+            for j in range(capacity + 1):
+                if j >= num:
+                    dp[j] += dp[j-num]
+
+        # find how many distinct ways
+        dp[0] = 1
+        for i in range(capacity + 1):
+            for num in nums:
+                if i >= num:
+                    dp[i] += dp[i-num]
+        return dp[capacity]
+    ```
   - 118 119 redo by using dynamic programming thoughts
 
 
@@ -450,7 +491,6 @@ def binary_search(arr, target):
         else:
             right = mid - 1
     return -1
-
 
 # Use recursion to return bool
 def binary_search(arr, target):
@@ -9676,10 +9716,20 @@ class Solution:
         return backtrack_nqueen(0, 0)
 ```
 ## 70. Climbing Stairs
-Tag: Recursion, Math, Dynamic Programming
+Tag: Recursion, Math, Dynamic Programming, Unbounded Knapsack
 
 ```python
 class Solution:
+    # TC: O(n)
+    # SC: O(n)
+    def climbStairs(self, n: int) -> int:
+        dp = [0] * (n + 1)
+        dp[0] = 1
+        for i in range(n+1):
+            for step in [1,2]:
+                if i >= step:
+                    dp[i] += dp[i-step]
+        return dp[n]
 
     # TC: O(n)
     # SC: O(1)
