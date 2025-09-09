@@ -252,6 +252,7 @@
   - [62. Unique Paths](#62-unique-paths)
   - [63. Unique Paths II](#63-unique-paths-ii)
   - [96. Unique Binary Search Trees](#96-unique-binary-search-trees)
+  - [322. Coin Change](#322-coin-change)
   - [343. Integer Break](#343-integer-break)
   - [377. Combination Sum IV](#377-combination-sum-iv)
   - [416. Partition Equal Subset Sum](#416-partition-equal-subset-sum)
@@ -10381,7 +10382,24 @@ class Solution:
                 dp[i] += (dp[j] * dp[i-j-1])
         return dp[n]
 ```
+## 322. Coin Change
+Tag: Dynamic Programming, Unbounded Knapsack
 
+```python
+class Solution:
+    # TC: O(amount * l)
+    # SC: O(amount)
+    def coinChange(self, coins: List[int], amount: int) -> int:
+        MAX_INTEGER = pow(2, 31) - 1
+        dp = [MAX_INTEGER] * (amount + 1)
+        dp[0] = 0
+        for j in range(amount + 1):
+            for coin in coins:
+                if j >= coin:
+                    if dp[j-coin] != MAX_INTEGER:
+                        dp[j] = min(dp[j], dp[j-coin] + 1)
+        return dp[amount] if dp[amount] != MAX_INTEGER else -1
+```
 ## 343. Integer Break
 Tag: Dynamic Programming, Number
 ```python
