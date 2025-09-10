@@ -252,6 +252,7 @@
   - [62. Unique Paths](#62-unique-paths)
   - [63. Unique Paths II](#63-unique-paths-ii)
   - [96. Unique Binary Search Trees](#96-unique-binary-search-trees)
+  - [139. Word Break](#139-word-break)
   - [322. Coin Change](#322-coin-change)
   - [343. Integer Break](#343-integer-break)
   - [377. Combination Sum IV](#377-combination-sum-iv)
@@ -10401,6 +10402,25 @@ class Solution:
             for j in range(i):
                 dp[i] += (dp[j] * dp[i-j-1])
         return dp[n]
+```
+## 139. Word Break
+Tag: Dynamic Programming, Unbounded Knapsack
+```python
+class Solution:
+    # TC: O(l1 * l2)
+    # SC: O(l1)
+    def wordBreak(self, s: str, wordDict: List[str]) -> bool:
+        # target is s
+        # dp[capacity] = s.length
+        # dp[i] = True if it is s[:i]
+        dp = [False] * (len(s)+1)
+        dp[0] = True
+        for i in range(len(s)+1):
+            for word in wordDict:
+                if i >= len(word):
+                    if dp[i-len(word)] and s[i-len(word):i] == word:
+                        dp[i] = True
+        return dp[len(s)]
 ```
 ## 322. Coin Change
 Tag: Dynamic Programming, Unbounded Knapsack
