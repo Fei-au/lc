@@ -254,6 +254,7 @@
   - [96. Unique Binary Search Trees](#96-unique-binary-search-trees)
   - [139. Word Break](#139-word-break)
   - [198. House Robber](#198-house-robber)
+  - [213. House Robber II](#213-house-robber-ii)
   - [322. Coin Change](#322-coin-change)
   - [343. Integer Break](#343-integer-break)
   - [377. Combination Sum IV](#377-combination-sum-iv)
@@ -10438,6 +10439,28 @@ class Solution:
         for i in range(2, len(nums)):
             dp[i] = max(dp[i-2] + nums[i], dp[i-1])
         return dp[-1]
+```
+## 213. House Robber II
+Tag: Dynamic Programming
+```python
+class Solution:
+    # TC: O(n)
+    # SC: O(n)
+    def rob(self, nums: List[int]) -> int:
+        def helper(arr):
+            dp = [0] * (len(arr))
+            dp[0] = arr[0]
+            dp[1] = max(arr[0], arr[1])
+            for i in range(2, len(arr)):
+                dp[i] = max(dp[i-1], dp[i-2] + arr[i])
+            return dp[-1]
+        if len(nums) == 1:
+                return nums[0]
+        elif len(nums) == 2:
+            return max(nums[0], nums[1])
+        r1 = helper(nums[1:])
+        r2 = helper(nums[:-1])
+        return max(r1, r2)
 ```
 
 ## 322. Coin Change
