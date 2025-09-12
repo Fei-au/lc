@@ -253,6 +253,7 @@
   - [63. Unique Paths II](#63-unique-paths-ii)
   - [96. Unique Binary Search Trees](#96-unique-binary-search-trees)
   - [139. Word Break](#139-word-break)
+  - [198. House Robber](#198-house-robber)
   - [322. Coin Change](#322-coin-change)
   - [343. Integer Break](#343-integer-break)
   - [377. Combination Sum IV](#377-combination-sum-iv)
@@ -10422,6 +10423,23 @@ class Solution:
                         dp[i] = True
         return dp[len(s)]
 ```
+## 198. House Robber
+Tag: Dynamic Programming
+```python
+class Solution:
+    # TC: O(n)
+    # SC: O(n)
+    def rob(self, nums: List[int]) -> int:
+        if len(nums) == 1:
+            return nums[0]
+        dp = [0] * len(nums)
+        dp[0] = nums[0]
+        dp[1] = max(nums[0], nums[1])
+        for i in range(2, len(nums)):
+            dp[i] = max(dp[i-2] + nums[i], dp[i-1])
+        return dp[-1]
+```
+
 ## 322. Coin Change
 Tag: Dynamic Programming, Unbounded Knapsack
 
