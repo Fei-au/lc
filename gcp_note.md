@@ -403,6 +403,100 @@ For data
 - relational
 
 ## Cloud Storage
+### Defination
+- website, archival, disaster recovery, distributing large data objects allow user direct download
+- Not a file
+- A collection of bucket that you place objects into
+- Directories are is just another object
+### Four classes
+- Standard
+  - eg: website, streaming video, data for mobile or gaming applications
+  - freqently accessed, hot data, or stored for brief period of time
+  - most expensive
+  - **no minimum duration**
+  - no retrieval cost
+  - select the same location as GKE or CE to save the data, maximize the performance for data-intensive computations and reduce network charges
+  - if in multi or dual region, it improves availability and is appropriate for data that is accessed around the world 
+- Nearline
+  - low cost, highly durable
+  - infrequently accessed data like data backup, long-tail multimedia content and data archiving
+  - **30-day** minimum storage duration
+  - higher price than standard storage for data access and lower price for data storage 
+- Codeline
+  - very-low-cost, highly durable for storing infrequently accessed data
+  - slightly low availability
+  - **90-day** minimum storage duration
+  - Higher cost than above two storages for data access and lowercost for storage
+- archive 
+  - lowest-cost, highly durable for data archiving, online backup, disaster recovery
+  - **365-day** minimum storage
+
+Auto class: transitions objects to appropriate storage classes
+### Each provides three location types
+- Multi-region
+- Dual-region
+- A Region
+The first two are geo-redundant
+
+You can change data storage type of a bucket as well as an object but cannot change the location types
+
+### Access control:
+- IAM, roles, for view, create buckets or objects
+- Access control lists or ACL for finer control. 
+  - Who can access the buckets or objects, 
+  - maximum 100 ACL
+  - one ACL consists of more entries
+  - entries consists of two information:
+    - A scope: **who** can perform the specific action (a user, a group)
+    - A permission: **what actions** can be performed (read, write)
+    - Allusers: everyone on the Internet is allowed
+    - allAuthenticatedUsers: anywho who is authenticated with a Google account
+- Signed URL provides a cryptographic key that give time-limited access to a bucket or object
+  - Not using account-based authentication
+- Signed policy document more finer: what file can be uploaded by people with a signed URL
+
+### Object Lifecycle Management:
+You set a few rules, and the system handles the cleanup or moving of files for you.
+Benefit:
+- Cost Optimization
+- Compliance, like deleting user data after certain period
+- Less Human Error
+"If This, Then That" logic
+- Condition: "Is this file older than 365 days?" or "Is there a newer version of this file?"
+- Action: e.g., "Delete it" or "Move it to a cheaper storage tier."
+Act asynchronize, so after update the rule, it may take 24 hours to be valid
+
+### Object Versioning
+Can be enabled for a bucket
+
+Create an archived version of an object 
+archived version identified by generation number
+
+Soft Delete:
+- use Soft Delete instead of Object Versioning to protect against permanent data loss
+- Soft Delete retains all deleted objects whether by overwriting, changing of the data
+
+### Retention Lock
+A retention configuration governs how long the object must be retained and has the option to permanently prevent the retention time from being reduced or removed.
+
+### Upload large file to Storage
+- Transfer Appliance
+  - Hardware appliance
+- Storage Transfer Service
+  - import online data
+- Offline Media Import
+  - physical media is sent to a provider who uploads the data
+
+Uploads are strongly consistent, never 404 or data inconsistent like read write problem
+
+Deletions are global consistency, so after delete an object, immediately access the data will response 404
+
+Bucket listing is strongly consistent
+
+Object listing is also strongly consistent
+
+### Directory Synchronization
+Sync a VM directory with a bucket
 
 ## Cloud SQL
 No global Scalability
@@ -413,6 +507,16 @@ No global Scalability
 Non-relational
 
 Document database
+
+Work with compute engine fleets, so they could have a shared file system.
+
+- Application migration
+- Media rendering
+- Electronic Design Automation EDA
+- Data analytics
+  - without the need to lose valuable time on loading an offloading data to clients drives
+- Genome sequencing 
+
 
 ## AlloyDB
 Relational
