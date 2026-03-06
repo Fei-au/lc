@@ -75,6 +75,121 @@ Like Gmail, Drive
 - Rate Quotas: For example, by default, the GKE service implements a quota of 3,000 calls to its API from each Google Cloud project every 100 seconds.
 - Allocation quotas: For example, by default, each Google Cloud project has a quota allowing it no more than 15 Virtual Private Cloud networks.
 
+### Resource Manager
+    
+Policies contain a set of roles and members, and policies are set on resources.
+    
+IAM policies are inherited top-to-bottom, billing is accumulated from the bottom up.
+
+Each project is associated with one billing account. and resources cost are accumulated.
+
+Specifically, projects let you enable billing, manage permissions and credentials, and enable services and APIs.
+
+To interact with Google Cloud resources, you must provide the identifying project information for every request. So you know which project pay the cost of the resource usage.
+
+Resource hierarchy:
+    From physical organization:
+        Global
+        Regional
+        Zonal
+
+**quotas**
+quotas or limits.
+Eg:
+    - you can only have fifteen VPC networks per project.
+    - you can only have 24 CPUs per region.
+    
+As your use of Google Cloud expands over time, your quotas may increase accordingly.
+- prevent runaway consumption in case of error or malicious attack.
+- Quotas also prevent billing spikes or surprises.
+
+
+**labels**
+more granularity for resources
+key-value pairs that you can attach to your resources, like VMs, disks, snapshots and images.
+Used to organize resources, and they can propagate through billing.
+
+- For example, you could create a label to define the environment of your virtual machines. Then search and list all your production resources
+- help analyze costs or to run bulk operations on multiple resources.
+Examples:
+- cost accounting or budgeting, eg: team:marketing and team:research.
+- distinguish components, eg: component:redis, and component:frontend.
+- owner or a primary contact for a resource, eg: owner:alice, and owner:bob.
+- state, eg: state:inuse, and state:readyfordeletion.
+
+
+**Network tags**
+ user-defined strings that are applied to instances only and are mainly used for networking, such as applying firewall rules and custom static routes.
+
+**billing**
+set a budget.
+
+create a budge:
+    1. on project name
+    2. set amount
+    3. email or pub/sub notification
+    
+labeling all your resources and exporting your billing data to BigQuery to analyze your spend.
+    
+
+## Resrouce Monitoring
+**Google Cloud Observability**
+monitoring logging, error reporting, and fault tracing
+    there are free usage allotments
+    
+**Cloud Monitoring**
+Charts
+Dashboards
+Alerts
+    Such as the server down at night
+    We recommend alerting on symptoms, and not necessarily causes
+    - The type of uptime check can be set to HTTP, HTTPS, or TCP.
+    - The resource to be checked can be an App Engine application, a Compute Engine instance, a URL of a host, or an AWS instance or load balancer.
+    
+Metrics
+A metrics scope is the root entity that holds monitoring and configuration information in Cloud Monitoring.
+- Every metrics scope is hosted by a specific Google Cloud project, known as the Scoping Project.
+- The metrics scope can include the scoping project itself plus up to 375 additional Google Cloud projects. These are called Monitored Projects.
+    - By adding projects to a metrics scope, you can view metrics from different environments (like Production, Staging, and Dev) on a single chart without switching project contexts
+
+a role assigned to one person on one project applies equally to all projects monitored by that metrics scope.
+
+In order to give people different roles per project and to control visibility to data, consider placing the monitoring of those projects in separate metrics scopes.
+
+The Ops Agent collects metrics inside the VM, not at the hypervisor level.
+
+The Ops Agent supports most major operating systems, such as CentOS, Ubuntu, and Windows.
+
+When you want to maintain a metric at a target value, specify a utilization target.
+The autoscaler creates VMs when the metric value is above the target and deletes VMs when the metric value is below the target.
+**Logging**
+store, search, analyze, monitor, and alert on log data and events from Google Cloud and AWS.
+
+Logging includes storage for logs, a user interface called Logs Explorer, and an API to manage logs programmatically.
+
+Logs are only retained for 30 days, but you can export your logs to Cloud Storage buckets, BigQuery datasets, and Pub/Sub topics.
+BigQuery for analysis
+Pub/Sub for real-time processing and alerting
+
+Looker Studio transforms your raw data into the metrics and dimensions that you can use to create easy-to-understand reports and dashboards.
+
+**Partner Integration**
+This helps expand the IT ops, security, and compliance capabilities available to Google Cloud customers.
+
+Site Reliability Engineering:
+Monitoring!!!
+
+**Error Reporting**
+
+**Tracing**
+Cloud Trace is a distributed tracing system that collects latency data from your applications and displays it in the Google Cloud console.
+
+track how requests propagate through your application and receive detailed, near real-time performance insights.
+
+**Profiling**
+Cloud Profiler continuously analyzes the performance of CPU or memory-intensive functions executed across an application.
+Profiler uses statistical techniques and extremely low-impact instrumentation that runs across all production application instances to provide a complete picture of an application’s performance without slowing it down.
+
 ## Multi-zone
 - Improve fault tolerance 即便是一个region中的multi-zone，防止单个机房出问题，如火灾等
 - Multi-region 成本更高，防止的是地震，战争等
@@ -89,7 +204,7 @@ Can be organized into folders
 - Each project is a seperate entity under the organization node
 - Each resource belongs to exactly one project
 Identity attributes
-- Project ID, name, number
+- Project ID (95% Identity, global unique), name, number (rarely used, global unique)
 Google Cloud’s Resource Manager tool: the API manages projects
 -  Even recover projects that were previously deleted,and can be accessed through the RPC API and the REST API
 3. folders: Your department
@@ -501,12 +616,59 @@ Sync a VM directory with a bucket
 ## Cloud SQL
 No global Scalability
 
+fully managed service of either MySQL, PostgreSQL, or Microsoft SQL Server databases
+
+patches and updates are automatically applied
+
+High Availability configuration:
+  - a primary instance and a standby instance 
+  - synchronous replication to each zone's persistent disk, all writes made to the primary instance are replicated to disks in both zones before a transaction is reported as committed.
+  - failover: In the event of an instance or zone failure, the persistent disk is attached to the standby instance, and it becomes the new primary instance.
+  - automated and on-demand backups
+  - 
+Disadvantage: 
+  - scale up, which does require a machine restart or scale out using read replicas. 
+  - horizontal scalability using spanner 
+Connection:
+  - Private IP connection: within the same Google Cloud project
+  - Outside Google Cloud project or publicly connect to it:
+    - Cloud SQL Auth Proxy, which handles authentication, encryption, and key rotation for you
+    - SSL connection
+    - authorizing a specific IP address to connect to your SQL server over its external IP address
+
 ## Spanner
+horizontal scalability
+
+全球级、强一致性的分布式关系型数据库
+Like Relational DB
+- Has schema, SQL, strong consistency
+Like Non-Relational DB
+- high availability, horizontal scalability, and configurable replication.
+
+A Spanner instance replicates data in N cloud zones, which can be within one region or across several regions.
+The replication of data will be synchronized across zones using Google's global fiber network.
 
 ## Firestore
-Non-relational
+**Non-relational**
+highly-scalable, NoSQL database
+fully managed, **serverless**, cloud-native, NoSQL, **document database**
 
-Document database
+
+simplifies storing, syncing and querying data for your mobile, web, and IoT apps at global scale.
+
+ACID transactions
+
+Firestore even allows you to run sophisticated queries against your NoSQL data without any degradation in performance.
+
+Firestore in Datastore mode for new server projects, and Native mode for new mobile and web apps.
+
+- **No-SQL Non-relational**: Schema might change
+- **Serverless**: Adaptable database, scale to zero
+- low maintenance overhead
+- transactional consistency
+If not transactional consistency, could consider Bigtable
+
+**Document database**
 
 Work with compute engine fleets, so they could have a shared file system.
 
@@ -519,36 +681,81 @@ Work with compute engine fleets, so they could have a shared file system.
 
 
 ## AlloyDB
-Relational
+**Relational**
+For PostgreSQL, fully managed
+- automates administrative tasks, such as backups, replication, patching and capacity management
+- fast transactional processing
+- enterprise workloads: high transaction throughput, large data sizes, or multiple read replicas.
 Need hybrid transactional and analytical processing (HTAP)
 
 ## Bigtable
 Analytics
 
-NoSQL wide-column database
+fully managed NoSQL database with petabyte-scale and very low latency
+
+Perational and analytical applications, including IoT, user analytics, and financial data analysis, machine learning applications
+
+Support open source industry standard HBase API
+
+In Bigtable, data is indexed by a Row Key, a Column Family, a Column Qualifier, and a Timestamp.
+
+1. Row key: Like the unique id in SQL
+    Example: USER#12345
+
+2. Column family: Like a table in SQL, and each row can have many tables, or families. Related columns together and are defined at the schema level
+    Example: Family A: profile
+            Family B: interactions
+            
+3. Column Qualifiers: Like a field in a SQL table, or dynamic and can be anything
+    Under profile: display_name, country
+    Under interactions: last_login, total_posts
+
+4. Timestamps & Versioning
+
+
+Bigtable is sparse, if "Bob" doesn't have a total_posts qualifier, it takes up zero space. There are no "NULL" values like in a SQL database.
+
+**Tablets**
+Bigtable doesn't store a whole table as one giant file. It chops your table into chunks of rows called Tablets    
+
+**Nodes and Load Balancing**
+It learns to adjust to specific access patterns based on workload.
+Node: is like a VM or Compute instance that serves many tablets.
+
+When a node is frequently accesssing a certain subset of data --- a tablet,
+it will split the tablet into smaller tablets and move some of it to another node.
+And update the index to point to the new location.
+In this way, other nodes can distribute that workload.
+
+so for every single node that you do add, you're going to see a linear scale of throughput performance, up to hundreds of nodes.
+Each node you add will not be staled, it will be active and serving traffic, and you can see a linear increase in performance as you add more nodes.
+
+
+
+**NoSQL** wide-column database
 
 low latency, large numbers of reads and writes, and maintaining performance at scale.
 
-Bigtable is also suited as a ‘fast lookup’ non-relational database
+Bigtable is also suited as a ‘fast lookup’ **non-relational** database
+
+Row-level consistency
 
 ## BigQuery
 Analytics
 
-as a data warehouse, is the default storage for tabular data, and is optimized for large-scale, ad-hoc SQL-based analysis and reporting.
+as a data warehouse, is the default storage for **tabular / relational** data, and is optimized for large-scale, ad-hoc SQL-based analysis and reporting.
 
 it has a built-in cache, BigQuery works really well in cases where the data does not often change.
 
 ## Memorystore
-Non-relational
+**Non-relational**
 
-Google Cloud's fully managed Redis service, cache storage
+Google Cloud's fully managed Redis service, **cache storage**
 
+- have large spikes in traffic
+- gaming environments and real-time analytics
 
-
-
-
-
-
+- are replicated across two zones
 
 
 
@@ -573,5 +780,9 @@ Google Cloud's fully managed Redis service, cache storage
 
 
 
-### Spanner
-全球级、强一致性的分布式关系型数据库
+
+
+
+
+
+
