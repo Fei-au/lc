@@ -349,7 +349,13 @@ Tow steps
 
 ### Cloud Identity
 
+
+
+
+
 ## Virtual Private Cloud Networking
+
+![image-20260307135308026](./gcp_note.assets/image-20260307135308026.png)
 
 1. Definition & Value
    Concept: A private, isolated network hosted within Google’s public cloud.
@@ -359,25 +365,25 @@ Tow steps
 2. Core Components
    Connectivity: Connects resources to each other and the internet.
 
-Control Tools: * Firewall Rules: Restrict access to instances.
+​	Control Tools: * Firewall Rules: Restrict access to 	instances.
 
-Static Routes: Forward traffic to specific destinations.
+​	Static Routes: Forward traffic to specific destinations.
 
-Segmentation: Organizes the network into subnets.
+​	Segmentation: Organizes the network into subnets.
 
 3. Global Architecture (High Probability Exam Topic) ⭐
    VPC Scope: Global. A single VPC can span multiple regions worldwide.
 
-Subnet Scope: Regional. Subnets are defined within a region but can span multiple Zones.
+​	Subnet Scope: Regional. Subnets are defined within a region but can span multiple Zones.
 
-Key Advantage: Resources (VMs) can be in different Zones but belong to the same Subnet.
+​	Key Advantage: Resources (VMs) can be in different Zones but belong to the same Subnet.
 
 4. Flexibility & Scaling
    IP Expansion: You can increase subnet size by expanding the IP range.
 
-Zero Downtime: Expanding a subnet does not affect existing, configured VMs.
+​	Zero Downtime: Expanding a subnet does not affect existing, configured VMs.
 
-1. 
+
 
 Compatibilities:
 
@@ -385,7 +391,57 @@ Compatibilities:
 - Firewall, distributed firewall
 - VPC Peering, two VPCs can exchange traffic; IAM control who and what in one project can interact with a VPC in another
 
+### Network Layers 
 
+#### 7 Layers OSI (Open Systems Interconnect) Model
+
+The model is typically viewed from the bottom (hardware) to the top (software).
+
+1. Physical Layer
+
+This is the actual hardware. It deals with the electrical signals, fiber optics, or radio waves (Wi-Fi) used to transmit raw bits (0s and 1s).
+
+- **Examples:** Ethernet cables, Hubs, Repeaters.
+
+2. Data Link Layer
+
+This layer handles node-to-node data transfer. It packages bits into **frames** and handles error correction from the physical layer. It uses **MAC addresses** to ensure data gets to the right hardware on a local network.
+
+- **Examples:** Switches, Bridges.
+
+3. Network Layer
+
+The Network Layer is responsible for **routing**. It decides the best physical path for the data to take. It uses **IP addresses** to transfer data packets between different networks.
+
+- **Examples:** Routers, IP (IPv4/IPv6), ICMP.
+
+4. Transport Layer
+
+This layer ensures that data is delivered reliably and in the correct order. It breaks large data into **segments** and handles flow control (so a fast sender doesn't overwhelm a slow receiver).
+
+- **Examples:** TCP (Transmission Control Protocol), UDP (User Datagram Protocol).
+
+5. Session Layer
+
+This layer manages the "conversation" between computers. It opens, maintains, and terminates the connection sessions between local and remote applications.
+
+6. Presentation Layer
+
+Often called the "syntax layer," it translates data between the application and the network. It handles encryption, decryption, and data compression.
+
+- **Examples:** SSL/TLS, JPEG, GIF.
+
+7. Application Layer
+
+This is the only layer the user directly interacts with. It provides network services to end-user applications.
+
+- **Examples:** HTTP/HTTPS (Web browsing), SMTP (Email), FTP (File transfer).
+
+#### TCP/IP Model
+
+The **TCP/IP model** is what the internet actually runs on
+
+![OSI vs TCP/IP model comparison](https://encrypted-tbn1.gstatic.com/licensed-image?q=tbn:ANd9GcQUyuLV9UuO6t_KV9dNfjmrpqNQBAQxHi_MSlgDKadrQnqPmC-SzmaAy8tasN79UJhFdzt2zYmWA7XbM2_zyHjDFf_g8x00AFsIpgxKChJuzrzlJqg)
 
 ### Connecting networks to Google VPC
 
@@ -406,46 +462,191 @@ Peering, putting a router in the same public data center as a Google point of pr
 4. Transitive Peering is NOT allowed
 5. Administration: Each side of the peering must independently agree to the connection (one side "requests," the other "accepts").
 
-
 Each GC project has a default network
 
+### Cloud VPN
 
-### Service Level Agreement
+Layer 3, use IP
+
+1.5 to 3 Gbps per tunnel
+
+**Service Level Agreement**
 
 A Service Level Agreement (SLA) is a documented, formal contract between a service provider and a customer that defines specific, measurable performance metrics (e.g., 99.9% uptime, 4-hour response time).
 
-Network SLA
+**Gateway**
 
-### Dedicated Interconnect
+- Handle Encryption and Decryption
+- Ensures only authorized traffic can enter.
+- For example, for a Cloud side Gateway, when data from on premises arrive, it decrypt it and then transit it to VPC. And when packet leaves Google Cloud, the gateway encrypt it then send out so nobody on the Internet can read it except the on premise gateway which can decrypt it.
+
+Detailed Example:
+
+1. A server sent an envelop with content password, from a private subnet (10.0.1.5) to a private subnet on-premises (192.168.10.20). Private IPs cannot travel on Internet, routers will discard it if they saw one.
+2. Cloud VPN Gateway recognize it's a VPN traffic
+3. Encrypt the entire original envelope (Source IP, destination IP and message)
+4. Put it inside a NEW envelop with Cloud Gateway IP as source IP, on-premises Gateway IP as destination IP. payload encrypted.
+
+In comparison with HTTPS, the browser or server encrypt the data, even routers can see the content, but it is not informative.
+
+**Router**
+
+- Direct traffic, tells traffic where to go next
+- Does not encrypt data at this level
+- Router just do Routing and NAT (Network Address Translation)
+  -  Router read the envelop source IP and destination IP, it checks it's routing table and routing the envelop.
+  -  NAT: relabeling station so your private IP becomes as public IP
+- Like a map. Static (Manual Map): does not change
+- Dynamic/BGP (Live GPS): pass new changes
+
+#### Cloud Router in VPN
+
+The Map
+
+Example:
+
+1. Cloud Router and on-premises router exchange each others' private subnet information.
+2. on-prem router: know how to get private subnet 192.168.10.0/24, so send data here through tunnel
+3. cloud router: Got it, and I know my private subnet `10.0.1.0/24` (the VPC subnet), send your data here.
+4. Then if a VM server in VPC send data to 192.168.10.20, it looped up Cloud Router, the map, know the destination is VPN gateway, and send it to VPN gateway.
+5. After processed at the gateway, the package sends to destination via internet.
+
+**Dynamic VS Static**
+
+Dynamic routers exchange their subnet information automatically cause they know it, and they update to date the information.
+
+Static routers, the cloud admin has to write on-prem private subnet into it's routing table, and vise versa. If there is any change like adding a new subnet, we have to inform another side admin and let them manually update the table.  
+
+#### Classic VPN
+
+- 99.9% SLA
+- Has only a single external IP address (single interface)
+- Routing: Support Static Routing  (both policy-based and route-based) and Dynamic Routing
+
+
+
+Classic VPN connects an on-premises network to a Google Cloud VPC network through an IPsec VPN tunnel.
+
+encrypted by one VPN gateway, then decrypted by the other VPN gateway
+
+in order to connect to your on-premises network and its resources, you need to configure your Cloud VPN gateway, on-premises VPN gateway, and two VPN tunnels.
+
+maximum transmission unit, or MTU, for your on-premises VPN gateway cannot be greater than 1460 bytes.
+
+#### HA VPN
+
+ High Availability VPN
+
+- SLA (Service Level Agreement) 99.99%
+- Architecture: A HA VPN gateway automatically provides two external IP addresses (two interfaces). So on premises gateway must configure a tunnel on each of these interfaces
+- Routing: Exclusively use Dynamic Routing. Must use a Cloud Router to manage Border Gateway Protocol BGP sessions.
+
+through an IPsec VPN connection in a single region
+
+### Interconnect
+
+Most of of them are building connection at Layer 2, and on the layer 2 basis, the layer 3, google cloud enforce Interconnect use BGP 
+
+Direct access to RFC1918 IPs in your **VPC**, private IP connect to VPC
+
+#### Dedicated Interconnect
+
+Layer 2, use VLAN Virtual local area network
+
+10 Gbps or 100 Gbps per link
+
+Provides physical connection between on-premises network and Google's network.
 
 For solutions where Google has direct control over the physical hardware and the connection termination point.
 
-Peering is to send traffic between your business and Google
+- 99.9% or 99.99% SLA
 
-Network Tier is to send traffic between Google and end user
+Need a colocation facility between on-premises and VPC
 
-### Carrier Peering
+![image-20260307131343451](./gcp_note.assets/image-20260307131343451.png)
 
-Your business === A service Provider === Google
-The provider do the handshake with Google
-Applicable when your data center location does not have a Google edge location(Points of Presence)
-Routes traffic over the public Internet; Google cannot gurantee internet hop performance.
+Peering is to send traffic between your business/the server and Google
 
-### Direct Peering
+Network Tier is to send traffic between Google and end user/the customer
 
-Your business === Google
+#### Partner Interconnect
+
+Layer 2 or Layer 3
+
+50 Mbps to 50 Gbps per connection
+
+On-premises ---- Google Partner Network Provider ---- VPC
+
+- 99.9% or 99.99% SLA
+
+#### Cross-Cloud Interconnect
+
+Layer 2
+
+10 Gbps or 100 Gbps
+
+Another cloud provider act like Network Provider
+
+Eg: AWS VPN ---- Google Cloud VPC
+
+### Peering
+
+Access to Google **public IPs**, without SLA
+
+#### Direct Peering
+
+Layer 3, use IP
+
+BGP routes
+
+Your business ----- Google edge location(Points of Presence) ---- Google Public Services (Cloud APIs, Google Workspace, YouTube)
+
 A fiber or logic connection to Google directly
 You and Google handshake
 
-Relies on a thrid-party provider's network; your SLA is with the carrier not Google
+Relies on a third-party provider's network; your SLA is with the carrier not Google
+
+#### Carrier Peering
+
+Layer 3, use IP
+
+Your business ----- Service Provider ----- Google Edge (PoP) ---- Google Public Service
+
+The provider do the handshake with Google
+Applicable when your data center location does not have a Google edge location(Points of Presence)
+
+Routes traffic over the public Internet; Google cannot guarantee internet hop performance.
+
+### Shared VPC
+
+Allows **an** organization to connect resources from multiple projects to a common Virtual Private Cloud (VPC) network
+
+User internal IP addresses
+
+Shared VPC only works within the **same organization**.
+
+Shared VPC only works **across projects**.
+
+Designate a project as a host project and attach one or more other service projects to it
+
+- A standalone project is not a host project neither a service project, it does not participate this group
+- A standalone VPC is not from a host project, but can from service project or standalone project. When it from service project, the project has two types of VPCs, one is standalone VPC, another is shared VPC
+
+### VPC Peering
+
+Allows private RFC 1918 connectivity across two VPC networks, regardless of whether they belong to the same project or the same organization.
+
+PC Network Peering does not incur the network latency, security, and cost drawbacks that are present when using external IP addresses or VPNs.
+
+Private communication between VPC networks **in different organizations**, you have to use VPC Network Peering.
+
+Private communication between VPC networks **in the same project**, you have to use VPC Network Peering.
 
 ### Standard Network Tier
 
 Routes traffic over the public Internet; Google not gurantee hop performance.
 
-### Dedicated Interconnect:
 
-Provides physical connection between on-premises network and Google's network.
 
 ### Networking subnets
 
@@ -479,6 +680,83 @@ Normally IP is public, but there are three IP reserved for subnets
 3. 192.168.0.0/16 or 192.168.0.0 - 192.168.255.255 for class C subnet, usually used by personal home
 4. 
 
+
+
+## Cloud Load Balancing
+
+Senario: 40 VMs handle requests
+Distribute user traffic across multiple instances of an application
+
+- Fully-distributed, software-defined
+- In front of HTTP, HTTPS, TCP, SSH, UDP
+- cross-region load balancing
+
+**Reverse proxy**
+
+The load balancing could act as a reverse proxy, who stands in front of backend servers. So users only see the load balancers, do handshake with load balancers. And the load balancer **uses url** map the request to backends dependently. The backend services sit behind the load balancer, it's safe and cannot be touch directly by the Internet.
+
+**Forwarding proxy**
+
+A **Forward Proxy** sits in front of the **client** (user). Think of a corporate office where all employees must go through a proxy to reach the internet. It hides the *client's* identity from the web.
+
+
+
+### Application Load Balancer
+
+- Work on application layer (7), for HTTP and HTTPS
+- reverse proxies
+- internet facing / external and internal application
+
+External ALB using Google Front Ends or managed proxies
+
+- Global, GFEs
+- Regional, GFEs
+- Classic
+
+GFEs offer multi-region load balancing in the Premium tier, directing traffic to the closest healthy backend that has capacity and terminating HTTP(S) traffic as close as possible to your users.
+
+It specifies:
+
+-  External IP address
+- Port
+- Target HTTP(S) proxy
+
+Normally, use round-robin algorithm to distribute requests among available instances
+
+Session affinity attempts to send all requests from the same client to the same virtual machine instance.
+
+**Target HTTPS proxy**
+
+In comparison with target HTTP proxy
+
+- At least one signed SSL certificate
+- Client session terminates at the load balancer
+- QUIC is a transport layer protocol that allows faster client connection initiation, eliminates head-of-line blocking in multiplexed streams, and supports connection migration when a client's IP address changes.
+
+**Network endpoint groups NEG**
+
+Before load balancer only talk to VMs
+
+It allows the Load Balancer to talk to things that aren't just standard VMs, like containers, serverless functions, or even servers in your own office.
+
+- Zonal NETs (Containers & VMs)
+  - it points to an **IP:Port** combination
+- Serverless NEGs (Cloud Run / Functions)
+- Internet NEGs (Outside Google Cloud)
+  - These point to a URL or IP address that is **not** on Google Cloud
+- Hybrid Connectivity NEGs (On-Premise)
+  - These point to your own physical data center via VPN or Interconnect.
+
+### Network Load Balancer
+
+- Work on network layer (layer 4)
+- TCP, UDP, other IP protocols
+  1. Proxy NLB
+     1. reverse proxies, terminating client connections and establishing new ones to backend services
+  2. Passthrough NLB
+     1. do not modify or terminate connections
+     2. forward traffic and preserving original source IP address
+     3. wider range of IP protocols  
 
 ## Compute Engine
 
@@ -517,39 +795,41 @@ You can use it with a cheap price, if someone else use it, the VM will let them 
   eg: VM on but application inside was crashed
   ans: Application-level Health Check
 
-Managed Instance Groups (MIGs): Always the answer for scaling and auto-healing.
+### Managed Instance Groups (MIGs)
 
-Instance Templates: You cannot edit a template; you must create a new version and update the MIG.
+Always the answer for scaling and auto-healing.
 
-Metadata & Startup Scripts: Used to configure VMs automatically when they boot up.
+- Instance Templates: You cannot edit a template; you must create a new version and update the MIG.
+- Update all instances by specifying a new template in a rolling update
+- Metadata & Startup Scripts: Used to configure VMs automatically when they boot up.
+
+Work with **load balancing** to distribute network traffic to all instances in the group
+
+**Regional managed instance groups** are generally recommended over zonal managed instance groups
+
+When create the instance group, type of group: **stateless serving (website) or batch workloads (database)**
 
 IP Addresses: Use Alias IP ranges if you are running containers (like GKE) on your VMs.
 
-## Cloud Load Balancing
+AutoScaling:
 
-Senario: 40 VMs handle requests
-Distribute user traffic across multiple instances of an application
+Based on CPU utilization, load balancing capacity, or monitoring metrics, or by a queue-based workload like Pub/Sub or schedule such as start-time, duration and recurrence.
 
-- Fully-distributed, software-defined
-- In front of HTTP, HTTPS, TCP, SSH, UDP
-- cross-region load balancing
+Health check:
 
-Application Load Balancer
+The health criteria define how often to check whether an instance is healthy (that’s the check interval); 
 
-- works on application layer, for HTTP and HTTPS
-- reverse proxies
-- internet facing and internal application
+how long to wait for a response (that’s the timeout); 
 
-Network Load Balancer
+how many successful attempts are decisive (that’s the healthy threshold); 
 
-- works on transport layer
-- TCP, UDP, other IP protocols
-  1. Proxy NLB
-     1. reverse proxies, terminating client connections and establishing new ones to backend services
-  2. Passthrough NLB
-     1. do not modify or terminate connections
-     2. forward traffic and preserving original source IP address
-     3. wider range of IP protocols  
+and how many failed attempts are decisive (that’s the unhealthy threshold).
+
+Configuring stateful IP addresses in a managed instance group ensures that applications continue to function seamlessly during autohealing, update, and recreation events.  ----> If you have other internal services (like a database or a legacy app) that have that specific IP hardcoded, they don't need to be updated. They can find the "new" VM at the "old" address immediately.
+
+But for web service, we do not need to keep the stateful IP, cause load balancer is pointing to the instance group, and the LB update the states of each instances and IPs, so the stateful IP is not necessary.
+
+
 
 ## Cloud DNS and Cloud CDN
 
