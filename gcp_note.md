@@ -691,6 +691,66 @@ Distribute user traffic across multiple instances of an application
 - In front of HTTP, HTTPS, TCP, SSH, UDP
 - cross-region load balancing
 
+A load balancer usually contains **three parts**:
+
+1. Forwarding rule
+
+   Role: The **Entrance gate**. 
+
+   Logic: Check IP, protocol, port
+
+   Placement: Reside in a standard subnet
+
+   Scope: In **Cross-region** mode, the forwarding rule is global and itself exposes a regional IP to let others connect it. If a forwarding rule points to a global target proxy, then it is called a **Global Forwarding Rule**.  
+
+   Function: It captures incoming traffic and directs it to the Target Proxy.
+
+2. Target Proxy & URL Map
+
+   Role: The **"Dispatcher."**
+
+   Logic:
+
+   - **Target Proxy:** Terminates the connection (handles SSL/TLS decryption).
+
+   - **URL Map:** The "Rulebook" that checks the request path (e.g., `/api` vs `/static`) or the hostname.
+
+   Function: It decides *which* backend service should handle the specific request
+
+3. Backend Service
+
+   Role: The **"Manager."**
+
+   **Logic:** It tracks the health of your **Backend Groups** (Instance Groups or NEGs).
+
+   **Scope:** In **Cross-Region** mode, this component is **Global**, allowing it to see backends across different regions.
+
+   **Function:** It distributes the traffic to healthy individual instances and manages features like session affinity and connection draining.
+
+**Traditional 3 tier web service**
+
+Backend to DB does not need LB
+
+服务器端渲染 (SSR)
+
+1. A user clicks a button on the web page, sends request to web frontend.
+2. It firstly access the external ALB, which receive the request, target proxy to a health Web frontend.
+3. Web frontend in the container sends an API call
+4. Web frontend and Backend are in a same VPC, so it calls https://internal-lb-ip/api
+5. The internal LB takes effect here.
+
+![www.skills.google_course_templates_178_video_620324](./gcp_note.assets/www.skills.google_course_templates_178_video_620324.png)
+
+**客户端渲染 (SPA）**
+
+We do not need the internal LB, cause when a user sends a request, it access the external ALB which proxy to backend service based on URL map. 
+
+**BFF 模式 (Backend For Frontend)**
+
+1. User access https://example.com/api, which goes to external ALB
+2. External ALB send request to Web BFF, a light way middle service layer, like Node service
+3. Web BFF as a proxy, in the VPC, send request to internal LB so to access the real backend service.
+
 **Reverse proxy**
 
 The load balancing could act as a reverse proxy, who stands in front of backend servers. So users only see the load balancers, do handshake with load balancers. And the load balancer **uses url** map the request to backends dependently. The backend services sit behind the load balancer, it's safe and cannot be touch directly by the Internet.
@@ -707,7 +767,7 @@ A **Forward Proxy** sits in front of the **client** (user). Think of a corporate
 - reverse proxies
 - internet facing / external and internal application
 
-External ALB using Google Front Ends or managed proxies
+**External ALB** using Google Front Ends or managed proxies
 
 - Global, GFEs
 - Regional, GFEs
@@ -724,6 +784,17 @@ It specifies:
 Normally, use round-robin algorithm to distribute requests among available instances
 
 Session affinity attempts to send all requests from the same client to the same virtual machine instance.
+
+**Internal ALB** is **Envoy proxy-based regional** Layer 7 load balancers
+
+The Internal ALB itself is a **regional resource**, cause itself it located in a subnet, it must use a private IP to indicates itselives entry point. The VPC subnet is a regional resource so does the ALB.
+The internal ALB **could be regional**, which means the ALB is deployed in one region, and all the backends should be deployed at the same region.
+
+The internal ALB could be **cross-regional**, which means the ALBs could deployed in many regions, and backend services can be deployed **globally**. When a single region like region A, its service down, the ALB in region A know that and forwards traffic to region B service, where it accomplish a global manner. (fail over to another region)
+
+and the backend services it serves should also be **regional or cross-regional**. The requests it receives could be **globally**.
+
+
 
 **Target HTTPS proxy**
 
@@ -750,13 +821,59 @@ It allows the Load Balancer to talk to things that aren't just standard VMs, lik
 ### Network Load Balancer
 
 - Work on network layer (layer 4)
+
 - TCP, UDP, other IP protocols
-  1. Proxy NLB
-     1. reverse proxies, terminating client connections and establishing new ones to backend services
-  2. Passthrough NLB
-     1. do not modify or terminate connections
-     2. forward traffic and preserving original source IP address
-     3. wider range of IP protocols  
+
+  **Proxy NLB**
+
+  1. Reverse proxies, terminating client connections and establishing new ones to backend services
+
+  2. TCP traffic only
+
+  3. Support multiple regions
+
+  4. Can be Internal and external NLB
+
+     **For external proxy NLB**, usually we can encrypt the TCP traffic with SSL, which configured in NLB. So the traffic flow is:
+
+     1. End users use Public SSL cert to encrypt TCP traffic, send to NLB
+     2. NLB decrypt it, and it can encrypt it again use Backend SSL Cert, send the TCP packet to backend service.
+     3. Backend service is supposed to have the ability to decrypt the package 
+
+     **For internal proxy NLB**, powered by Envoy proxy software
+
+     - Accessible to clients in the same VPC or clients connected to your VPC
+     - Terminate the connect at NLB, and open a new to the backend
+     - Regional internal: all clients and backends are from the same region.
+     - Cross-region internal deployment: NLB deployed regionally, backends deploy globally.
+
+  **Passthrough NLB**
+
+  1. do not modify or terminate connections
+
+  2. regional
+
+  3. forward traffic and preserving original source IP address
+
+  4. Responses from the backend VMs go directly to the clients, not back through the load balancer.
+
+  5. wider range of IP protocols: such as TCP, UDP, ESP, GRE, ICMP, and ICMPv6
+
+     **Internal and external**
+
+     **External**, two types of architecture:
+
+     1. use a regional backend service to set up the backend
+     2. use a target pool (same region) to set up the backend
+        1. A packet is sent to the NLB
+        2. Based on the forwarding rule, the NLB checks packet original IP, protocol, port, decide which target pool it transit the packet to.
+        3. The target pool uses hash based on source IP, port, destination IP, port, protocol to determine which VM it will send the packet to. This ensure same original traffic can be processed by same VM.
+        4. each target pool can have only one health check
+
+     **Internal**
+
+     - Regional, private load balancer
+     - software-defined load balancing that directly delivers the traffic from the client instance to a backend instance.
 
 ## Compute Engine
 
@@ -829,9 +946,31 @@ Configuring stateful IP addresses in a managed instance group ensures that appli
 
 But for web service, we do not need to keep the stateful IP, cause load balancer is pointing to the instance group, and the LB update the states of each instances and IPs, so the stateful IP is not necessary.
 
+## Cloud CDN
 
+Cloud CDN, or Content Delivery Network
 
-## Cloud DNS and Cloud CDN
+Use Google's globally distributed edge points of presence to cache HTTP(S) load-balanced content close to your users.
+
+Providing faster delivery of content to your users while reducing serving costs.
+
+Cache modes:
+
+USE_ORIGIN_HEADERS 
+
+In this mode, the CDN does exactly what your backend tells it to do. It looks for standard HTTP headers like `Cache-Control` or `Expires`.
+
+CACHE_ALL_STATIC
+
+This is the **default and recommended** mode for most web projects. It tries to be helpful by identifying "static-looking" files.
+
+The CDN looks at the file extension. If it’s a `.jpg`, `.css`, `.js`, or `.pdf`, the CDN will automatically cache it even if the backend didn't explicitly say to.
+
+FORCE_CACHE_ALL
+
+This mode ignores the back end's instructions entirely. It is a "brute force" approach to caching.
+
+## Cloud DNS
 
 8.8.8.8 Domain Name Service
 Translate internet hostname to addresses
@@ -842,7 +981,7 @@ Content Delivery Network:
 
 Edge caching refers to use caching servers to store content closer to end users
 
-1. 
+
 
 ## Cloud Storage
 
