@@ -946,6 +946,44 @@ Configuring stateful IP addresses in a managed instance group ensures that appli
 
 But for web service, we do not need to keep the stateful IP, cause load balancer is pointing to the instance group, and the LB update the states of each instances and IPs, so the stateful IP is not necessary.
 
+## Infrastructure as code (IaC)
+
+**Terraform**
+
+Uses a system of highly structured templates and configuration files to document the infrastructure in an easily readable and understandable format.
+
+- Create identity infrastructures for dev, test, and prod
+- Can be part of a CI/CD pipleline
+- Templates are the building blocks for disaster recovery procedures
+
+**Cloud Marketplace**
+
+
+
+## Managed Service
+
+Most of them are serverless, except Dataproc, which you create the cluster and worker instances.
+
+BigQuery
+
+DataFlow
+
+Dataflow processes stream and batch data
+
+Automatic
+
+DataPrep
+
+Dataprep is an intelligent data service for visually exploring, cleaning, and preparing structured and unstructured data for analysis, reporting, and machine learning.
+
+Dataproc
+
+Dataproc is a fast, easy-to-use, fully managed cloud service for running Apache Spark and Apache Hadoop clusters in a simpler way.
+
+Dataproc and Dataflow can both be used for data processing, and there’s overlap in their batch and streaming capabilities.
+
+Manual
+
 ## Cloud CDN
 
 Cloud CDN, or Content Delivery Network
