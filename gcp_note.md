@@ -351,6 +351,16 @@ Tow steps
 
 
 
+## Multiple network interfaces
+Devices use MNI to connect to multiple networks
+needs a mechanism to interconnect multiple networks to a single virtual appliance.
+Usage:
+- Configure an instance as a network appliance for load balancing.
+- Traffic separation such as separation of data plane traffic from management plane traffic.
+
+- Multiple network interfaces let you create configurations in which an VM instance connects directly to several VPC networks.
+- Each interface has an internal IP and external IP
+    
 
 
 ## Virtual Private Cloud Networking
@@ -875,6 +885,43 @@ It allows the Load Balancer to talk to things that aren't just standard VMs, lik
      - Regional, private load balancer
      - software-defined load balancing that directly delivers the traffic from the client instance to a backend instance.
 
+## Cloud CDN
+
+Cloud CDN, or Content Delivery Network
+
+Use Google's globally distributed edge points of presence to cache HTTP(S) load-balanced content close to your users.
+
+Providing faster delivery of content to your users while reducing serving costs.
+
+Cache modes:
+
+USE_ORIGIN_HEADERS 
+
+In this mode, the CDN does exactly what your backend tells it to do. It looks for standard HTTP headers like `Cache-Control` or `Expires`.
+
+CACHE_ALL_STATIC
+
+This is the **default and recommended** mode for most web projects. It tries to be helpful by identifying "static-looking" files.
+
+The CDN looks at the file extension. If it’s a `.jpg`, `.css`, `.js`, or `.pdf`, the CDN will automatically cache it even if the backend didn't explicitly say to.
+
+FORCE_CACHE_ALL
+
+This mode ignores the back end's instructions entirely. It is a "brute force" approach to caching.
+
+## Cloud DNS
+
+8.8.8.8 Domain Name Service
+Translate internet hostname to addresses
+
+Cloud DNS help to find hostnames and addresses built in Coogle Cloud
+
+Content Delivery Network:
+
+Edge caching refers to use caching servers to store content closer to end users
+
+
+
 ## Compute Engine
 
 As a solution of IaaS
@@ -983,41 +1030,6 @@ Dataproc is a fast, easy-to-use, fully managed cloud service for running Apache 
 Dataproc and Dataflow can both be used for data processing, and there’s overlap in their batch and streaming capabilities.
 
 Manual
-
-## Cloud CDN
-
-Cloud CDN, or Content Delivery Network
-
-Use Google's globally distributed edge points of presence to cache HTTP(S) load-balanced content close to your users.
-
-Providing faster delivery of content to your users while reducing serving costs.
-
-Cache modes:
-
-USE_ORIGIN_HEADERS 
-
-In this mode, the CDN does exactly what your backend tells it to do. It looks for standard HTTP headers like `Cache-Control` or `Expires`.
-
-CACHE_ALL_STATIC
-
-This is the **default and recommended** mode for most web projects. It tries to be helpful by identifying "static-looking" files.
-
-The CDN looks at the file extension. If it’s a `.jpg`, `.css`, `.js`, or `.pdf`, the CDN will automatically cache it even if the backend didn't explicitly say to.
-
-FORCE_CACHE_ALL
-
-This mode ignores the back end's instructions entirely. It is a "brute force" approach to caching.
-
-## Cloud DNS
-
-8.8.8.8 Domain Name Service
-Translate internet hostname to addresses
-
-Cloud DNS help to find hostnames and addresses built in Coogle Cloud
-
-Content Delivery Network:
-
-Edge caching refers to use caching servers to store content closer to end users
 
 
 
