@@ -352,15 +352,58 @@ Tow steps
 
 
 ## Multiple network interfaces
-Devices use MNI to connect to multiple networks
-needs a mechanism to interconnect multiple networks to a single virtual appliance.
+
+What's this?
+
+Devices (VM, virtual appliance) use MNI to connect to multiple networks
+
+Why use this?
+
+Let data flow through different networks (VPCs) securely and under control
+
+Normal scenario:
+
+	1. Two VPCs are connected via VPC Peering
+	1. A VM is attached to one VPC, VPC A
+	1. A request from outside sent to the VM -- under VPC A, which as a proxy sends the data from VPC A to VPC B using receiver's internal IP in VPC B.
+	1. After the VM sent the data, the data is out of control.
+
+Main defects:
+
+1. Two VPCs are not separated (shared hallway), so data flow through smoothly even with **firewall rule** (software rule), all data mixed together, hard to do **data trace**
+2. VM in VPC A as a proxy, when send data by itself, the original IP loss, hard to track problem
+3. If VPC A is attacked by DDOS, which is overwhelmed, the VPC B is also stuck.
+
+Use MNI instead:
+
+1. A VM has two network interfaces, one connects to VPC A, the customer portal, one connects to VPC B the inner control panel.
+2. Internet -> VPC A Router -> NIC 0 -> VM CPU -> NIC 1 -> VPC B Router -> Destination.
+
+Benefit:
+
+1. Isolation. Physical-style (Network-level separation)
+2. Security. Use the VM as a lock
+3. Audit Trails
+
+
+
 Usage:
+
 - Configure an instance as a network appliance for load balancing.
 - Traffic separation such as separation of data plane traffic from management plane traffic.
 
+Feature:
+
 - Multiple network interfaces let you create configurations in which an VM instance connects directly to several VPC networks.
 - Each interface has an internal IP and external IP
-    
+- only configure a network interface when you create an instance
+- You cannot delete a network interface without deleting the instance.
+- Each network interface configured in a single instance must be attached to a different VPC network.
+- internal DNS, domain name system, query is made with primary interface nic0 of the instance
+
+
+
+
 
 
 ## Virtual Private Cloud Networking
