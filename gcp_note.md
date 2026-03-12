@@ -401,9 +401,19 @@ Feature:
 - Each network interface configured in a single instance must be attached to a different VPC network.
 - internal DNS, domain name system, query is made with primary interface nic0 of the instance
 
+## Network Tier
 
+**Standard Tier**
 
+- Traffic mainly flow on the public Internet
+- Low cost
+- Location based cost, even the request is far from resource, cost is low, cause most traffic are on public Internet
 
+**Premium Tier**
+
+- Traffic mainly flow on Google's network
+- High cost
+- Cost based on distance between the resources and the end user
 
 
 ## Virtual Private Cloud Networking
