@@ -699,11 +699,24 @@ Designate a project as a host project and attach one or more other service proje
 
 Allows private RFC 1918 connectivity across two VPC networks, regardless of whether they belong to the same project or the same organization.
 
-PC Network Peering does not incur the network latency, security, and cost drawbacks that are present when using external IP addresses or VPNs.
+Historically we use VPN or external IP address to connect with VPCs, this incurs:
 
-Private communication between VPC networks **in different organizations**, you have to use VPC Network Peering.
+- Network latency, security, and cost drawbacks that are present when using external IP addresses or VPNs.
 
-Private communication between VPC networks **in the same project**, you have to use VPC Network Peering.
+VPC Features:
+
+- Private communication between VPC networks **in different organizations**, you have to use VPC Network Peering.
+
+- Private communication between VPC networks **in the same project**, you have to use VPC Network Peering.
+- Each VPC must config firewall rule to allow another one access to it
+- Each VPC must peer another one so to activate it
+- Decentralized, distributed. Each VPC network is managed by its own administration, like routes, firewalls, VPNs, and other traffic management tools
+- No subnet IP ranges overlap across peered VPC networks, eg: two default VPC with default subnets can not peer
+- Transitive peering is not supported
+- After peering is established, the two networks automatically exchange **subnet routes**.
+- There is also **Custom routes**, includes followings. Only VPC A manually config export routes, and VPC B manually config import routes, it will be valid 
+  - Static routes (manually configured)
+  - Dynamic routes (BGP router learned from somewhere else
 
 ### Standard Network Tier
 
