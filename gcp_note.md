@@ -414,6 +414,7 @@ Feature:
 - Traffic mainly flow on Google's network
 - High cost
 - Cost based on distance between the resources and the end user
+  
 
 
 ## Virtual Private Cloud Networking
@@ -673,7 +674,7 @@ Relies on a third-party provider's network; your SLA is with the carrier not Goo
 
 Layer 3, use IP
 
-Your business ----- Service Provider ----- Google Edge (PoP) ---- Google Public Service
+Your business ----- Service Provider ----- Google Edge (PoP) ---- Google Public Service (Cloud APIs, Google Workspace, YouTube)
 
 The provider do the handshake with Google
 Applicable when your data center location does not have a Google edge location(Points of Presence)
@@ -684,11 +685,11 @@ Routes traffic over the public Internet; Google cannot guarantee internet hop pe
 
 Allows **an** organization to connect resources from multiple projects to a common Virtual Private Cloud (VPC) network
 
-User internal IP addresses
+- User internal IP addresses
 
-Shared VPC only works within the **same organization**.
+- Shared VPC works within the **same organization**.
 
-Shared VPC only works **across projects**.
+- Shared VPC works **across projects**.
 
 Designate a project as a host project and attach one or more other service projects to it
 
@@ -717,6 +718,57 @@ VPC Features:
 - There is also **Custom routes**, includes followings. Only VPC A manually config export routes, and VPC B manually config import routes, it will be valid 
   - Static routes (manually configured)
   - Dynamic routes (BGP router learned from somewhere else
+
+
+
+### Comparison Interconnect  VS Peering VS Shared VPC VS VPC Peering
+
+
+
+Colocation facility:
+For your company private network.
+Imagine a data center owned by Equinix where you rent space to place you servers.
+Google rent space in level 3 and place some servers for interconnect
+You or your network provider rent a room at level 1
+You pay the money to connect a fiber from your service in level 1 to the google server in level 3.
+
+Edge point of presence (PoP):
+For public internet access.
+Google rent space at level 2 or some other place and place some servers for peering.
+You at home or your server at home access to google.com, your traffic through public internet and reach google edge PoP.
+
+Connect between **on-premises** to **private VPC resources (GKE, VMs)**
+Interconnect
+- Where: Connect to private VPC, through colocation facilities
+- How: Use Google's private IPs
+- Performance: up to 99.99% SLA
+- Router: BGP routes
+
+VPN
+
+Connect between **on-premises** to **Cloud Public services (Google APIs, Workspace, Map, Youtube, etc.)**
+Peerings (direct peering, carrier peering, and partner peering)
+- Where: Connect to google edge of presence
+- How: Use Google's Public IPs
+- Performance: No SLA
+- Router: BGP routes
+
+Connect amongst seperate **VPCs** in same project or different organizations
+VPC Peerings
+
+- Where: google private VPC --- google private VPC, through google network
+- How: Use private IPs
+- Performance: globally valid, network latency depends on distance, but cause it's within google's network, low hops and network congestion.
+- Router: software defined, no BGP
+
+Connect across projects into one VPC, only within same organization
+Shared VPC
+- Where: Only one VPC, different projects use one VPC
+- How: Use private IPs to communicate, one project host the VPC and other projects use it
+- Performance: globally valid, network latency depends on distance, but cause it's within google's network, low hops and network congestion.
+- Router: software defined
+
+
 
 ### Standard Network Tier
 
