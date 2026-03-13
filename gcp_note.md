@@ -136,20 +136,22 @@ labeling all your resources and exporting your billing data to BigQuery to analy
 
 ## Resrouce Monitoring
 
-**Google Cloud Observability**
+### Google Cloud Observability
 monitoring logging, error reporting, and fault tracing
     there are free usage allotments
     
-**Cloud Monitoring**
-Charts
-Dashboards
-Alerts
+
+### Cloud Monitoring
+**Charts**
+**Dashboards**
+**Alerts**
     Such as the server down at night
     We recommend alerting on symptoms, and not necessarily causes
+
     - The type of uptime check can be set to HTTP, HTTPS, or TCP.
-    - The resource to be checked can be an App Engine application, a Compute Engine instance, a URL of a host, or an AWS instance or load balancer.
-    
-Metrics
+        - The resource to be checked can be an App Engine application, a Compute Engine instance, a URL of a host, or an AWS instance or load balancer.
+
+**Metrics**
 A metrics scope is the root entity that holds monitoring and configuration information in Cloud Monitoring.
 
 - Every metrics scope is hosted by a specific Google Cloud project, known as the Scoping Project.
@@ -166,7 +168,8 @@ The Ops Agent supports most major operating systems, such as CentOS, Ubuntu, and
 
 When you want to maintain a metric at a target value, specify a utilization target.
 The autoscaler creates VMs when the metric value is above the target and deletes VMs when the metric value is below the target.
-**Logging**
+
+### Logging
 store, search, analyze, monitor, and alert on log data and events from Google Cloud and AWS.
 
 Logging includes storage for logs, a user interface called Logs Explorer, and an API to manage logs programmatically.
@@ -177,22 +180,56 @@ Pub/Sub for real-time processing and alerting
 
 Looker Studio transforms your raw data into the metrics and dimensions that you can use to create easy-to-understand reports and dashboards.
 
-**Partner Integration**
+### Partner Integration
 This helps expand the IT ops, security, and compliance capabilities available to Google Cloud customers.
 
 Site Reliability Engineering:
 Monitoring!!!
 
-**Error Reporting**
+### Error Reporting
 
-**Tracing**
+### Tracing
 Cloud Trace is a distributed tracing system that collects latency data from your applications and displays it in the Google Cloud console.
 
 track how requests propagate through your application and receive detailed, near real-time performance insights.
 
-**Profiling**
+### Profiling
 Cloud Profiler continuously analyzes the performance of CPU or memory-intensive functions executed across an application.
 Profiler uses statistical techniques and extremely low-impact instrumentation that runs across all production application instances to provide a complete picture of an application’s performance without slowing it down.
+
+### Network monitoring
+
+Metrics
+
+Alerting policy
+
+Connectivity tests: Using the network intelligence center connectivity tests, Tal can self diagnose connectivity issues within Google Cloud or Google Cloud to an external
+
+Firewall insights: Firewall insights provides reports that contain information about firewall usage and the impact of various firewall rules on your virtual Private Cloud, VPC network.
+
+Network analyzer: automatically monitors your VPC network configurations and detects misconfigurations and suboptimal configurations.
+
+**VPC Flow Logs**
+
+Records a sample of network flows sent from and received by VM instances
+
+- Enable or disable VPC Flow Logs per VPC subnet.
+- Capture VM-to-VM conversation within the same VPC network, all subnets should enable VPC Flow logs
+
+**Packet Mirroring**
+
+Packet Mirroring clones the traffic of specific instances in your Virtual Private Cloud (VPC) network and forwards it for examination
+
+- The mirroring happens on the virtual machine (VM) instances, not on the network.
+- Consumes additional bandwidth on the hosts
+
+**Cloud NAT Logging**
+
+- Cloud NAT logging only logs dropped packets if they are egress, while dropped ingress packets will not be recorded
+
+**BigQuery**
+
+
 
 ## Multi-zone
 
@@ -557,9 +594,9 @@ In comparison with HTTPS, the browser or server encrypt the data, even routers c
 
 - Direct traffic, tells traffic where to go next
 - Does not encrypt data at this level
-- Router just do Routing and NAT (Network Address Translation)
+- Router just do Routing and NAT (Network Address port Translation)
   -  Router read the envelop source IP and destination IP, it checks it's routing table and routing the envelop.
-  -  NAT: relabeling station so your private IP becomes as public IP
+  -  NAT: relabeling station so your private IP becomes as public IP, mainly for TCP (which includes HTTP, HTTPS, SSH, FTP), UDP, which are all have port, so NAT is associate with them.
 - Like a map. Static (Manual Map): does not change
 - Dynamic/BGP (Live GPS): pass new changes
 
@@ -657,6 +694,9 @@ Eg: AWS VPN ---- Google Cloud VPC
 
 Access to Google **public IPs**, without SLA
 
+- Largest scope is different projects in different organizations
+- Decentralized approach, each VPC network can maintain its own global firewall and routing tables
+
 #### Direct Peering
 
 Layer 3, use IP
@@ -686,10 +726,10 @@ Routes traffic over the public Internet; Google cannot guarantee internet hop pe
 Allows **an** organization to connect resources from multiple projects to a common Virtual Private Cloud (VPC) network
 
 - User internal IP addresses
+- Shared VPC works within the **across projects** in **same organization**.
+- Centrally manage the VPC networks while still segregating workloads that use these networks.
+  - Segregating workloads means: We have a VPC administrator manages the shared VPC network, and the host project. We have service project admin or network user, who can use the shared network and manage their own service project.
 
-- Shared VPC works within the **same organization**.
-
-- Shared VPC works **across projects**.
 
 Designate a project as a host project and attach one or more other service projects to it
 
@@ -739,6 +779,7 @@ You at home or your server at home access to google.com, your traffic through pu
 
 Connect between **on-premises** to **private VPC resources (GKE, VMs)**
 Interconnect
+
 - Where: Connect to private VPC, through colocation facilities
 - How: Use Google's private IPs
 - Performance: up to 99.99% SLA
@@ -748,8 +789,9 @@ VPN
 
 Connect between **on-premises** to **Cloud Public services (Google APIs, Workspace, Map, Youtube, etc.)**
 Peerings (direct peering, carrier peering, and partner peering)
+
 - Where: Connect to google edge of presence
-- How: Use Google's Public IPs
+- How: Use Google's Public IPs for service 
 - Performance: No SLA
 - Router: BGP routes
 
@@ -759,10 +801,11 @@ VPC Peerings
 - Where: google private VPC --- google private VPC, through google network
 - How: Use private IPs
 - Performance: globally valid, network latency depends on distance, but cause it's within google's network, low hops and network congestion.
-- Router: software defined, no BGP
+- Router: Google Cloud’s underlying SDN (Software Defined Network), no BGP
 
 Connect across projects into one VPC, only within same organization
 Shared VPC
+
 - Where: Only one VPC, different projects use one VPC
 - How: Use private IPs to communicate, one project host the VPC and other projects use it
 - Performance: globally valid, network latency depends on distance, but cause it's within google's network, low hops and network congestion.
