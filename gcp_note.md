@@ -571,11 +571,13 @@ Layer 3, use IP
 
 1.5 to 3 Gbps per tunnel
 
-**Service Level Agreement**
+**Concepts**
+
+1 **Service Level Agreement**
 
 A Service Level Agreement (SLA) is a documented, formal contract between a service provider and a customer that defines specific, measurable performance metrics (e.g., 99.9% uptime, 4-hour response time).
 
-**Gateway**
+2 **Gateway**
 
 - Handle Encryption and Decryption
 - Ensures only authorized traffic can enter.
@@ -590,7 +592,7 @@ Detailed Example:
 
 In comparison with HTTPS, the browser or server encrypt the data, even routers can see the content, but it is not informative.
 
-**Router**
+3 **Router**
 
 - Direct traffic, tells traffic where to go next
 - Does not encrypt data at this level
@@ -600,17 +602,42 @@ In comparison with HTTPS, the browser or server encrypt the data, even routers c
 - Like a map. Static (Manual Map): does not change
 - Dynamic/BGP (Live GPS): pass new changes
 
-#### Cloud Router in VPN
+#### Cloud Router and BGP
 
-The Map
+The Map. Cloud router is like a device, and BGP (Border Gateway Protocol) is it's application, only with the application, Cloud Router can do it's job. The Cloud router dynamically exchange data, write to routing table using Border Gateway Protocol.
 
 Example:
 
 1. Cloud Router and on-premises router exchange each others' private subnet information.
 2. on-prem router: know how to get private subnet 192.168.10.0/24, so send data here through tunnel
-3. cloud router: Got it, and I know my private subnet `10.0.1.0/24` (the VPC subnet), send your data here.
-4. Then if a VM server in VPC send data to 192.168.10.20, it looped up Cloud Router, the map, know the destination is VPN gateway, and send it to VPN gateway.
+3. cloud router: Got it, and I know my private subnet `10.0.1.0/24` (the VPC subnet), send your data here. Also write on-perm subnet information into VPC, so VPC added a new on-perm subnet on it's routing table.
+4. Then if a VM server in VPC send data to 192.168.10.20, it sends data to VPC, the VPC found the destination written by cloud router is bound to HA VPN gateway, then send it to VPN gateway.
 5. After processed at the gateway, the package sends to destination via internet.
+
+**BGP multi-exit discriminator or MED**
+
+Rout priority
+
+MED tells your neighbor, which route is the best to came to your home.
+
+The smallest number is better, from 0 to 65535. 0 is the highest priority
+
+Example:
+
+1. There are two tunnels between your HA VPN gateway and on-premises, your BGP MED setting is tunnel 1 = 20, tunnel 2 = 50. Cause tunnel 1 is 10 GBP and tunnel 2 is 1 GBP
+2. When on-premises send packet to VPC, its router finds that tunnel1 has higher priority so sends the packet through tunnel 1.
+
+While in **Google Cloud VPC**, it's a global VPC, so when setting the MED, there is another parameter **Region Cost**
+
+The finally **MED** value in GCP equals to 1. MED set by BGP + 2. Region cost
+
+Near region has low region cost
+
+Example:
+
+1. VPC is located at us-central, tunnel 1 peer device is at euro-central, tunnel 2 peer device is at us-west
+2. us-central to us-west region cost is 200, us-central to euro-central region cost is 300
+3. So even BGP set tunnel 1 MED is 50, tunnel 2 is 20, finally packet still goes to tunnel 1, as it has a final lower MED value. 
 
 **Dynamic VS Static**
 
@@ -639,7 +666,11 @@ maximum transmission unit, or MTU, for your on-premises VPN gateway cannot be gr
  High Availability VPN
 
 - SLA (Service Level Agreement) 99.99%
-- Architecture: A HA VPN gateway automatically provides two external IP addresses (two interfaces). So on premises gateway must configure a tunnel on each of these interfaces
+- Architecture: A HA VPN gateway automatically provides two external IP addresses (two interfaces). So on premises gateway must configure a tunnel on each of these interfaces. So on the on-premises side, the peer VPN device has three form of configures
+  - Two peer VPN devices each with one IP address
+  - One peer VPN device with two IP addresses (two interfaces)
+  - One peer VPN device wit one Ip address
+
 - Routing: Exclusively use Dynamic Routing. Must use a Cloud Router to manage Border Gateway Protocol BGP sessions.
 
 through an IPsec VPN connection in a single region
@@ -759,7 +790,59 @@ VPC Features:
   - Static routes (manually configured)
   - Dynamic routes (BGP router learned from somewhere else
 
+### Network Topology
 
+#### **Hub-and-Spoke**
+
+Eg: 
+
+1. VPC Peering
+2. Cloud VPN
+3. NCC Network Connectivity Center 
+
+**Hub-and-Spoke（以及 NCC）** 的逻辑是**“把好几个独立的房子连在一起”**。
+
+- 每个 Spoke 都是一个**独立且完整**的 VPC。
+- 它们有自己的路由表、防火墙规则和管理边界。
+- NCC 的作用是作为一个“中央交换机”，让这些独立的房子能够互相通信（解决传递性路由问题）。
+
+对比之下Shared VPC只有一个VPC网络，大家都在里面通信，集中管理
+
+Two main types of spokes that can be connected to a hub: VPC spokes and Hybrid spokes (Cloud VPN, Cloud Interconnect, Router Appliance)
+
+**Global Spoke and Regional Spoke**
+
+是VPC的路由行为
+
+| **特性**       | **Regional Spokes (或受限模式)**                             | **Global Spokes (全球模式)**                           |
+| -------------- | ------------------------------------------------------------ | ------------------------------------------------------ |
+| **路由可见性** | Spoke 只能看到与之连接的同一 Region 内的路由。               | Spoke 可以看到整个 Hub 内部、全球所有 Region 的路由。  |
+| **典型场景**   | 对延迟极其敏感，或有严格合规要求，数据不能跨区传输。         | **企业级标准架构**。需要跨国/跨区 office 和 VPC 互通。 |
+| **费用**       | 仅限区域内流量费（通常较低）。                               | 涉及跨区域数据传输费（Inter-region Data Transfer）。   |
+| **配置点**     | VPC 的动态路由模式（Dynamic Routing Mode）设为 **Regional**。 | VPC 的动态路由模式设为 **Global**。                    |
+
+- 如果你的 VPC 开启了 **Global Dynamic Routing**，那么当它作为 Spoke 加入 NCC Hub 时，它就表现为 **Global Spoke**，能学到全球各地的路由。
+
+- 如果你的 VPC 开启了 **Regional Dynamic Routing**，它就只能看到同一区域内的 Spoke 路由。
+
+#### Mesh topology
+
+The multiple paths between nodes in a mesh network ensure that if one connection fails, traffic can be rerouted.
+
+- high uptime
+
+Full mesh: GKE
+
+Partial mesh: automatic failover
+
+#### Mirrored topology
+
+- For disaster recovery
+- For testing and development
+
+#### Gating topologies
+
+managing and securing network traffic flows in cloud environments, particularly in hybrid and multi-cloud scenarios.
 
 ### Comparison Interconnect  VS Peering VS Shared VPC VS VPC Peering
 
@@ -811,11 +894,15 @@ Shared VPC
 - Performance: globally valid, network latency depends on distance, but cause it's within google's network, low hops and network congestion.
 - Router: software defined
 
+![image-20260314205016811](./gcp_note.assets/image-20260314205016811.png)
 
 
-### Standard Network Tier
+
+**Standard Network Tier**
 
 Routes traffic over the public Internet; Google not gurantee hop performance.
+
+**Premium Network Tier**
 
 
 
@@ -849,7 +936,30 @@ Normally IP is public, but there are three IP reserved for subnets
 1. 10.0.0.0/8 or 10.0.0.0 - 10.255.255.255 are class A subnet, usually used by big companies
 2. 176.16.0.0/16 or 176.16.0.0 - 176.16.255.255 for class B subnet
 3. 192.168.0.0/16 or 192.168.0.0 - 192.168.255.255 for class C subnet, usually used by personal home
-4. 
+
+### Network Architecture
+
+**Scalibility**
+
+increasing demands
+
+**Security**
+
+firewalls, access controls, and encryption
+
+**Compliance**
+
+observing guidelines, rules, and restrictions of your organization, industry, and pertinent government bodies
+
+**Performance**
+
+speed and responsiveness
+
+**Cost efficiency**
+
+
+
+
 
 
 
