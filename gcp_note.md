@@ -1,3 +1,325 @@
+# Design and Process
+
+## Defining Services
+
+### 1 Describe users roles and personas
+
+- Who
+  - Who are users
+  - developers
+  - stakeholders
+- What
+  - What the system do
+  - main feature
+- Why
+  - Why is the system needed
+- When
+  - When do users need
+  - developer can done
+- How
+  - How well system will look
+  - How many users
+  - How much data
+
+Roles
+
+- Role are not people of job titles, people have multiple roles, single role have many people
+- Roles should describe a user objective
+- Eg: shopper, Account holder, Customer, Administrator, Manager
+
+Persona
+
+A end user in real world who will use the application, their story related to the application or their needs or scenario they may encounter
+
+User stories
+
+- Give each story a title of that describes purpose
+- Short, one sentence description
+- Specify user role, what they want to do, and why
+- As a [role], I want to..., so that I can...
+- Evaluate user stories with INVEST criteria
+
+### 2 Write qualitative requirements with user stories
+
+1. Define role
+2. Write personas for each roles
+3. Write user stories for main features of case study
+
+### 3 Write quantitative requirements using key performance indicators (KPIs)
+
+- Availability: whether the request has responded to
+- Latency: How long does it take to response
+- Throughput: How many requests can be handed
+- Data storage
+  - Latency: How long does it take to read and write date
+  - Availability: Is the data there when we needed
+  - Durability: If there is a failure, do we lose any data
+
+Business KPIs
+
+- Return of Investment
+- Employee turnover
+- Customer churn
+
+Technical KPIs
+
+- Page views
+- User registrations
+- Checkouts
+
+The goal is outcome or result you want to achieve.
+
+The KPI is a metric that indicates whether you are on track to achieve the goal.
+
+Eg: As an example, a goal may be to increase turnover for an online store, and an associated KPI may be the percentage of conversions on the website.
+
+### 4 Use SMART criteria to evaluate your service requirements
+
+SMART
+
+- Specific
+- Measurable
+- Achievable
+- Relevant
+- Time-bound
+
+### 5 Determine appropriate SLOs and SLIs for you services
+
+SLI Service Level Indicator: Availability, latency
+
+- Measurable, time bound
+  - 400ms aggregated per minute
+
+SLO Service Level Objectives: 
+
+- Realistic: 95% Availability rather than 99.99%
+
+SLA Service Level Agreement, more strict SLO
+
+- A business contract between the provider and the customer
+
+Eg:
+
+- SLO: mean latency ≤ 200 ms
+
+- SLA: 99th percentile latency > 300 ms for compensation. 排序后第100个用户的延迟
+- There is the case 99% requests latency are very fast less than 200ms, but 1% is extremely slow which is larger than 300ms, so after sort the P99 is larger than 300ms, trigger the compensation
+
+## Microservices
+
+![image-20260316134928483](./gcp_note.assets/image-20260316134928483.png)
+
+### Definitions
+
+App Engine, Cloud Run, GKE, and Cloud Run functions could deploy microservices
+
+**Monolith to microservices**
+
+- Decompose applications by feature to minimize dependencies (Review services, Order service, products services)
+- Organize services by architecture layer (Web, Android interfaces, Data access services)
+- Isolate services that provide shared functionality (Authentication service, Reporting service)
+
+**State services**
+
+- manage stored data over time
+- hard to scale
+- hard to upgrade
+- need to backup
+
+**Stateless services**
+
+- get data from env or other stateful services
+- easy to scale by adding instances
+- easy to migrate to new versions
+- easy to administer
+
+**Suggestions:**
+
+- Avoid strong shared state in-memory on your servers (hard to scale, cause the subsequence requests have to be sent to the same server)
+- Store state using backend storage services shared by the frontend server
+  - Cache state data for faster access
+  - Use Firestore, cloud SQL for state
+  - Redis for caching
+
+![image-20260316140307050](./gcp_note.assets/image-20260316140307050.png)
+
+### 12 factors
+
+1 Codebase, use git like version control to track changes
+
+2 Dependencies, use package manager like NPM, pip
+
+3 Config, kept out of code and in env variables
+
+4 Backing services, treat backing services as attached services. 
+
+- Database, cache, queues are accessed via URLs
+- Should be easy to swap one for another
+
+5 Build, release, run.
+
+- Build create package from source code
+- Deployment packages are linked to a release for rollback and audit
+- Run for execution the app
+
+6 Processes
+
+- Apps run in one or more processes
+- Data should fetch from data services, ether stateless or stateful data
+
+7 Port binding, export services via port binding
+
+- No separate server like Apache needed, the application itself can be host on GKE, App engine...
+- Apps are self-contained
+
+8 Concurrency
+
+- Scale out via process, because of self-contained so easily to do so.
+
+9 Disposability, Apps should be more reliable
+
+- When infrastructure failed, they can gracefully shutdown and restart quickly
+- Scale up and down quickly
+
+10 Dev/prod parity, keep dev, stage, prod as similar as possible
+
+- Docker makes this easier
+- Workflows built on Artifact Registry, Cloud Storage, Terraform
+
+11 Logs, treat logs as event streams
+
+- Decouple the collection, processing, and analysis of logs from the core logic of apps
+- Should be standard output and aggregating into a single source. So when scale up and down, no log storage to be concerned, and also good to distribute VMs or containers
+
+12 Admin processes, run admin/management tasks as one-off processes
+
+- Admin tasks should be repeatable processes, not one-off manual tasks (Like migrate database, script pre-hit to fill cache)
+- Admin tasks shouldn't be a part of the application, cause this will slow the app
+
+### HTTP
+
+The underlying protocol of carrying transportation data
+
+#### REST
+
+The design of microservices based on REST, gRPC, etc to achieve loosely coupled independent services
+
+- maintain backward compatibility of the contract
+- Can response JSON, HTMl, XML and etc.
+
+#### gRPC
+
+For internal communications
+
+#### GraphQL
+
+
+
+### APIs
+
+Definition, the interface of services
+
+#### OpenAPI
+
+The standard doc format for REST interface, including details like url, params, response format
+
+**Swagger**, OpenAPI application, easy to debug
+
+#### GraphQL Schema
+
+### **Google managing APIs tools**
+
+- Cloud Endpoints
+- Apigee API platform
+- API Gateway
+
+## DevOps Auto
+
+### CI/CD
+
+1 Check-in code
+
+- Git
+- Cloud Source Repositories
+  - Managed
+  - Pub/sub messages when change
+  - Audit logging
+  - Connect with GitHub
+
+2 Run unit tests
+
+
+
+3 Build deployment package
+
+- Create a Docker image
+- Cloud Build
+  - Google-hosted Docker build service
+- Build triggers whenever there is change in the repo
+  - On commits of a particular branch
+  - On commits of a particular tag
+  - Dockerfile or a Cloud Build file
+- Artifact Registry
+  - A universal packge manager for build artifacts and dependencies.
+  - Store Docker and OCI container images
+
+4 Deploy
+
+- Save new Docker image in an artifact registry
+- Each microservice should have its own repository
+- Binary authorization allows you to enforce the deployment of only trusted containers into GKE
+
+### Cloud Source Repositories
+
+### Automate builds
+
+with Cloud Build and build triggers
+
+### Artifact Registry
+
+### Infrastructure as code using Terraform
+
+Infrastructure as code (IaC)
+
+which allows for the provisioning, configuration, and deployment activities to be automated.
+
+HashiCorp Configuration Language (HCL) allows for concise descriptions of resources using blocks, arguments, and expressions.
+
+## Storage solutions
+
+- Storing binary data with Cloud Storage
+- Relational data with Cloud SQL or Spanner
+- NoSQL or unstructured data using Firestore and Bigtable
+- caching for fast data access using Memorystore
+- aggregating data for queries and reports using BigQuery as a data warehouse
+
+Choose storage:
+
+1. Service
+2. Structured or unstructured
+3. SQL or NoSQL
+4. Strong or Eventual Consistency
+5. Amount of Data (MB, GB, TP, PB)
+6. Read only or Read/Write
+
+![image-20260316211926147](./gcp_note.assets/image-20260316211926147.png)
+
+
+
+![image-20260316212404190](./gcp_note.assets/image-20260316212404190.png)
+
+Decision chart
+
+![image-20260316212643246](./gcp_note.assets/image-20260316212643246.png)
+
+- **HTAP** 的全称是 **Hybrid Transactional/Analytical Processing**（混合事务/分析处理）
+
+**Upload data, use Cloud Storage Transfer Service**
+
+## Google Cloud and Hybrid Network Architecture
+
+# IaaS and PaaS
+
 Three wave of cloud computing
 
 1. Colocation
@@ -8,10 +330,8 @@ Three wave of cloud computing
    Docker and Kubernetes
    Do not need to virtualize a whole computer, but only virtualize the running enviroment for the application.
 
-## IaaS and PaaS
-
 Virtual data center:
-Infrastructure as a service
+**Infrastructure as a service**
 
 - Raw compute
 - Storage
@@ -20,7 +340,7 @@ Infrastructure as a service
   Computer Engine is an IaaS
   Customer pay the resources ahead of time
 
-Platform as a service
+**Platform as a service**
 
 - Bind code to libraries that provide access to the infrasture application needs
   App Engine is an PaaS
@@ -30,23 +350,14 @@ Platform as a service
 Cloud Run is another PaaS, a serverless technology, run containerized microservices
 Cloud Run functions, manages event-driven codes
 
-SaaS
+**SaaS**
 Provide entire application stack, deliverying entire cloud-based application that customer can use
 Like Gmail, Drive
 
-## The Google Cloud network
-
-- Google cloud Run on Google's own global network
-- High throughput and low latencies
-- Locations cached for quicker access
-- Redundant cloud regions to high-bandwidth connectivity
-- Seven major geographic locations, each location divided into different regions and zones. For availability, durability, and latency
-  - Locations: Asian, North America, Europe...
-  - Regions: asia-east1
-  - Zones: asia-east1-a, zones are connected by high fiber network
 
 
-## Security
+
+# Security
 
 - Hardware infrastructure layer
   - Hardware design and provenance: customer design data center, chips
@@ -71,12 +382,12 @@ Like Gmail, Drive
   - Employee U2F use
   - Stringent software development practices：central source control and two-party review of code
 
-## Billings and pricing
+# Billings and pricing
 
 - Rate Quotas: For example, by default, the GKE service implements a quota of 3,000 calls to its API from each Google Cloud project every 100 seconds.
 - Allocation quotas: For example, by default, each Google Cloud project has a quota allowing it no more than 15 Virtual Private Cloud networks.
 
-### Resource Manager
+## Resource Manager
 
 Policies contain a set of roles and members, and policies are set on resources.
     
@@ -134,14 +445,14 @@ create a budge:
 labeling all your resources and exporting your billing data to BigQuery to analyze your spend.
     
 
-## Resrouce Monitoring
+# Resrouce Monitoring
 
-### Google Cloud Observability
+## Google Cloud Observability
 monitoring logging, error reporting, and fault tracing
     there are free usage allotments
     
 
-### Cloud Monitoring
+## Cloud Monitoring
 **Charts**
 **Dashboards**
 **Alerts**
@@ -169,7 +480,7 @@ The Ops Agent supports most major operating systems, such as CentOS, Ubuntu, and
 When you want to maintain a metric at a target value, specify a utilization target.
 The autoscaler creates VMs when the metric value is above the target and deletes VMs when the metric value is below the target.
 
-### Logging
+## Logging
 store, search, analyze, monitor, and alert on log data and events from Google Cloud and AWS.
 
 Logging includes storage for logs, a user interface called Logs Explorer, and an API to manage logs programmatically.
@@ -180,24 +491,24 @@ Pub/Sub for real-time processing and alerting
 
 Looker Studio transforms your raw data into the metrics and dimensions that you can use to create easy-to-understand reports and dashboards.
 
-### Partner Integration
+## Partner Integration
 This helps expand the IT ops, security, and compliance capabilities available to Google Cloud customers.
 
 Site Reliability Engineering:
 Monitoring!!!
 
-### Error Reporting
+## Error Reporting
 
-### Tracing
+## Tracing
 Cloud Trace is a distributed tracing system that collects latency data from your applications and displays it in the Google Cloud console.
 
 track how requests propagate through your application and receive detailed, near real-time performance insights.
 
-### Profiling
+## Profiling
 Cloud Profiler continuously analyzes the performance of CPU or memory-intensive functions executed across an application.
 Profiler uses statistical techniques and extremely low-impact instrumentation that runs across all production application instances to provide a complete picture of an application’s performance without slowing it down.
 
-### Network monitoring
+## Network monitoring
 
 Metrics
 
@@ -231,12 +542,12 @@ Packet Mirroring clones the traffic of specific instances in your Virtual Privat
 
 
 
-## Multi-zone
+# Multi-zone
 
 - Improve fault tolerance 即便是一个region中的multi-zone，防止单个机房出问题，如火灾等
 - Multi-region 成本更高，防止的是地震，战争等
 
-## Googel Cloud's resource hierarchy
+# Googel Cloud's resource hierarchy
 
 Four levels, buttom up. Each resource has exactly one parent
 
@@ -282,7 +593,7 @@ Four levels, buttom up. Each resource has exactly one parent
     Policies are inherited downward:
     A policy applied to folder, will applied to its projects within the folder
 
-## IAM
+# IAM
 
 Define who can do what on which resources
 
@@ -328,7 +639,7 @@ Define who can do what on which resources
 
 - Resource hierarchy
 
-### Policy
+## Policy
 
 A policy is a list of bindings which bind “谁（Principal）在什么资源上拥有什么权力（Role）”
 It has to bind with resources
@@ -358,11 +669,11 @@ It has to bind with resources
 Policy insights to help you do the least priviledge
 ML-based findings about permission usage in your project, folder, or organization
 
-### Google Cloud Directory Sync
+## Google Cloud Directory Sync
 
 This tool synchronizes users and groups from your existing Active Directory or LDAP system with the users and groups in your Cloud Identity domain.
 
-### Service accounts
+## Service accounts
 
 It is an account that belongs to your application instead of to an individual end user.
 
@@ -372,7 +683,7 @@ Eg, compute engine holds a service account, and the service account holds some r
   Eg, Alice has service accounts create permission, so she can create and set any permissions on the service accounts even the permission Alice does not have like bucket access
   Anothe Eg, Service_Account_1 has InstanceAdmin role, and some users or a group are assigned to Service Account User Role, which means they can manipulate or pretend they are a certain Service Account. So they act as Service_Account_1, and then they can do create, modify action on instance which from InstanceAdmin role.
 
-### IAP Identity-Aware Proxy
+## IAP Identity-Aware Proxy
 
 Is to project custom applications like (Admin website, internal tools)
 Which IAM is to project Cloud Resources which hold those custom applications.
@@ -384,59 +695,20 @@ Tow steps
 - Who you are (log in to Cloud Account)
 - What can you do (check the account's IAM permissions)
 
-### Cloud Identity
+## Cloud Identity
 
 
 
-## Multiple network interfaces
+# The Google Cloud network
 
-What's this?
-
-Devices (VM, virtual appliance) use MNI to connect to multiple networks
-
-Why use this?
-
-Let data flow through different networks (VPCs) securely and under control
-
-Normal scenario:
-
-	1. Two VPCs are connected via VPC Peering
-	1. A VM is attached to one VPC, VPC A
-	1. A request from outside sent to the VM -- under VPC A, which as a proxy sends the data from VPC A to VPC B using receiver's internal IP in VPC B.
-	1. After the VM sent the data, the data is out of control.
-
-Main defects:
-
-1. Two VPCs are not separated (shared hallway), so data flow through smoothly even with **firewall rule** (software rule), all data mixed together, hard to do **data trace**
-2. VM in VPC A as a proxy, when send data by itself, the original IP loss, hard to track problem
-3. If VPC A is attacked by DDOS, which is overwhelmed, the VPC B is also stuck.
-
-Use MNI instead:
-
-1. A VM has two network interfaces, one connects to VPC A, the customer portal, one connects to VPC B the inner control panel.
-2. Internet -> VPC A Router -> NIC 0 -> VM CPU -> NIC 1 -> VPC B Router -> Destination.
-
-Benefit:
-
-1. Isolation. Physical-style (Network-level separation)
-2. Security. Use the VM as a lock
-3. Audit Trails
-
-
-
-Usage:
-
-- Configure an instance as a network appliance for load balancing.
-- Traffic separation such as separation of data plane traffic from management plane traffic.
-
-Feature:
-
-- Multiple network interfaces let you create configurations in which an VM instance connects directly to several VPC networks.
-- Each interface has an internal IP and external IP
-- only configure a network interface when you create an instance
-- You cannot delete a network interface without deleting the instance.
-- Each network interface configured in a single instance must be attached to a different VPC network.
-- internal DNS, domain name system, query is made with primary interface nic0 of the instance
+- Google cloud Run on Google's own global network
+- High throughput and low latencies
+- Locations cached for quicker access
+- Redundant cloud regions to high-bandwidth connectivity
+- Seven major geographic locations, each location divided into different regions and zones. For availability, durability, and latency
+  - Locations: Asian, North America, Europe...
+  - Regions: asia-east1
+  - Zones: asia-east1-a, zones are connected by high fiber network
 
 ## Network Tier
 
@@ -451,10 +723,9 @@ Feature:
 - Traffic mainly flow on Google's network
 - High cost
 - Cost based on distance between the resources and the end user
-  
 
 
-## Virtual Private Cloud Networking
+# Virtual Private Cloud Networking
 
 ![image-20260307135308026](./gcp_note.assets/image-20260307135308026.png)
 
@@ -492,9 +763,9 @@ Compatibilities:
 - Firewall, distributed firewall
 - VPC Peering, two VPCs can exchange traffic; IAM control who and what in one project can interact with a VPC in another
 
-### Network Layers 
+## Network Layers 
 
-#### 7 Layers OSI (Open Systems Interconnect) Model
+### 7 Layers OSI (Open Systems Interconnect) Model
 
 The model is typically viewed from the bottom (hardware) to the top (software).
 
@@ -538,13 +809,64 @@ This is the only layer the user directly interacts with. It provides network ser
 
 - **Examples:** HTTP/HTTPS (Web browsing), SMTP (Email), FTP (File transfer).
 
-#### TCP/IP Model
+### TCP/IP Model
 
 The **TCP/IP model** is what the internet actually runs on
 
 ![OSI vs TCP/IP model comparison](https://encrypted-tbn1.gstatic.com/licensed-image?q=tbn:ANd9GcQUyuLV9UuO6t_KV9dNfjmrpqNQBAQxHi_MSlgDKadrQnqPmC-SzmaAy8tasN79UJhFdzt2zYmWA7XbM2_zyHjDFf_g8x00AFsIpgxKChJuzrzlJqg)
 
-### Connecting networks to Google VPC
+## Networking subnets
+
+Subnet:
+
+1. Logical Grouping: You don't want your HR database sitting in the same "room" as your public-facing website code. Subnets let you group related resources.
+2. Granular Security: You can apply different rules to different subnets.Example: A "Public Subnet" for your website (allows internet traffic). A "Private Subnet" for your Database (blocks ALL internet traffic, only allows the website to talk to it).
+3. Geography (Google Specific): In Google Cloud, a VPC is global, but a Subnet is Regional. You create a subnet to define where in the world your resources physically live (e.g., a subnet in Tokyo, another in Iowa).
+
+Subnets are used to manage IP, splite a large network into small chunks, reduce traffic congestion and improve safety.
+It uses subnet mask to split IP
+
+Purpose:
+
+- Minimize broadcasting: If a network includes a thousand computers, and each computers is broadcasting, it will ruin the network.
+- Security: Split financial and guest Wi-Fi into different subnet, so they cannot access data in each other
+- Easy management: Let floor 1 use 192.168.1.x subnet and floor 2 use 192.168.2.x subnet
+
+eg:
+web-subnet-us use 10.0.1.0/24 for us VMs
+web-subnet-asia use 10.0.2.0/24 for asian VMs
+db-subnet-us use 10.0.3.0/24 for Cloud SQL and Storage
+
+The subnet mask is to mask the first N bit, so that masked N bit are a subnet IP range, the rest bits are subnets IPs and can be used by hosts in the subnet
+Like 10.0.1.0/24, they masked 10.0.1, so all the hosts in this subnets are IPs start from 10.0.1, and they can be arranged as 10.0.1.0 - 10.0.1.255 IPs except broadcasting, and other normal reserved IP, so maybe totally 250 IPs can be used by hosts in the subnet
+
+Normally IP is public, but there are three IP reserved for subnets
+
+1. 10.0.0.0/8 or 10.0.0.0 - 10.255.255.255 are class A subnet, usually used by big companies
+2. 176.16.0.0/16 or 176.16.0.0 - 176.16.255.255 for class B subnet
+3. 192.168.0.0/16 or 192.168.0.0 - 192.168.255.255 for class C subnet, usually used by personal home
+
+## Network Architecture
+
+**Scalibility**
+
+increasing demands
+
+**Security**
+
+firewalls, access controls, and encryption
+
+**Compliance**
+
+observing guidelines, rules, and restrictions of your organization, industry, and pertinent government bodies
+
+**Performance**
+
+speed and responsiveness
+
+**Cost efficiency**
+
+## Connecting networks to Google VPC
 
 Method 1:
 Cloud Virtual Private Network(VPN), the tunnel, connects Cloud VPC and other network like (AWS network or your own data center)
@@ -602,7 +924,7 @@ In comparison with HTTPS, the browser or server encrypt the data, even routers c
 - Like a map. Static (Manual Map): does not change
 - Dynamic/BGP (Live GPS): pass new changes
 
-#### Cloud Router and BGP
+### Cloud Router and BGP
 
 The Map. Cloud router is like a device, and BGP (Border Gateway Protocol) is it's application, only with the application, Cloud Router can do it's job. The Cloud router dynamically exchange data, write to routing table using Border Gateway Protocol.
 
@@ -645,7 +967,7 @@ Dynamic routers exchange their subnet information automatically cause they know 
 
 Static routers, the cloud admin has to write on-prem private subnet into it's routing table, and vise versa. If there is any change like adding a new subnet, we have to inform another side admin and let them manually update the table.  
 
-#### Classic VPN
+### Classic VPN
 
 - 99.9% SLA
 - Has only a single external IP address (single interface)
@@ -661,7 +983,7 @@ in order to connect to your on-premises network and its resources, you need to c
 
 maximum transmission unit, or MTU, for your on-premises VPN gateway cannot be greater than 1460 bytes.
 
-#### HA VPN
+### HA VPN
 
  High Availability VPN
 
@@ -675,13 +997,13 @@ maximum transmission unit, or MTU, for your on-premises VPN gateway cannot be gr
 
 through an IPsec VPN connection in a single region
 
-### Interconnect
+## Interconnect
 
 Most of of them are building connection at Layer 2, and on the layer 2 basis, the layer 3, google cloud enforce Interconnect use BGP 
 
 Direct access to RFC1918 IPs in your **VPC**, private IP connect to VPC
 
-#### Dedicated Interconnect
+### Dedicated Interconnect
 
 Layer 2, use VLAN Virtual local area network
 
@@ -701,7 +1023,7 @@ Peering is to send traffic between your business/the server and Google
 
 Network Tier is to send traffic between Google and end user/the customer
 
-#### Partner Interconnect
+### Partner Interconnect
 
 Layer 2 or Layer 3
 
@@ -711,7 +1033,7 @@ On-premises ---- Google Partner Network Provider ---- VPC
 
 - 99.9% or 99.99% SLA
 
-#### Cross-Cloud Interconnect
+### Cross-Cloud Interconnect
 
 Layer 2
 
@@ -721,14 +1043,14 @@ Another cloud provider act like Network Provider
 
 Eg: AWS VPN ---- Google Cloud VPC
 
-### Peering
+## Peering
 
 Access to Google **public IPs**, without SLA
 
 - Largest scope is different projects in different organizations
 - Decentralized approach, each VPC network can maintain its own global firewall and routing tables
 
-#### Direct Peering
+### Direct Peering
 
 Layer 3, use IP
 
@@ -741,7 +1063,7 @@ You and Google handshake
 
 Relies on a third-party provider's network; your SLA is with the carrier not Google
 
-#### Carrier Peering
+### Carrier Peering
 
 Layer 3, use IP
 
@@ -752,7 +1074,7 @@ Applicable when your data center location does not have a Google edge location(P
 
 Routes traffic over the public Internet; Google cannot guarantee internet hop performance.
 
-### Shared VPC
+## Shared VPC
 
 Allows **an** organization to connect resources from multiple projects to a common Virtual Private Cloud (VPC) network
 
@@ -767,7 +1089,7 @@ Designate a project as a host project and attach one or more other service proje
 - A standalone project is not a host project neither a service project, it does not participate this group
 - A standalone VPC is not from a host project, but can from service project or standalone project. When it from service project, the project has two types of VPCs, one is standalone VPC, another is shared VPC
 
-### VPC Peering
+VPC Peering
 
 Allows private RFC 1918 connectivity across two VPC networks, regardless of whether they belong to the same project or the same organization.
 
@@ -790,9 +1112,9 @@ VPC Features:
   - Static routes (manually configured)
   - Dynamic routes (BGP router learned from somewhere else
 
-### Network Topology
+## Network Topology
 
-#### **Hub-and-Spoke**
+### **Hub-and-Spoke**
 
 Eg: 
 
@@ -825,7 +1147,7 @@ Two main types of spokes that can be connected to a hub: VPC spokes and Hybrid s
 
 - 如果你的 VPC 开启了 **Regional Dynamic Routing**，它就只能看到同一区域内的 Spoke 路由。
 
-#### Mesh topology
+### Mesh topology
 
 The multiple paths between nodes in a mesh network ensure that if one connection fails, traffic can be rerouted.
 
@@ -835,16 +1157,16 @@ Full mesh: GKE
 
 Partial mesh: automatic failover
 
-#### Mirrored topology
+### Mirrored topology
 
 - For disaster recovery
 - For testing and development
 
-#### Gating topologies
+### Gating topologies
 
 managing and securing network traffic flows in cloud environments, particularly in hybrid and multi-cloud scenarios.
 
-### Comparison Interconnect  VS Peering VS Shared VPC VS VPC Peering
+## Comparison Interconnect  VS Peering VS Shared VPC VS VPC Peering
 
 
 
@@ -904,66 +1226,67 @@ Routes traffic over the public Internet; Google not gurantee hop performance.
 
 **Premium Network Tier**
 
+## Multiple network interfaces
+
+What's this?
+
+Devices (VM, virtual appliance) use MNI to connect to multiple networks
+
+Why use this?
+
+Let data flow through different networks (VPCs) securely and under control
+
+Normal scenario:
+
+	1. Two VPCs are connected via VPC Peering
+	1. A VM is attached to one VPC, VPC A
+	1. A request from outside sent to the VM -- under VPC A, which as a proxy sends the data from VPC A to VPC B using receiver's internal IP in VPC B.
+	1. After the VM sent the data, the data is out of control.
+
+Main defects:
+
+1. Two VPCs are not separated (shared hallway), so data flow through smoothly even with **firewall rule** (software rule), all data mixed together, hard to do **data trace**
+2. VM in VPC A as a proxy, when send data by itself, the original IP loss, hard to track problem
+3. If VPC A is attacked by DDOS, which is overwhelmed, the VPC B is also stuck.
+
+Use MNI instead:
+
+1. A VM has two network interfaces, one connects to VPC A, the customer portal, one connects to VPC B the inner control panel.
+2. Internet -> VPC A Router -> NIC 0 -> VM CPU -> NIC 1 -> VPC B Router -> Destination.
+
+Benefit:
+
+1. Isolation. Physical-style (Network-level separation)
+2. Security. Use the VM as a lock
+3. Audit Trails
 
 
-### Networking subnets
 
-Subnet:
+Usage:
 
-1. Logical Grouping: You don't want your HR database sitting in the same "room" as your public-facing website code. Subnets let you group related resources.
-2. Granular Security: You can apply different rules to different subnets.Example: A "Public Subnet" for your website (allows internet traffic). A "Private Subnet" for your Database (blocks ALL internet traffic, only allows the website to talk to it).
-3. Geography (Google Specific): In Google Cloud, a VPC is global, but a Subnet is Regional. You create a subnet to define where in the world your resources physically live (e.g., a subnet in Tokyo, another in Iowa).
+- Configure an instance as a network appliance for load balancing.
+- Traffic separation such as separation of data plane traffic from management plane traffic.
 
-Subnets are used to manage IP, splite a large network into small chunks, reduce traffic congestion and improve safety.
-It uses subnet mask to split IP
+Feature:
 
-Purpose:
+- Multiple network interfaces let you create configurations in which an VM instance connects directly to several VPC networks.
+- Each interface has an internal IP and external IP
+- only configure a network interface when you create an instance
+- You cannot delete a network interface without deleting the instance.
+- Each network interface configured in a single instance must be attached to a different VPC network.
+- internal DNS, domain name system, query is made with primary interface nic0 of the instance
 
-- Minimize broadcasting: If a network includes a thousand computers, and each computers is broadcasting, it will ruin the network.
-- Security: Split financial and guest Wi-Fi into different subnet, so they cannot access data in each other
-- Easy management: Let floor 1 use 192.168.1.x subnet and floor 2 use 192.168.2.x subnet
-
-eg:
-web-subnet-us use 10.0.1.0/24 for us VMs
-web-subnet-asia use 10.0.2.0/24 for asian VMs
-db-subnet-us use 10.0.3.0/24 for Cloud SQL and Storage
-
-The subnet mask is to mask the first N bit, so that masked N bit are a subnet IP range, the rest bits are subnets IPs and can be used by hosts in the subnet
-Like 10.0.1.0/24, they masked 10.0.1, so all the hosts in this subnets are IPs start from 10.0.1, and they can be arranged as 10.0.1.0 - 10.0.1.255 IPs except broadcasting, and other normal reserved IP, so maybe totally 250 IPs can be used by hosts in the subnet
-
-Normally IP is public, but there are three IP reserved for subnets
-
-1. 10.0.0.0/8 or 10.0.0.0 - 10.255.255.255 are class A subnet, usually used by big companies
-2. 176.16.0.0/16 or 176.16.0.0 - 176.16.255.255 for class B subnet
-3. 192.168.0.0/16 or 192.168.0.0 - 192.168.255.255 for class C subnet, usually used by personal home
-
-### Network Architecture
-
-**Scalibility**
-
-increasing demands
-
-**Security**
-
-firewalls, access controls, and encryption
-
-**Compliance**
-
-observing guidelines, rules, and restrictions of your organization, industry, and pertinent government bodies
-
-**Performance**
-
-speed and responsiveness
-
-**Cost efficiency**
-
-
+3. 
 
 
 
 
 
-## Cloud Load Balancing
+
+
+
+
+# Cloud Load Balancing
 
 Senario: 40 VMs handle requests
 Distribute user traffic across multiple instances of an application
@@ -1042,7 +1365,7 @@ A **Forward Proxy** sits in front of the **client** (user). Think of a corporate
 
 
 
-### Application Load Balancer
+## Application Load Balancer
 
 - Work on application layer (7), for HTTP and HTTPS
 - reverse proxies
@@ -1099,7 +1422,7 @@ It allows the Load Balancer to talk to things that aren't just standard VMs, lik
 - Hybrid Connectivity NEGs (On-Premise)
   - These point to your own physical data center via VPN or Interconnect.
 
-### Network Load Balancer
+## Network Load Balancer
 
 - Work on network layer (layer 4)
 
@@ -1156,7 +1479,7 @@ It allows the Load Balancer to talk to things that aren't just standard VMs, lik
      - Regional, private load balancer
      - software-defined load balancing that directly delivers the traffic from the client instance to a backend instance.
 
-## Cloud CDN
+# Cloud CDN
 
 Cloud CDN, or Content Delivery Network
 
@@ -1180,7 +1503,7 @@ FORCE_CACHE_ALL
 
 This mode ignores the back end's instructions entirely. It is a "brute force" approach to caching.
 
-## Cloud DNS
+# Cloud DNS
 
 8.8.8.8 Domain Name Service
 Translate internet hostname to addresses
@@ -1193,7 +1516,7 @@ Edge caching refers to use caching servers to store content closer to end users
 
 
 
-## Compute Engine
+# Compute Engine
 
 As a solution of IaaS
 
@@ -1230,7 +1553,7 @@ You can use it with a cheap price, if someone else use it, the VM will let them 
   eg: VM on but application inside was crashed
   ans: Application-level Health Check
 
-### Managed Instance Groups (MIGs)
+## Managed Instance Groups (MIGs)
 
 Always the answer for scaling and auto-healing.
 
@@ -1264,7 +1587,7 @@ Configuring stateful IP addresses in a managed instance group ensures that appli
 
 But for web service, we do not need to keep the stateful IP, cause load balancer is pointing to the instance group, and the LB update the states of each instances and IPs, so the stateful IP is not necessary.
 
-## Infrastructure as code (IaC)
+# Infrastructure as code (IaC)
 
 **Terraform**
 
@@ -1278,7 +1601,7 @@ Uses a system of highly structured templates and configuration files to document
 
 
 
-## Managed Service
+# Managed Service
 
 Most of them are serverless, except Dataproc, which you create the cluster and worker instances.
 
@@ -1304,9 +1627,9 @@ Manual
 
 
 
-## Cloud Storage
+# Cloud Storage
 
-### Defination
+## Defination
 
 - website, archival, disaster recovery, distributing large data objects allow user direct download
 - Not a file
@@ -1348,7 +1671,7 @@ Auto class: transitions objects to appropriate storage classes
 
 You can change data storage type of a bucket as well as an object but cannot change the location types
 
-### Access control:
+Access control:
 
 - IAM, roles, for view, create buckets or objects
 - Access control lists or ACL for finer control. 
@@ -1377,7 +1700,7 @@ Benefit:
 - Action: e.g., "Delete it" or "Move it to a cheaper storage tier."
   Act asynchronize, so after update the rule, it may take 24 hours to be valid
 
-### Object Versioning
+Object Versioning
 
 Can be enabled for a bucket
 
