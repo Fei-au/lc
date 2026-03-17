@@ -318,6 +318,18 @@ Decision chart
 
 ## Google Cloud and Hybrid Network Architecture
 
+## Cloud networks
+
+Regions, geographical location run the resources, it has zones in each region
+
+points of presence PoPs, where Google's network is connected to rest of the world
+
+Global private network, globally, resources across regions can communicate using their internal IP addressees within same VPC
+
+Services
+
+
+
 # IaaS and PaaS
 
 Three wave of cloud computing
