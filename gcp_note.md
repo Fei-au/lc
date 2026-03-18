@@ -346,10 +346,35 @@ For application that is a database
   
 ## Reliable systems
   
-  1. Single points of failure
-  2. Correlated failures
-  3. Cascading failures
-    
+1. Single points of failure
+2. Correlated failures
+3. Cascading failures
+4. Overload
+   
+- Circuit breaker
+- truncated exponontial
+  
+resilient data storage with lazy deletion
+
+degraded
+
+### Matrics for reliable systems
+
+**availability**
+the percent of time a system is running and able to process requests.
+- monitoring is vital, health check
+- building in fault tolerance, removing single points of failure 
+- Backup systems
+
+**durability**
+- the chance of losing data because hardware or system failure
+- data is preserved and available is a mixture of replication and backup
+- replicated in multiple zones
+- Regular restores from backup should be performed to confirm that the process works as expected
+
+**scalability**
+- the ability of a system to continue to work as user load and data grow
+- Monitoring and autoscaling should be used to respond to variations in load
 
 ### Load balancer
 
