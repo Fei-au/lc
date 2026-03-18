@@ -327,8 +327,29 @@ points of presence PoPs, where Google's network is connected to rest of the worl
 Global private network, globally, resources across regions can communicate using their internal IP addressees within same VPC
 
 Services
-
-
+ 
+1. specific machine and os requirements: Compute engine
+2. wheter use containers (microservice architecture): GKE or Cloud Run, depending on whether configure own kubernetes cluster
+3. If no container 
+    1. event-driven: Cloud Run functions
+    2. no event-driven: App Engine
+  
+### Compute Engine
+- Iaas
+For applications that are not containerized
+For application that is a database
+  
+#### Instance group for variations
+- instance templates: defines boot disk image, machine type, labels, startup script...
+- autoscaling, could be in multiple zones for high availability, use a global load balancer to distribute traffic, and use CDN for static content
+  
+  
+## Reliable systems
+  
+  1. Single points of failure
+  2. Correlated failures
+  3. Cascading failures
+    
 
 # IaaS and PaaS
 
