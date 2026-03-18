@@ -330,6 +330,30 @@ Services
 
 
 
+### Load balancer
+
+Application load balancer and network load balancer
+
+![image-20260317191106019](./gcp_note.assets/image-20260317191106019.png)
+
+![image-20260317191143840](./gcp_note.assets/image-20260317191143840.png)
+
+Application load balancer, use CDN to cache data
+
+**Network Intelligence Center**
+
+visualize your VPC’s network topology and test network connectivity
+
+**Choose Load balancer**
+
+![image-20260317191449639](./gcp_note.assets/image-20260317191449639.png)
+
+![image-20260317191605483](./gcp_note.assets/image-20260317191605483.png)
+
+![image-20260317191632091](./gcp_note.assets/image-20260317191632091.png)
+
+### Peering, Cloud VPN, and Cloud Interconnect
+
 # IaaS and PaaS
 
 Three wave of cloud computing
@@ -925,6 +949,8 @@ Detailed Example:
 4. Put it inside a NEW envelop with Cloud Gateway IP as source IP, on-premises Gateway IP as destination IP. payload encrypted.
 
 In comparison with HTTPS, the browser or server encrypt the data, even routers can see the content, but it is not informative.
+
+Cloud Gateway is a Regional Resources
 
 3 **Router**
 
