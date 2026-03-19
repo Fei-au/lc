@@ -350,13 +350,6 @@ For application that is a database
 2. Correlated failures
 3. Cascading failures
 4. Overload
-   
-- Circuit breaker
-- truncated exponontial
-  
-resilient data storage with lazy deletion
-
-degraded
 
 Reliability
 
@@ -373,12 +366,19 @@ A group of related items that could fail together, is refered as a fault domain.
 Cascading failures: Like a message queue overload
 - health check in CE or readiness probe in GKE
 - new server should start up quickly
+
+Query of death: a request causes a failure in the service
+- latency, resource, utilization and error rates should be monitored to help identify the problem
 - retry in a proper way
   - use exponential backoff strategy, and add jitter to avoid thundering herd problem.
   - circuit breaker used to fail following requests after it receives certain number of failures, and resume when a test of requests succeed
   (GKE, the Istio service mesh automatically implements circuit breakers)
   
-lazy deletion
+recover data
+- lazy deletion, viable to the user who deleted for like 30 days, after that move it to soft deletion phase, which can be restored by admin
+
+
+
 
 
 ### Matrics for reliable systems
