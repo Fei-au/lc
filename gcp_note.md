@@ -358,6 +358,29 @@ resilient data storage with lazy deletion
 
 degraded
 
+Reliability
+
+single points of failure:
+- relicating data
+- multiple virtual machine instances, two extra instance or N plus 2 for failure and upgraded
+- instances deployed in different zones
+- for scaling, make each units interchangeable, stateless clones
+
+correlated failures: related items fail at the same time
+A single machine / top-of-rack switch / zone or region /configuration fails, all following processes relying on it will fail as well
+A group of related items that could fail together, is refered as a fault domain. Decouple it into microservices can be a solution
+
+Cascading failures: Like a message queue overload
+- health check in CE or readiness probe in GKE
+- new server should start up quickly
+- retry in a proper way
+  - use exponential backoff strategy, and add jitter to avoid thundering herd problem.
+  - circuit breaker used to fail following requests after it receives certain number of failures, and resume when a test of requests succeed
+  (GKE, the Istio service mesh automatically implements circuit breakers)
+  
+lazy deletion
+
+
 ### Matrics for reliable systems
 
 **availability**
