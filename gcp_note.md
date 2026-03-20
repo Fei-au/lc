@@ -327,25 +327,47 @@ points of presence PoPs, where Google's network is connected to rest of the worl
 Global private network, globally, resources across regions can communicate using their internal IP addressees within same VPC
 
 Services
- 
+
 1. specific machine and os requirements: Compute engine
 2. wheter use containers (microservice architecture): GKE or Cloud Run, depending on whether configure own kubernetes cluster
 3. If no container 
     1. event-driven: Cloud Run functions
     2. no event-driven: App Engine
-  
+
 ### Compute Engine
 - Iaas
-For applications that are not containerized
-For application that is a database
+  For applications that are not containerized
+  For application that is a database
   
 #### Instance group for variations
 - instance templates: defines boot disk image, machine type, labels, startup script...
 - autoscaling, could be in multiple zones for high availability, use a global load balancer to distribute traffic, and use CDN for static content
-  
-  
+### Load balancer
+
+Application load balancer and network load balancer
+
+![image-20260317191106019](./gcp_note.assets/image-20260317191106019.png)
+
+![image-20260317191143840](./gcp_note.assets/image-20260317191143840.png)
+
+Application load balancer, use CDN to cache data
+
+**Network Intelligence Center**
+
+visualize your VPC’s network topology and test network connectivity
+
+**Choose Load balancer**
+
+![image-20260317191449639](./gcp_note.assets/image-20260317191449639.png)
+
+![image-20260317191605483](./gcp_note.assets/image-20260317191605483.png)
+
+![image-20260317191632091](./gcp_note.assets/image-20260317191632091.png)
+
+### Peering, Cloud VPN, and Cloud Interconnect
+
 ## Reliable systems
-  
+
 1. Single points of failure
 2. Correlated failures
 3. Cascading failures
@@ -374,6 +396,7 @@ Query of death: a request causes a failure in the service
   - circuit breaker used to fail following requests after it receives certain number of failures, and resume when a test of requests succeed
   (GKE, the Istio service mesh automatically implements circuit breakers)
   
+
 recover data
 - lazy deletion, viable to the user who deleted for like 30 days, after that move it to soft deletion phase, which can be restored by admin
 
@@ -385,9 +408,11 @@ recover data
 
 **availability**
 the percent of time a system is running and able to process requests.
+
 - monitoring is vital, health check
 - building in fault tolerance, removing single points of failure 
 - Backup systems
+- db use multi-zones, and use distributed database
 
 **durability**
 - the chance of losing data because hardware or system failure
@@ -399,29 +424,11 @@ the percent of time a system is running and able to process requests.
 - the ability of a system to continue to work as user load and data grow
 - Monitoring and autoscaling should be used to respond to variations in load
 
-### Load balancer
+**Disaster recovery**
 
-Application load balancer and network load balancer
+Recovery time of object: how long it can take to be back up and running.
 
-![image-20260317191106019](./gcp_note.assets/image-20260317191106019.png)
-
-![image-20260317191143840](./gcp_note.assets/image-20260317191143840.png)
-
-Application load balancer, use CDN to cache data
-
-**Network Intelligence Center**
-
-visualize your VPC’s network topology and test network connectivity
-
-**Choose Load balancer**
-
-![image-20260317191449639](./gcp_note.assets/image-20260317191449639.png)
-
-![image-20260317191605483](./gcp_note.assets/image-20260317191605483.png)
-
-![image-20260317191632091](./gcp_note.assets/image-20260317191632091.png)
-
-### Peering, Cloud VPN, and Cloud Interconnect
+recovery point objective: the amount of data that would be acceptable to lose
 
 # IaaS and PaaS
 
