@@ -1821,6 +1821,99 @@ Configuring stateful IP addresses in a managed instance group ensures that appli
 
 But for web service, we do not need to keep the stateful IP, cause load balancer is pointing to the instance group, and the LB update the states of each instances and IPs, so the stateful IP is not necessary.
 
+# GKE
+
+GKE at scale
+
+## Multi-cloud and multi-cluster
+
+- Compliance
+- Minimize risk
+- Increase resilience
+- Leveraging existing cloud commitments
+
+## GKE
+
+clusters across different projects, other provider, on-premises
+
+- modernize your existing applications and infrastructure
+- create, update, and optimize container clusters
+- scale large multi-cluster applications
+- enforce consistent governance and security
+
+![image-20260320225609890](./gcp_note.assets/image-20260320225609890.png)
+
+Additional GKE services and tools
+
+- configuration and policy management
+- Team management
+- Cloud Service Mesh
+- identity management features
+- observability features
+
+## Sameness and trust
+
+Sameness 
+
+Kubernetes objects that have the same name, like namespaces, are treated equally, even if they are in different clusters.
+
+Trust
+
+resources can be managed at the fleet level instead of individually configuring each cluster.
+
+Organize fleets based on organizational requirements
+
+- fleet host project
+- Clusters with services that frequently communicate with each other have significant advantages when managed in a fleet.
+
+Teams
+
+- Teams might go against the principles of sameness within GKE
+
+## GKE fleet management
+
+**Connect Agent**
+
+- Manage fleet connections between Google Cloud and other cloud providers
+- Automatically installed with cluster registration
+- Securely connect cluster and Google Cloud host project
+
+**Load balancing solutions**
+
+Network Load balancer
+
+Application Load balancer
+
+**Authentication and authorization**
+
+- Using google credentials
+- Google identity
+- Third-party credentials
+- SAML and LDAP 
+
+**Policy Controller**
+
+- Consistent enforcement of security and regulatory compliance across a fleet can be challenging
+- Validates every API requests to your Kubernetes cluster and ensures compliance
+
+**Application-level security**
+
+- Use binary authorization to deploy only trusted images on your clusters
+- Use Kubernetes network policy to control communication between Pods and network endpoints
+- Use Cloud Service Mesh to control communication between services
+
+**Observability**
+
+- Observability and dashboard
+- Cloud logging and Cloud monitoring
+- Integrate tools
+
+
+
+
+
+
+
 # Infrastructure as code (IaC)
 
 **Terraform**
