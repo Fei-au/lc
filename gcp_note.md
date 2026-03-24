@@ -1832,6 +1832,47 @@ GKE at scale
 - Increase resilience
 - Leveraging existing cloud commitments
 
+### Single cluster GKE and containers
+
+containers
+
+- portable, standalone, executable packages of software 
+- include everything needed to run an application-- code, runtime, system tools, system libraries, and settings
+- DevOps teams can leverage containers to rapidly deploy and scale applications
+
+Kubernetes
+
+- automated placement
+- Service discovery and load balancing
+- Automated rollouts and rollbacks
+- Resource management
+- Health monitoring and healing
+- Centralized management
+
+GKE
+
+- A fully-managed service that handles
+  infrastructure provisioning, networking, load
+  balancing, security, and upgrades
+- User friendly console, scalability, high availability,
+  security, and cost-effectiveness
+
+### Centralize
+
+With GKE, you can manage your clusters in one place, regardless of where they're located. From running clusters in Google Cloud, to Azure AKS, or AWS EKS, GKE provides a comprehensive, centralized, and fully managed Kubernetes experience.
+
+Use additional features like Cloud Service Mesh, Policy Controller and
+Config Controller, you must register your GKE clusters with a **GKE fleet.**
+
+Authenticate
+
+- For google cloud, use **Connect gateway** with Google ID 
+- **Workforce identity federation** for third party identity
+
+**Single environment**
+
+
+
 ## GKE
 
 clusters across different projects, other provider, on-premises
