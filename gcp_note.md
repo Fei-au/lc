@@ -1832,6 +1832,18 @@ GKE at scale
 - Increase resilience
 - Leveraging existing cloud commitments
 
+### Centralize
+
+With GKE, you can manage your clusters in one place, regardless of where they're located. From running clusters in Google Cloud, to Azure AKS, or AWS EKS, GKE provides a comprehensive, centralized, and fully managed Kubernetes experience.
+
+Use additional features like Cloud Service Mesh, Policy Controller and
+Config Controller, you must register your GKE clusters with a **GKE fleet.**
+
+Authenticate
+
+- For google cloud, use **Connect gateway** with Google ID 
+- **Workforce identity federation** for third party identity
+
 ### Single cluster GKE and containers
 
 containers
@@ -1857,19 +1869,80 @@ GKE
 - User friendly console, scalability, high availability,
   security, and cost-effectiveness
 
-### Centralize
+### **A simple env for GKE**
 
-With GKE, you can manage your clusters in one place, regardless of where they're located. From running clusters in Google Cloud, to Azure AKS, or AWS EKS, GKE provides a comprehensive, centralized, and fully managed Kubernetes experience.
+Configuration parts
 
-Use additional features like Cloud Service Mesh, Policy Controller and
-Config Controller, you must register your GKE clusters with a **GKE fleet.**
+- Config Sync
+- Workload Identity
+- Policy Controller
+- Service Mesh: controls and secures traffic flow between your services
 
-Authenticate
+Clusters
+- eg. 2 clusters for prod, 1 cluster for dev
+- distributed across regions
 
-- For google cloud, use **Connect gateway** with Google ID 
-- **Workforce identity federation** for third party identity
+Load Balancing
+- Cloud Load Balancing distributes application traffic across regions to Kubernetes service objects (in each cluster).
 
-**Single environment**
+### Namespaces and Tenants
+
+Resource management and optimization
+
+- Namespaces provide a fundamental way to divide a cluster into multiple virtual clusters
+    - own resource quotas and limits, amount of CPU, memory
+    - resource isolation
+- tenants serve as an abstraction to represent multiple users and workloads
+    - each with different permissions and roles.
+    - tenants are implemented as namespaces
+
+Explaination:
+Cluster owns the acutal RAM, CPU, Disk
+Namespace is the logical division of the cluster, like it holds 4GB RAM, 2 CPU, 100GB disk
+Tenant is the abstraction of users and workloads that uses the namespace.
+
+Eg.:
+Cluster 1 us-east1-a:
+    Namespace-1-prod-payment (Tenant 1): Service A, Service B
+    Namespace-1-prod-inventory (Tenant 1): Service C, Service D
+    Namespace-1-prod-frontend (Tenant 1): Service E, Service F
+    
+    Namespace-1-dev-payment (Tenant 1): Service A, Service B
+    Namespace-1-dev-inventory (Tenant 1): Service C, Service D
+    Namespace-1-dev-frontend (Tenant 1): Service E, Service F
+    
+    Namespace-2-prod-payment (Tenant 2): Service A, Service B
+    ...
+    Namespace-2-dev-payment (Tenant 2): Service A, Service B
+    ...
+
+Cluster 2 eu-west1-a:
+    Namespace-1-prod-payment (Tenant 1): Service A, Service B
+    ...
+    Namespace-1-dev-payment (Tenant 1): Service A, Service B
+    ...
+    Namespace-2-prod-payment (Tenant 2): Service A, Service B
+    ...
+    Namespace-2-dev-payment (Tenant 2): Service A, Service B
+
+### **Structure of GKE**
+
+![image-20260326140932866](E:\code\lc\gcp_note.assets\image-20260326140932866.png)
+
+1. Common:
+Cloud Build, Artifact Registry, and Cloud Deploy
+
+2. Envs:
+Production
+- two clusters to cover high availability and disaster recovery use cases
+Non-production
+Development
+- one cluster
+
+3. Adjacent Cloud Services
+like Cloud Monitoring and Cloud Logging
+
+- 
 
 
 
@@ -1892,7 +1965,55 @@ Additional GKE services and tools
 - identity management features
 - observability features
 
-## Sameness and trust
+**Authentication and authorization**
+
+- Using google credentials
+- Google identity
+- Third-party credentials
+- SAML and LDAP 
+
+### **Policy Controller**
+
+Policy Controller is a Kubernetes policy enforcement engine (based on OPA Gatekeeper) used to validate and govern cluster resources.
+
+- Consistent enforcement of security and regulatory compliance across a fleet can be challenging
+- Validates every API requests to your Kubernetes cluster and ensures compliance
+
+- only approved container registries are allowed
+- required labels/annotations must exist
+- privileged pods or hostPath mounts are blocked
+- namespaces must follow naming/security standards
+
+### **Cloud Service Mesh**
+
+Cloud Service Mesh is Google’s managed service mesh (Istio-based) for service-to-service networking and security.
+It provides:
+
+- mTLS encryption between services
+- traffic management (routing, canary, retries, failover)
+- observability (metrics, traces, service-level telemetry)
+- policy and access control between workloads
+
+**Application-level security**
+
+- Use binary authorization to deploy only trusted images on your clusters
+- Use Kubernetes network policy to control communication between Pods and network endpoints
+- Use Cloud Service Mesh to control communication between services
+
+### **Observability**
+
+- Observability and dashboard
+- Cloud logging and Cloud monitoring
+- Integrate tools
+
+## Fleet
+
+For disaster recover, high availability
+
+- A fleet includes many same cluster, same ingress, same config, same services
+- A high level load balancer distribute traffic between them for disaster, high availability
+
+### Sameness and trust
 
 Sameness 
 
@@ -1911,7 +2032,7 @@ Teams
 
 - Teams might go against the principles of sameness within GKE
 
-## GKE fleet management
+### fleet management
 
 **Connect Agent**
 
@@ -1925,33 +2046,11 @@ Network Load balancer
 
 Application Load balancer
 
-**Authentication and authorization**
+- Within one fleet, among clusters
 
-- Using google credentials
-- Google identity
-- Third-party credentials
-- SAML and LDAP 
+  There is a high level load balancer that can distribute traffic to different clusters in one fleet
 
-**Policy Controller**
-
-- Consistent enforcement of security and regulatory compliance across a fleet can be challenging
-- Validates every API requests to your Kubernetes cluster and ensures compliance
-
-**Application-level security**
-
-- Use binary authorization to deploy only trusted images on your clusters
-- Use Kubernetes network policy to control communication between Pods and network endpoints
-- Use Cloud Service Mesh to control communication between services
-
-**Observability**
-
-- Observability and dashboard
-- Cloud logging and Cloud monitoring
-- Integrate tools
-
-
-
-
+- 
 
 
 
