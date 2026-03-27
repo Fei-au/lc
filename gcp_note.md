@@ -2006,6 +2006,8 @@ It provides:
 - Cloud logging and Cloud monitoring
 - Integrate tools
 
+
+
 ## Fleet
 
 For disaster recover, high availability
@@ -2039,6 +2041,12 @@ Teams
 - Manage fleet connections between Google Cloud and other cloud providers
 - Automatically installed with cluster registration
 - Securely connect cluster and Google Cloud host project
+- This connection is authenticated and encrypted using Transport Layer Security, or TLS.
+- If you want to manage an existing Kubernetes cluster with GKE, you must register it with a GKE fleet.
+
+**Connect Gateway**
+
+- a secure entry point for accessing your registered clusters from anywhere, regardless of your network location.
 
 **Load balancing solutions**
 
@@ -2050,7 +2058,15 @@ Application Load balancer
 
   There is a high level load balancer that can distribute traffic to different clusters in one fleet
 
-- 
+**Authenticate**
+
+- OIDC, Microsoft Entra AD or Azure AD, and Okta and bearer tokens.
+
+
+
+
+
+
 
 
 
