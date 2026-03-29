@@ -2012,8 +2012,31 @@ It provides:
 
 For disaster recover, high availability
 
-- A fleet includes many same cluster, same ingress, same config, same services
+- A fleet includes many same cluster, same ingress, same config, same services, VMs
+- It is within a host project, spanning across Google Cloud, VPC networks, and projects
 - A high level load balancer distribute traffic between them for disaster, high availability
+
+Fleet-enabled components
+
+- Workload identity pools: simplify service authentication and authorization
+- Multi-cluster gateways: low latency and high availability (load-balancing)
+- Cloud Service Mesh: monitor and manage a reliable service mesh on Google Cloud, on premises, or on other supported Cloud providers.
+- Config Controller: deploys, monitors, and enforces declarative policies from a central Git repository
+
+Benefits:
+
+- same namespaces, services, workload identities, mesh identity, and access.
+- Each fleet-aware resource, like a namespace or service, belongs to only one fleet.
+- Security policies applied at the fleet level automatically extend to all clusters within it.
+- communicate frequently can be placed in the same fleet
+- Flexible service organization for easier administration
+- centralizing policy and governance at the fleet level while retaining multiple clusters
+
+Create fleet
+
+Register a new cluster (Autopilot cluster, GKE standard cluster) to a fleet in (same project, different project)
+
+
 
 ### Sameness and trust
 
