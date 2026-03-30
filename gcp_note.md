@@ -2036,7 +2036,97 @@ Create fleet
 
 Register a new cluster (Autopilot cluster, GKE standard cluster) to a fleet in (same project, different project)
 
+### Config Controller
 
+a fully managed service that allows you to manage Google Cloud resources (like bucket, DB, network) using Kubernetes-style declarative configuration.
+
+extending Kubernetes's powerful configuration management tools to your entire Google Cloud infrastructure.
+
+benefits
+
+- No need to build tools from scratch, simplified management
+- consistent configuration and policy management.
+- scalable, automated, and reliable management of configurations and systems in production.
+- Reduce risk with customizable and consistent policies across environments.
+
+**Config Sync**
+
+**“Multi-cluster consistency”**、**“GitOps”** , **“Declarative management”**
+
+- syncs your clusters to a central set of configurations stored in one or more Git repositories.
+- ensures consistent, auditable, and version-controlled configurations across clusters and environments.
+
+For example: get YAML from git, move to clusters  
+
+![image-20260329210307768](./gcp_note.assets/image-20260329210307768.png)
+
+![image-20260329210703042](./gcp_note.assets/image-20260329210703042.png)
+
+- Config Management Operator: they manage Config Sync components and require cluster admin permissions.
+
+- Reconciler Manager: they create and manage reconcilers for RootSync and RepoSync objects, ensuring synchronization.
+
+  
+
+### **Policy Controller**
+
+- enforces programmable policies
+- prevent configurations from violating security and compliance controls
+- features a library of pre-built policies
+- review and maintain configuration compliance
+
+It enforces security and compliance policies on the desired state.
+
+For example: check YAML configuration follow compliance or any other rules
+
+![image-20260329211513736](./gcp_note.assets/image-20260329211513736.png)
+
+![image-20260329211548427](./image-20260329211548427.png)
+
+**图纸 (Template)** -> **规则 (Constraint)** -> **应用 (Enforcement)**
+
+1. 图纸 vs 规则，ConstraintTemplate (约束模板 - "图纸")，**Constraint (约束 - "规则实体")**
+2. Built-in Policy (内置策略库)
+3. Custom Policy (自定义策略)
+4. Policy Constraints 的执行动作 enforcement
+
+### **Config Connector**
+
+- uses an API endpoint to provision and orchestrate GKE and Google Cloud resources
+- can also be run in your cluster
+
+For example: run the YAML and do the work
+
+![image-20260329184520763](./gcp_note.assets/image-20260329184520763.png)
+
+![image-20260329212642024](./gcp_note.assets/image-20260329212642024.png)
+
+### Blueprints
+
+To simplify matters and make things easier
+
+![image-20260329212924630](./gcp_note.assets/image-20260329212924630.png)
+
+Google provides pre-built blueprints for both Kubernetes and Terraform.
+
+![image-20260329213049369](./gcp_note.assets/image-20260329213049369.png)
+
+![image-20260329213150764](./gcp_note.assets/image-20260329213150764.png)
+
+The landing zone blueprint specifies the environment where.
+
+And the enterprise application blueprint indicates the applications, what and how.
+
+![image-20260329213331006](./gcp_note.assets/image-20260329213331006.png)
+
+Google Cloud 提供了几种针对不同场景的蓝图：
+
+1. **GKE Enterprise Foundation Blueprint:**
+   - 这是最基础、也是 PCA 考试最常涉及的。它教你如何建立一个跨多区域、带治理功能的“基座”。
+2. **Multitenant Batch Workload Blueprint:**
+   - 专门针对运行批处理任务（如数据分析、AI 训练）的场景，优化了成本和资源隔离。
+3. **PCI-DSS on GKE Blueprint:**
+   - 如果你的 WMS 系统需要处理支付信息，这个蓝图会自动帮你配置好所有符合 PCI 安全标准的合规项。
 
 ### Sameness and trust
 
@@ -2058,6 +2148,86 @@ Teams
 - Teams might go against the principles of sameness within GKE
 
 ### fleet management
+
+**Team scope**
+
+- operators and admins can access information defined by the scope, like resource utilization, logs, errors, and metrics.
+- facilitate resource assessment, troubleshooting, and rollout sequencing upgrades.
+- members can use Connect gateway to log in with their Google credentials and authenticate with Google groups
+
+![image-20260329001217406](./gcp_note.assets/image-20260329001217406.png)
+
+![image-20260329001607270](./gcp_note.assets/image-20260329001607270.png)
+
+**Rollout sequencing**
+
+fleet management feature used to manage software updates at scale.
+
+在 GKE 中，Rollout Sequence 定义了**升级动作的具体步骤和策略**。它决定了流量如何从旧节点（蓝色）迁移到新节点（绿色），以及在什么阶段触发浸泡观察。
+
+在一个典型的蓝绿升级中，Rollout Sequence 通常包含以下几个关键阶段，而 Soaking Time 嵌入在其中：
+
+1. **排水阶段 (Drain Phase)**
+
+Rollout Sequence 开始，系统会逐个“驱逐”旧节点上的 Pod。
+
+- **动作：** 在新节点（绿色）上启动新 Pod，同时在旧节点（蓝色）上触发优雅停机。
+- **目的：** 确保业务不中断。
+
+2. **流量切换阶段 (Traffic Shift)**
+
+这是序列中的关键点。你可以配置是“一次性全切”还是“分批切”。
+
+- **联系：** 当流量完全切换到绿色节点池后，**Soaking Time 正式开启**。
+
+**3. 浸泡阶段 (Soaking Phase)**
+
+这是 Rollout Sequence 里的“暂停键”。
+
+- **动作：** 序列在此处挂起（Pending）。
+- **目的：** 给你时间运行自动化测试或人工观察。
+
+**4. 确认/清理阶段 (Finalize/Cleanup)**
+
+- **自动模式：** 如果 Soaking Time 结束且没有报警，Rollout Sequence 进入最后一步：删除旧节点池。
+- **手动模式：** 你可以在序列中设置“手动确认”。即使浸泡时间到了，除非你点一下“完成”，否则旧节点会一直留着。
+
+Google Cloud 选项
+
+**Surge Upgrade**（默认）：速度快，省钱（只多收 1 个节点的钱），但没有真正的 Soaking Time，回滚较慢。
+
+**Blue-Green Upgrade**：安全性最高。利用 **Rollout Sequence** 确保平滑过渡，利用 **Soaking Time** 确保万无一失。
+
+![image-20260329002137190](./gcp_note.assets/image-20260329002137190.png)
+
+**Team-based sequences** require each team to have its own dedicated cluster, and team scope must be in a separate fleet.
+
+![image-20260329002633824](./gcp_note.assets/image-20260329002633824.png)
+
+### Soak time
+
+ is the delay between upgrades in different groups.
+
+蓝绿升级（Blue-Green Upgrades）
+
+在进行集群节点池的蓝绿升级时，GKE 会创建一个完整的新节点池（绿色环境），并将流量切过去。**Soaking Time 指的是：在旧节点池（蓝色环境）被彻底删除之前，新节点池维持运行并承载流量的这段等待时间。**
+
+- 稳定性观察
+- 快速回滚
+- 业务验证
+
+在 GKE 节点池升级过程中，流程通常如下：
+
+1. **准备阶段：** GKE 创建新的“绿色”节点池。
+2. **切换阶段：** 将工作负载从“蓝色”节点迁移到“绿色”节点。
+3. **浸泡阶段（Soaking）：** 此时新旧节点池共存。**Soaking Time 开始计时。**
+   - 如果计时结束前你没点“回滚”，也没有发生严重的异常，升级会自动完成。
+   - 你可以手动缩短（完成）或延长这段时间。
+4. **清理阶段：** Soaking Time 结束后，GKE 会自动删除旧的“蓝色”节点池，释放资源。
+
+![image-20260329002827102](./gcp_note.assets/image-20260329002827102.png)
+
+![image-20260329002912045](./gcp_note.assets/image-20260329002912045.png)
 
 **Connect Agent**
 
@@ -2087,11 +2257,25 @@ Application Load balancer
 
 
 
+### Fleet Solutions
+
+![image-20260328235820131](./gcp_note.assets/image-20260328235820131.png)
+
+![image-20260329000012985](./gcp_note.assets/image-20260329000012985.png)
+
+![image-20260329000221762](./gcp_note.assets/image-20260329000221762.png)
 
 
 
+### Management
 
+**Drift** is when the real-world state of your infrastructure differs from the state defined in your configuration.
 
+To solve this challenge, you can manage configuration declaratively with **GitOps**.
+
+Instead of individual teams or tools directly modifying the state of a cluster, changes are made and stored in a shared centralized repository.
+
+automatically synchronize configurations and policies across clusters and Cloud resources
 
 # Infrastructure as code (IaC)
 
