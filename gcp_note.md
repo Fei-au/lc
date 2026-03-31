@@ -2277,6 +2277,16 @@ Instead of individual teams or tools directly modifying the state of a cluster, 
 
 automatically synchronize configurations and policies across clusters and Cloud resources
 
+## Fleet Networking
+
+### Network Endpoint Group
+
+Global HTTPS load balancers use Anycast IPs and Network Endpoint Groups, or NEGs, to distribute traffic efficiently.
+
+**service discovery mechanisms**
+
+Problem: Pods are ephemeral, can be created and destroyed dynamically. So it's hard to communicate with each other
+
 # Infrastructure as code (IaC)
 
 **Terraform**
