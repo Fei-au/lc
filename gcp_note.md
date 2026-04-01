@@ -2287,6 +2287,50 @@ Global HTTPS load balancers use Anycast IPs and Network Endpoint Groups, or NEGs
 
 Problem: Pods are ephemeral, can be created and destroyed dynamically. So it's hard to communicate with each other
 
+**Service**
+
+Within one cluster
+
+It is a permanent, logical object in the Kubernetes API. It's in the **Network Layer**. It includes
+
+- **A selector**. A rule like app: orders-db
+- **A Port Mapping**: it defines which port it listens on
+- **An Endpoints list**: GKE maintains a hidden list called Endpoints, it's the real-time list of all healthy Pods IPs that match the selector.
+
+The path of sending requests to a service
+
+1. The frontend code sends a request to http://orders-db:3306
+2. The frontend Pod asks the internal GKE DNS, the IP of orderes-db
+   1. The Internal GKE DNS runs as a Pods inside your cluster (usually in the `kube-system` namespace). And both services are within in one cluster. Every node in your cluster has a small cache (NodeLocal DNSCache) to make these lookups fast.
+3. DNS server responses the IP of the selector
+4. The traffic hits the selector, and the selector redirects the traffic to actual Pod IP
+   1. It's the Linux Kernel to route traffic to each nodes
+   2. Every node in the cluster has a component called `kube-proxy`, it programs the **IPtables** (or IPVS) of the Linux kernel on that node based on the **Endpoint list**.
+
+### MultiCluster Services MCS
+
+MCS acts as a central definition for a service that spans multiple clusters
+
+- MCS uses Cloud DNS to enable cross-cluster service discovery.
+- Multicluster service configuration is separate from Istio and Cloud service mesh.
+- Multicluster service is only available for GKE clusters, and those clusters must be using VPC native networking.
+
+An MCS selects pods using labels and clusters.
+
+- MCS chooses from clusters registered to the fleet called member clusters
+- Then it generates a derived service, which creates a NEG (network endpoint group)
+- NEG tracks POD endpoints for all pods that match the specified label selector in the cluster.
+- If there is label selector in the cluster, NEG is empty, otherwise, those POD IPs will be added as backends for the multicluster gateway
+
+the MCS is acting as the blueprint for the matching clusters to create a derived service from
+
+**Enable** **MCS**
+
+1. First enable APIs-- MCS, Fleet Hub, Resource Manager, Cloud Service Mesh and Cloud DNS.
+2. use the gcloud container fleet
+3. Use command to enable the MCS feature for your project's fleet
+4. use the gcloud container fleet memberships register command to register your GKE clusters to the fleet
+
 # Infrastructure as code (IaC)
 
 **Terraform**
