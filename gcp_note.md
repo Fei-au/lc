@@ -2318,11 +2318,13 @@ MCS acts as a central definition for a service that spans multiple clusters
 An MCS selects pods using labels and clusters.
 
 - MCS chooses from clusters registered to the fleet called member clusters
-- Then it generates a derived service, which creates a NEG (network endpoint group)
+- Then it generates a **derived service**, which creates a NEG (network endpoint group)
 - NEG tracks POD endpoints for all pods that match the specified label selector in the cluster.
 - If there is label selector in the cluster, NEG is empty, otherwise, those POD IPs will be added as backends for the multicluster gateway
 
 the MCS is acting as the blueprint for the matching clusters to create a derived service from
+
+While MCS typically schedules derived services on all target clusters, you can explicitly select specific clusters for deployment.
 
 **Enable** **MCS**
 
@@ -2330,6 +2332,126 @@ the MCS is acting as the blueprint for the matching clusters to create a derived
 2. use the gcloud container fleet
 3. Use command to enable the MCS feature for your project's fleet
 4. use the gcloud container fleet memberships register command to register your GKE clusters to the fleet
+
+### Multi-cluster gateway MCG
+
+Gateway API has several key resources, including gateway class, gateways, routes, and policies
+
+**Gateway class** provides a template for creating load balancers.
+
+**Gateways** define where and how load balancers listen for traffic. Cluster operators create gateways based on a gateway class.
+
+**HTTP routes** define rules for routing HTTP(S) requests from a gateway to Kubernetes services.
+
+**Policies** define implementation-specific characteristics of a gateway resource -- for example, health checks and front end or back end configurations.
+
+**Configure steps**
+
+1. gateway Custom Resource Definition, CRD
+
+2. gateway API is enabled
+
+3. gateway YAML file, specify the 
+
+   1. name of the resource 
+   2. the target namespace
+   3. The gatewayClassName, which determines the type of load balancer that will be provisioned.
+   4. To load balance across clusters, include mc at the end of the load balancer name.
+   5. create routes inside the gateway or in a separate HTTP route resource
+      1. An HTTPRoute defines rules for routing HTTPS requests from a gateway to backend services.
+      2. Use traffic splits to deliver requests based on weights
+   6. supports the GCPBackendConfig resource
+      1. connectionDraining to enable existing connections to complete when a backend is removed
+      2. iap enables you to authenticate and authorize employees to use internal applications
+      3. Cloud Armor Security policies help you protect your load balanced applications from web-based attacks, such as denial of service, cross-scripting injection, or SQL injection.
+      4. Enabling logging can log all HTTP requests from clients to cloud logging at a sampling rate of your choice.
+
+   
+
+## Workload Identity
+
+让运行在 GKE 里的 Pod 能像一个真实的“人”或“服务”一样，安全地去访问 Google Cloud 的其他资源
+
+**K8s ServiceAccount (KSA)：** 是 Kubernetes 集群内部的身份
+
+Workload Identity：只要是这个 KSA 发出的请求，就把它看作是那个指定的 IAM Service Account 在操作。
+
+工作原理：
+
+1. Pod 向 GKE 的元数据服务器请求令牌。
+2. GKE 验证该 Pod 使用的 **Kubernetes ServiceAccount (KSA)**。
+3. 通过 Workload Identity 映射，GKE 向 IAM 申请一个临时的、短寿命的 Access Token。
+4. Pod 拿到 Token，成功访问 Google Cloud 资源。
+
+**配置流程**：
+
+**第一步：开启集群功能**
+
+在创建或更新 GKE 集群时启用 Workload Identity
+
+```bash
+gcloud container clusters update CLUSTER_NAME \
+    --region=REGION \
+    --workload-pool=PROJECT_ID.svc.id.goog
+```
+
+**第二步：创建 IAM 角色并授权**
+
+在 Google Cloud 端创建一个 IAM Service Account (GSA)，并给它分配访问 Storage 的权限
+
+```bash
+# 创建 GSA
+gcloud iam service-accounts create my-gcp-sa
+
+# 授权
+gcloud projects add-iam-policy-binding PROJECT_ID \
+    --member="serviceAccount:my-gcp-sa@PROJECT_ID.iam.gserviceaccount.com" \
+    --role="roles/storage.objectViewer"
+```
+
+
+
+**第三步：建立身份绑定**
+
+允许 Kubernetes 的 ServiceAccount (KSA) “冒充”这个 GSA：
+
+```bash
+gcloud iam service-accounts add-iam-policy-binding my-gcp-sa@PROJECT_ID.iam.gserviceaccount.com \
+    --role="roles/iam.workloadIdentityUser" \
+    --member="serviceAccount:PROJECT_ID.svc.id.goog[NAMESPACE/MY-K8S-SA]"
+```
+
+**第四步：在 K8s 中标注**
+
+在 Kubernetes 内部创建一个 ServiceAccount，并添加一个特定的 **Annotation（注解）** 来指向 GSA：
+
+```yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: MY-K8S-SA
+  namespace: NAMESPACE
+  annotations:
+    iam.gke.io/gcp-service-account: my-gcp-sa@PROJECT_ID.iam.gserviceaccount.com
+```
+
+**第五步：部署 Pod**
+
+在 Pod 的配置中指定 `serviceAccountName: MY-K8S-SA`。此时，你的 Python 或 Go 代码只需要使用官方的 SDK（默认凭据），它就会自动识别并完成授权。
+
+## Workload Identity Federation for GKE
+
+直接绑定到 **IAM 策略** (无需中间的 GSA)
+
+**对应第三步**
+
+```bash
+gcloud projects add-iam-policy-binding PROJECT_ID \
+    --member "principal://iam.googleapis.com/projects/PROJECT_NUMBER/locations/global/workloadIdentityPools/PROJECT_ID.svc.id.goog/subject/ns/gke-mcs/sa/gke-mcs-importer" \
+    --role "roles/compute.networkViewer"
+```
+
+
 
 # Infrastructure as code (IaC)
 
