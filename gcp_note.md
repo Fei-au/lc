@@ -2366,7 +2366,147 @@ Gateway API has several key resources, including gateway class, gateways, routes
       3. Cloud Armor Security policies help you protect your load balanced applications from web-based attacks, such as denial of service, cross-scripting injection, or SQL injection.
       4. Enabling logging can log all HTTP requests from clients to cloud logging at a sampling rate of your choice.
 
-   
+## Cloud Service Mesh
+
+A service mesh is a transparent and intelligent network that sits alongside your application code managing how your various services interact with each other.
+
+处理微服务之间的通信、安全和可观察性
+
+### Two corn structure
+
+#### Data plane
+
+处理微服务之间的通信、安全和可观察性
+
+#### Control plan
+
+由 Google 全权负责维护。它负责存储配置、分发策略（如路由规则、安全设置）并管理网格中的身份验证
+
+
+
+### Why need cloud service mesh
+
+#### **流量管理 (Traffic Management)**
+
+- 灰度发布/蓝绿部署
+- 超时与重试
+- 负载均衡
+
+#### **安全 (Security)**
+
+- 双向 TLS (mTLS) a cryptographic protocol that secures data transmitted over the internet through encryption, authentication, and data integrity.
+- 身份验证与授权
+
+#### **可观察性 (Observability)**
+
+- 拓扑图
+- 黄金指标
+
+### 两种实现方式
+
+#### **Sidecar 模式 (基于 Istio):**
+
+如果你使用 gRPC 开发应用，可以直接让应用与控制面通信，省去了 Sidecar 代理带来的性能开销和资源占用。
+
+在每个 Pod 里运行一个 Envoy 容器。这是最经典的 Service Mesh 模式，功能最全，对现有应用的侵入性极低。
+
+#### **无代理模式 (Proxyless gRPC):**
+
+如果你使用 gRPC 开发应用，可以直接让应用与控制面通信，省去了 Sidecar 代理带来的性能开销和资源占用。
+
+### 使用流程
+
+**1 API and fleet**
+
+- 开启API
+
+- 整个fleet设置成默认使用CSM，这样新的Cluster加进来的时候会自动启动CSM
+
+**2 Enable applications use CSM**
+
+2.1 Sidecar automatically inject at the namespace level
+
+- 给namespace添加label，istio-injection=enabled，是GKE的功能标签，它区别于普通自定义标签。当开启了这个标签，GKE会意识到它并实行某种功能
+- Admission Webhook。在要生成新pod之前，会先看是否有label，有的话它会先配置上Envoy Proxy容器的配置，镜像地址，卷挂载等信息
+
+2.2 `annotate`（注解）
+
+- 让 Google 帮你维护这些 Sidecar
+- Envoy 代理的版本更新、安全补丁，你都不用管了，Google 帮你升级
+
+2.3 无代理模式（Proxyless gRPC）
+
+- 代码本来就是用 gRPC 写的，可以让应用直接和控制面说话
+
+**3 接管流量（拦截原理）**
+
+Envoy 是怎么强行截获流量的，是给Sidecar使用的。gPRC不走这里
+
+**流派 A：Init 容器（默认做法）**
+
+- 在你的应用启动前，先跑一个小容器，修改 Pod 内部的 `iptables`（网络防火墙规则）。
+
+  **缺点：** 这种方式需要 `NET_ADMIN` 权限，有些对安全性要求极高的公司不给这个权限。
+
+**流派 B：Istio CNI 插件（更安全）**
+
+- 在 Pod 还没出生（网络设置阶段）就直接把规则写好。
+- **优点：** 你的业务 Pod 不需要特殊权限，更安全，符合大型企业的合规要求。
+
+
+
+![image-20260403223648999](./gcp_note.assets/image-20260403223648999.png)
+
+![image-20260403223727160](./gcp_note.assets/image-20260403223727160.png)
+
+![image-20260403223745415](./gcp_note.assets/image-20260403223745415.png)
+
+![image-20260403223752417](./gcp_note.assets/image-20260403223752417.png)
+
+![image-20260403223813146](./gcp_note.assets/image-20260403223813146.png)
+
+![image-20260403223821653](./gcp_note.assets/image-20260403223821653.png)
+
+![image-20260403224244912](./gcp_note.assets/image-20260403224244912.png)
+
+这一步打小报告 (Telemetry)：顺便记录下：*“这次请求花了 50ms，成功了”*。这个“打小报告”的操作，在底层就是通过 WebAssembly **Wasm 扩展** 实现的
+
+但是Google 的 CSM (托管模式)不让自定义Wasm，因为很多不合格，造成Envoy崩溃。
+
+
+
+Dashbaords:
+
+latency, traffic, error, and saturation
+
+
+
+Service Level Indicators, or SLIs, are the key metrics you must report on, for example, latency and availability.
+
+After figuring out what to measure, SLIs, you can set targets for how good they need to be, SLOs.
+
+
+
+
+CSM is available with GKE or as a standalone offering on Google Cloud.
+
+Billing is determined by the Google APIs that are enabled on your project.
+
+
+
+虽然 CSM 的内核是 Istio，但因为它是**托管服务**，Google 为了保证系统的“绝对稳定”和“云原生集成”，会对原生的 Istio 功能做一些**裁剪**或**限制**。
+
+这就是为什么你会看到“**CSM 1.23 相比 Istio** 的局限性”：
+
+| **维度**      | **原生 Istio (自建)**                       | **Cloud Service Mesh (CSM)**                            |
+| ------------- | ------------------------------------------- | ------------------------------------------------------- |
+| **控制权**    | **完全控制。** 你可以改源代码，装任何插件。 | **有限控制。** 控制面由 Google 锁死。                   |
+| **Wasm 扩展** | 随意注入自定义 Wasm 模块。                  | **受限。** 因为未审核的代码可能导致托管服务崩溃。       |
+| **API 支持**  | 永远支持最新的 Istio API 特性。             | **稍有延迟。** 只有经过 Google 测试稳定的特性才会放出。 |
+| **CA 证书**   | 可以自建任何 CA 证书系统。                  | **默认集成。** 强制或推荐使用 Google Mesh CA。          |
+| **多集群**    | 手动配置非常复杂，容易出错。                | **舰队 (Fleet) 模式。** 跨集群配置被大大简化。          |
+
+
 
 ## Workload Identity
 
