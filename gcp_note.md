@@ -2279,6 +2279,17 @@ automatically synchronize configurations and policies across clusters and Cloud 
 
 ## Fleet Networking
 
+| **技术名称**               | **缩写** | **核心功能（人话版）**                                       | **作用层级**           |
+| -------------------------- | -------- | ------------------------------------------------------------ | ---------------------- |
+| **Network Endpoint Group** | **NEG**  | **“定位器”**。把具体的 Pod IP 映射给负载均衡器，直接对接硬件。 | **L3/L4 (网络层)**     |
+| **MultiCluster Services**  | **MCS**  | **“虚空之门”**。让 A 集群能直接用域名访问 B 集群的内网服务。 | **L4 (传输层/DNS)**    |
+| **Multi-cluster Gateway**  | **MCG**  | **“海关/大门”**。外网流量进入多个集群的总入口，负责分流。    | **L7 (应用层/入口)**   |
+| **Cloud Service Mesh**     | **CSM**  | **“智能交警+保镖”**。精细控制服务间怎么说话、加不加密、报不报警。 | **L7 (应用层/全路径)** |
+
+- NEG不可替代，是IP层的硬件功能
+- 在多集群服务治理场景下，CSM 确实替代了 MCS 的角色
+- 现在的 **Cloud Service Mesh (1.23+)** 已经深度集成了 **Gateway API**。这意味着你以后可以用**同一种语法**（Gateway 规格）来配置 MCG 和 CSM
+
 ### Network Endpoint Group
 
 Global HTTPS load balancers use Anycast IPs and Network Endpoint Groups, or NEGs, to distribute traffic efficiently.
@@ -2508,6 +2519,11 @@ Billing is determined by the Google APIs that are enabled on your project.
 
 ### Routing
 
+Configured in **YAML** file called **Kubernetes Custom Resource Definitions-- CRDs**
+
+- Control panel shares them with the envoy proxies via the Envoy xDS API
+- a set of protocols used by **Envoy proxies** or proxyless gRPC to **dynamically fetch** configurations from the control plane.
+
 #### **VirtualService** How
 
 looking at the incoming cars (requests) and deciding which lane they should take based on specific rules
@@ -2630,17 +2646,116 @@ spec:
 
 #### **Gateway**
 
-- Ingress gateways manage incoming traffic.
-- Egress gateways manage outgoing traffic.
+- greater granularity when configuring load balancing properties, TLS settings, and routing rules
+- Gateways are applied to standalone Envoy proxies at the mesh edge, not to sidecar proxies, and they configure Layer 4-6 load balancing (ports, TLS).
+- VirtualServices handle Layer 7 (application-level) routing bound to the Gateway.
 
-Gateway configuration settings are applied on
-Envoy proxy pods running on the edge of the
-mesh.
+#### Ingress gateways
+
+**load balancers located at the edge of the mesh**. They receive HTTP/TCP connections
+
+**VirtualService 是注入到 Gateway 内部的大脑里的**。流量并没有“跳”出 Gateway 去找 VirtualService，而是 Gateway 在接收到流量的那一瞬间，根据 VirtualService 赋予它的规则，决定了流量的去向。
+
+**所以，VirtualService 的作用就是：定义 Gateway 在拿到流量后，该如何根据 HTTP 细节（路径、Header、权重等）进行精准的“分拣”**
+
+```yaml
+# Ingress gateway
+# HTTP
+# external certificates
+apiVersion: networking.istio.io/v1
+kind: Gateway
+metadata:
+	name: bookinfo-gateway
+spec:
+    selector:
+    	istio: ingressgateway
+    servers:
+    - port:
+        number: 443
+        name: https
+        protocol: HTTPS
+    hosts:
+    - "*"
+    tls:
+        mode: SIMPLE
+        credeentialName: ext-cert
+        
+# VirtualService send traffic to the gateway
+# *: it accepts all traffic from any destination and after evaluated routes traffic based on route attribute
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+	name: bookinfo
+spec:
+    hosts:
+    	- "*"
+    gateways:
+    - bookinfo-gateway
+    http:
+        - match:
+            uri:
+                exact: /productpage
+            route:
+            - destination:
+                host: productpage
+                port:
+                    number: 9080
+```
+
+![image-20260408132550195](E:\code\lc\gcp_note.assets\image-20260408132550195.png)
+
+1. A Google **Cloud load balancer is created along with an ingress gateway**
+2. Inbound traffic flows from a load balancer into the mesh. The load balancer forwards
+   traffic to a NodePort and then to the ingress gateway pod.
+3. The ingress gateway deployment has a single **Envoy container configured with**
+   **VirtualServices and DestinationRules**
+4. The ingress gateway's **Envoy processes requests and forwards them to the**
+   **appropriate destination**
+
+#### Egress gateways
+
+Dedicated exit nodes for traffic leaving the mesh, controlling external network access.
+
+- Egress Gateways are useful for notes that lack public IPs and are unable to access the internet.
+
+![image-20260408133039108](E:\code\lc\gcp_note.assets\image-20260408133039108.png)
+
+
+
+#### East-west gateway 
+
+ Proxies for cross-cluster traffic in multi-primary meshes
+
+East-west gateways are essential for managing inter-cluster communication and applying policies to traffic flowing between clusters.
+
+
 
 #### **ServiceEntry**
 
 - Commonly used to enable requests to services outside of Cloud Service Mesh.
 - Useful for accessing external APIs or integrating with legacy services that are not part of the mesh.
+- Envoy proxies can send traffic to the service as if it was a service in your mesh
+- Define **retry, timeout, and fault injection policies** for external destinations.
+- **Add VMs** to your mesh and run services in them.
+- **Configure a multi-cluster** Istio mesh by logically adding services from different
+
+```yaml
+apiVersion: networking.istio.io/v1
+kind: ServiceEntry
+metadata:
+	name: svc-entry
+spec:
+    hosts:
+    - ext-svc.example.com
+    ports:
+    - number: 443
+        name: https
+        protocol: HTTPS
+    location: MESH_EXTERNAL
+    resolution: DNS
+```
+
+
 
 #### **Sidecar**
 
@@ -2653,11 +2768,54 @@ mesh.
 - Used to onboard non-Kubernetes workloads into the mesh. Like virtual machines and bare metal servers
 - A WorkloadEntry uses a ServiceEntry to select workloads and provide the service definition.
 
+A WorkloadEntry must have a corresponding ServiceEntry, which defines the service itself (hostnames, ports). ServiceEntry uses label selectors to associate the service with the WorkloadEntry
+
+Centralized workload monitoring and management: When a workload connects to Istio, its status is updated, containing its health and
+other details
+
+![image-20260408173640607](E:\code\lc\gcp_note.assets\image-20260408173640607.png)
+
+![image-20260408174449601](E:\code\lc\gcp_note.assets\image-20260408174449601.png)
+
+
+
+
+
 #### WorkloadGroup
 
 - A collection of workload instances.
 - Designed for non-Kubernetesworkloads.
 - Replicates the sidecar injection and deployment model used in Kubernetes to bootstrap Istio proxies.
+- WorkloadGroup is essentially a template for WorkloadEntry resources.
+
+![image-20260408180406765](E:\code\lc\gcp_note.assets\image-20260408180406765.png)
+
+是一个WorkloadEntry的模板，当有新的资源（VM）接入的时候，需要bootstrap（引导）配置。该VM需要定义两个文件
+
+1. /var/lib/istio/config/sidecar.env
+
+   ```bash
+   # 核心：告诉 Istiod 该套用哪个模版
+   ISTIO_META_WORKLOAD_GROUP=oracle-db-group 
+   
+   # 告诉 Istiod 应该在哪找这个组
+   ISTIO_META_NAMESPACE=database
+   
+   # 告诉 Istiod 这台 VM 叫什么名字（如果不写，通常会用 Hostname）
+   ISTIO_META_WORKLOAD_NAME=vm-instance-01
+   ```
+
+2. /var/lib/istio/config/mesh.yaml
+
+   这是 **“公共地图”**。它定义了整个网格的通用配置（比如 Istiod 的地址、CA 证书的验证方式等），通常所有 VM 都是一样的，它不负责区分具体的 Group。
+
+当启动istio时，一个pilot-agent进程会启动，根据上面两个文件，在内存中动态生成一个Envoy 的初始配置文件 （Bootstrap Config）
+
+Envoy 拿着这个包含 `ISTIO_META_WORKLOAD_GROUP` 标签的配置去连接 Istiod
+
+Istiod 收到请求，看到 `oracle-db-group` ，于是去 K8s 找到定义的 `WorkloadGroup` 规则，然后把完整的路由规则（VirtualService 等）下发给这台 VM
+
+
 
 ## Workload Identity
 
