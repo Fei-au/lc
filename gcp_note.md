@@ -2283,11 +2283,11 @@ automatically synchronize configurations and policies across clusters and Cloud 
 
 Global HTTPS load balancers use Anycast IPs and Network Endpoint Groups, or NEGs, to distribute traffic efficiently.
 
-**service discovery mechanisms**
+#### **Service discovery mechanisms**
 
 Problem: Pods are ephemeral, can be created and destroyed dynamically. So it's hard to communicate with each other
 
-**Service**
+#### **Service**
 
 Within one cluster
 
@@ -2506,7 +2506,158 @@ Billing is determined by the Google APIs that are enabled on your project.
 | **CA 证书**   | 可以自建任何 CA 证书系统。                  | **默认集成。** 强制或推荐使用 Google Mesh CA。          |
 | **多集群**    | 手动配置非常复杂，容易出错。                | **舰队 (Fleet) 模式。** 跨集群配置被大大简化。          |
 
+### Routing
 
+#### **VirtualService** How
+
+looking at the incoming cars (requests) and deciding which lane they should take based on specific rules
+
+- **Traffic Splitting:** Send 90% of traffic to `v1` and 10% to `v2` (Canary testing).
+- **HTTP Matching:** Route traffic based on headers, URIs, or cookies (e.g., "If the user is on mobile, send them to the mobile-optimized service").
+- **Fault Injection:** Purposefully delay or fail requests to test your application’s resilience.
+- **Retries and Timeouts:** Define exactly how long to wait before giving up on a request.
+
+**配置**
+
+一般如果不设置VirtualService，走的是Round robin方案，即一个一个轮流转发过去
+
+采用VirtualService则需要配置
+
+1. hostnames, 可以是IP addresses, DNS names, Kubernetes short names. eg: api.example.com, *.myapp.com
+
+2. conditions, 符合匹配的内容，eg: `uri: prefix: /v2`, `headers: end-user: exact: json`
+
+   routing options, including **HTTP**
+   **headers, URIs, ports, and source labels**
+
+3. rules, 匹配conditions的请求，route到哪里，eg: `destination: host: my-app-v2-sve` `destination: host: reviews subnet: v3`
+
+```yaml
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+	name: reviews
+spec:
+    hosts:
+    	- reviews
+	http:
+    - match:
+    	- headers:
+            end-user:
+            	exact: Jason
+            route:
+            - destination:
+                host: reviews
+                subset: v2
+        - destination:
+        	host: reviews
+        	ubset: v3
+# requests from end-user go to reviews v2, all others go to reviews v3
+spec:
+  hosts:
+  - api.example.com          # 匹配域名
+  http:
+  - match:
+    - uri:
+        prefix: /v2          # 匹配路径
+    route:
+    - destination:
+        host: my-app-v2-svc  # 转发给对应的后端“业务程序”
+```
+
+这里每个host是一个service
+
+- 单例模型中就是单一运行的一个程序
+- K8s中是一群一摸一样的pods，带有相同标签如`app: my-app`
+- Istio 中也是这么一群pods，不过这些pods有其他的标签属性如version来供进一步划分
+
+其他用法：
+
+- **Faults** test the resilience of your
+  application.
+- **Traffic mirroring** is a technique used to test shadow deployments and detect network intrusions
+
+#### **DestinationRule** Where
+
+Defines *what happens* when the traffic arrives, the DestinationRule is the set of rules for the destination itself
+
+- **Subsets:** This is the most common use. It groups pods by labels (e.g., "The pods with the label `version: v1` are part of the 'stable' subset").
+- **Load Balancing Algorithms:** Decide if you want standard Round Robin, Random, or Least Connections.
+- **Circuit Breaking:** If a specific pod is failing, the DestinationRule can "trip the circuit" and stop sending traffic there for a while to let it recover.
+- **TLS Settings:** Controls whether the connection between services should be encrypted (mTLS).
+
+**配置**
+
+1. 选定某一个host进行规则定义 `spec: host: ratings.prod.svc.cluster.local`
+2. 通过为同一个host中的`pods`进一步进行subnets分组。先定义组名 `- name: v2-group`
+3. 通过labels来把某些pods划分到该组 `labels: version: v2`
+
+```yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: my-app-dr
+spec:
+  host: my-app-svc        # 指向 K8s 的那个“统称” Service
+  trafficPolicy:
+    loadBalancer:
+        simple: LEAST_REQUEST
+          subsets:
+          - name: v1-group        # 起个名字叫 v1 组
+            labels:
+              version: v1         # 寻找带有 version: v1 标签的 Pod
+          - name: v2-group        # 起个名字叫 v2 组
+            labels:
+              version: v2         # 寻找带有 version: v2 标签的 Pod
+            trafficPolicy:
+                loadBalancer:
+                	simple: ROUND_ROBIN
+```
+
+**Routing strategies：**
+
+- Load balancing options (round-robin, random, least request (最少请求, 谁闲给谁，根据正在处理的活跃请求数), and pass-through（直接把请求发送到客户端最初请求的那个 IP 地址，不负载均衡）)
+- Configuring session affinity so that clients are consistently routed to the same service instance.
+- Configuring circuit-breaking to limit the impact of failures and latency spikes.
+
+**Traffic splitting**
+
+![image-20260408032507460](./gcp_note.assets/image-20260408032507460.png)
+
+**canary, A/B, or blue-green**
+
+
+
+#### **Gateway**
+
+- Ingress gateways manage incoming traffic.
+- Egress gateways manage outgoing traffic.
+
+Gateway configuration settings are applied on
+Envoy proxy pods running on the edge of the
+mesh.
+
+#### **ServiceEntry**
+
+- Commonly used to enable requests to services outside of Cloud Service Mesh.
+- Useful for accessing external APIs or integrating with legacy services that are not part of the mesh.
+
+#### **Sidecar**
+
+- Used to fine-tune Envoy proxy settings.
+- They are configured to accept traffic on all ports used by a workload by default.
+- They can reach every workload in the mesh.
+
+#### WorkloadEntry
+
+- Used to onboard non-Kubernetes workloads into the mesh. Like virtual machines and bare metal servers
+- A WorkloadEntry uses a ServiceEntry to select workloads and provide the service definition.
+
+#### WorkloadGroup
+
+- A collection of workload instances.
+- Designed for non-Kubernetesworkloads.
+- Replicates the sidecar injection and deployment model used in Kubernetes to bootstrap Istio proxies.
 
 ## Workload Identity
 
