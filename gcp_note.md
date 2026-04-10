@@ -2817,6 +2817,24 @@ Istiod 收到请求，看到 `oracle-db-group` ，于是去 K8s 找到定义的 
 
 
 
+
+
+### Security
+
+#### Authentication and encryption
+
+**Transport Layer Security TLS**
+
+Server A uses the public key from Server B to encrypt the message. Then Server B
+decrypts the message with its own private key. This process is called asymmetric
+encryption
+
+![image-20260409222132780](./gcp_note.assets/image-20260409222132780.png)
+
+
+
+
+
 ## Workload Identity
 
 让运行在 GKE 里的 Pod 能像一个真实的“人”或“服务”一样，安全地去访问 Google Cloud 的其他资源
@@ -2899,6 +2917,10 @@ gcloud projects add-iam-policy-binding PROJECT_ID \
     --member "principal://iam.googleapis.com/projects/PROJECT_NUMBER/locations/global/workloadIdentityPools/PROJECT_ID.svc.id.goog/subject/ns/gke-mcs/sa/gke-mcs-importer" \
     --role "roles/compute.networkViewer"
 ```
+
+
+
+
 
 
 
