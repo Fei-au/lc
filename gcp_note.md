@@ -2815,7 +2815,68 @@ Envoy 拿着这个包含 `ISTIO_META_WORKLOAD_GROUP` 标签的配置去连接 Is
 
 Istiod 收到请求，看到 `oracle-db-group` ，于是去 K8s 找到定义的 `WorkloadGroup` 规则，然后把完整的路由规则（VirtualService 等）下发给这台 VM
 
+#### Network resilience and testing
 
+![image-20260409095008151](E:\code\lc\gcp_note.assets\image-20260409095008151.png)
+
+A timeout is used to set the amount of time that an Envoy proxy should wait for replies from a given service.
+
+![image-20260409095045014](E:\code\lc\gcp_note.assets\image-20260409095045014.png)
+
+You can specify the maximum number of times an Envoy proxy can attempt to connect to a service with the retry setting.
+
+![image-20260409095347484](E:\code\lc\gcp_note.assets\image-20260409095347484.png)
+
+熔断器，当连接远端的请求达到一定量的失败的时候，则从当前的地方开始熔断，即不再发送请求到远端，让远端喘息恢复，然后慢慢发送请求过去尝试
+
+Circuit breakers increase the resilience of microservice-based applications. 
+
+In a circuit breaker, you set call limits to individual hosts within a service, like the amount of concurrent connections or failed calls to the host.
+
+Once the limit has been reached, the circuit breaker "trips" and stops further connections to that host.
+
+Circuit breakers fail quickly and keep clients from trying to connect to an overloaded or failing host.
+
+![image-20260409100004704](E:\code\lc\gcp_note.assets\image-20260409100004704.png)
+
+Circuit breaker thresholds are defined in DestinationRules, and settings are applied to each individual host in the service.
+In this example, the amount of concurrent connections for the reviews service workloads of the v1 subset is limited to 100.
+
+![image-20260409101441473](E:\code\lc\gcp_note.assets\image-20260409101441473.png)
+
+You can use outlier detection settings to detect and evict unhealthy hosts from the load balancing pool.
+
+In this example, if the reviews service returns three consecutive 500 errors in a 1-second interval, the service will be ejected for 2 minutes.
+
+Up to 50% of all services can be evicted in this example.
+
+![image-20260409102032736](E:\code\lc\gcp_note.assets\image-20260409102032736.png)
+
+Fault injections like delay and abort simulate scenarios like network delays, service overloads, and HTTP errors to test how an application responds to failure.
+
+![image-20260409102131688](E:\code\lc\gcp_note.assets\image-20260409102131688.png)
+
+Delay requests are applied before forwarding or simulating failures like network issues or overloaded upstream service.
+
+![image-20260409102349826](E:\code\lc\gcp_note.assets\image-20260409102349826.png)
+
+The optional percentage field can be used to only abort a certain percentage of requests. If not specified, all requests are aborted.
+
+Delay and abort faults are independent of one another, even if both are specified simultaneously.
+
+![image-20260409102455682](E:\code\lc\gcp_note.assets\image-20260409102455682.png)
+
+在传统的灰度发布（Canary）中，你需要分出 5% 的真实用户去尝试新版本，如果新版本有 Bug，这 5% 的用户就会受影响。
+
+而 **Traffic Mirroring** 的逻辑不同：
+
+1. **主流量**：100% 的用户请求依然发给现有的稳定版（V1）。用户收到的是 V1 的正确响应。
+2. **镜像流量**：Sidecar 代理（Envoy）会在后台**偷偷复制**一份一模一样的请求，发给新版本（V2）。
+3. **结果处理**：V2 也会处理这个请求，甚至去读数据库，但它的**返回结果会被 Sidecar 拦截并丢弃**。用户完全感知不到 V2 的存在。
+
+只能读不能写
+
+**解决方法**：在使用镜像流量测试时，通常需要将 V2 连接到一个只读的“影子数据库”，或者在代码层关闭写操作。
 
 
 
