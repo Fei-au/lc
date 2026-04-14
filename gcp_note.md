@@ -2923,7 +2923,7 @@ The process of authenticating services and encrypting messages in both direction
 
 Istio simplify this process by providing automated certificate management and mTLS enforcement
 
-### Service Mesh Sercurity
+#### Service Mesh Sercurity
 
 ![image-20260414164536978](E:\code\lc\gcp_note.assets\image-20260414164536978.png)
 
@@ -2934,6 +2934,40 @@ Then traffic between services in the mesh can be secured with mTLS.
 ![image-20260414164951247](E:\code\lc\gcp_note.assets\image-20260414164951247.png)
 
 a **sidecar proxy** is injected into the pod containing an **Envoy proxy** and an **Istio agent**
+
+![image-20260414175350074](E:\code\lc\gcp_note.assets\image-20260414175350074.png)
+
+1. **证书里确实有一个“名字”字段**
+
+在标准的 X.509 数字证书（也就是 mTLS 使用的证书）中，这个字段叫做 **SAN (Subject Alternative Name，使用者可选名称)**。
+
+在 GKE Mesh (Istio) 中，这个 SAN 字段里填写的不是简单的服务器域名，而是一个符合 **SPIFFE** 标准的身份 ID。格式通常长这样： `spiffe://<集群域名>/ns/<命名空间>/sa/<服务账号>`
+
+**过程如下：**
+
+- **签发时：** 当 Service B 启动时，它向 Mesh 的 CA 申请证书。CA 会核实 Service B 运行在哪个 **Service Account** 下，然后把这个身份信息“烧”进证书的 SAN 字段里并盖上 CA 的公章。
+- **返回时：** 当 Service A 访问 Service B 时，Service B 把这张含有自己身份 ID 的证书甩给对方。
+
+2. **Envoy 的“双重验证”逻辑**
+
+Envoy 在收到证书后，逻辑确实如你所说，分成了两步：
+
+- **第一步：验证“真伪”（CA 验证）** Envoy 使用受信任的根证书检查对方的签名。如果签名对不上，说明证书是伪造的，直接断开。
+- **第二步：验证“对不对”（Secure Naming）** 如果签名是真的，Envoy 会接着读取证书里的 **SAN 字段**。 此时，Envoy 会查看控制平面（Istiod）发给它的“预期清单”：*“你要找的是 Service B，它的合法身份应该是 `.../sa/service-b-sa`。”* **如果 SAN 里的名字和清单里的对不上，即便证书是真的，Envoy 也会报 `CERTIFICATE_VERIFY_FAILED` 并拒绝连接。**
+
+![image-20260414175842788](E:\code\lc\gcp_note.assets\image-20260414175842788.png)
+
+
+
+![image-20260414180008382](E:\code\lc\gcp_note.assets\image-20260414180008382.png)
+
+**Mesh-wide policies**
+
+![image-20260414180057734](E:\code\lc\gcp_note.assets\image-20260414180057734.png)
+
+**Namespace-specific policies**
+
+![image-20260414180110769](E:\code\lc\gcp_note.assets\image-20260414180110769.png)
 
 ## Workload Identity
 
