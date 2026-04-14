@@ -2887,14 +2887,53 @@ Delay and abort faults are independent of one another, even if both are specifie
 **Transport Layer Security TLS**
 
 Server A uses the public key from Server B to encrypt the message. Then Server B
-decrypts the message with its own private key. This process is called asymmetric
-encryption
+decrypts the message with its own private key. This process is called **asymmetric**
+**encryption**
 
 ![image-20260409222132780](./gcp_note.assets/image-20260409222132780.png)
 
+![image-20260414113914576](E:\code\lc\gcp_note.assets\image-20260414113914576.png)
+
+services communicate in both directions
+
+To achieve this, Service A shares a symmetric key with Service B when it establishes
+the connection, which can be used by both services to encrypt and decrypt messages.
+
+![image-20260414114109484](E:\code\lc\gcp_note.assets\image-20260414114109484.png)
+
+But what if **an intermediate computer intercepts the traffic and claims to be Service**
+**B**? The identity of service B must be verified before it shares a public key.
+
+也就是从最开始就拦截下来，并且声称自己是service B, 拿下了service A分享的密钥，从而进行与service A的communication
+
+TLS standard can help solve this problem.
+
+When Service A first tries to establish an encrypted connection, it not only shares a symmetric key but also **asks Service B for a certificate of its identity**, in the form of X.509.
+
+A **certificate authority (CA)** is like the trusted advisor of the requester service, in this case Service A. CA validates the certificate provided by Service B and determines whether or not to proceed. **This is the same process used by websites that run over HTTPS.**
 
 
 
+![image-20260414164309634](E:\code\lc\gcp_note.assets\image-20260414164309634.png)
+
+
+
+When Service A wants to establish a connection with Service B, both certificates are exchanged and checked by the trusted CA. The symmetric key is used to encrypt the messages.
+The process of authenticating services and encrypting messages in both directions is called mutual **TLS or mTLS**.
+
+Istio simplify this process by providing automated certificate management and mTLS enforcement
+
+### Service Mesh Sercurity
+
+![image-20260414164536978](E:\code\lc\gcp_note.assets\image-20260414164536978.png)
+
+The certificate authority in a service mesh is called **Mesh CA**, and it’s responsible for **distributing, rotating, and managing certificates to provide identity.**
+
+Then traffic between services in the mesh can be secured with mTLS.
+
+![image-20260414164951247](E:\code\lc\gcp_note.assets\image-20260414164951247.png)
+
+a **sidecar proxy** is injected into the pod containing an **Envoy proxy** and an **Istio agent**
 
 ## Workload Identity
 
