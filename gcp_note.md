@@ -2969,6 +2969,16 @@ Envoy 在收到证书后，逻辑确实如你所说，分成了两步：
 
 ![image-20260414180110769](E:\code\lc\gcp_note.assets\image-20260414180110769.png)
 
+![image-20260416211732403](./gcp_note.assets/image-20260416211732403.png)
+
+![image-20260416211740438](./gcp_note.assets/image-20260416211740438.png)
+
+![image-20260416211804335](./gcp_note.assets/image-20260416211804335.png)
+
+
+
+
+
 ## Workload Identity
 
 让运行在 GKE 里的 Pod 能像一个真实的“人”或“服务”一样，安全地去访问 Google Cloud 的其他资源
