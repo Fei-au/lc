@@ -1823,8 +1823,6 @@ But for web service, we do not need to keep the stateful IP, cause load balancer
 
 # GKE
 
-GKE at scale
-
 ## Multi-cloud and multi-cluster
 
 - Compliance
@@ -1836,17 +1834,16 @@ GKE at scale
 
 With GKE, you can manage your clusters in one place, regardless of where they're located. From running clusters in Google Cloud, to Azure AKS, or AWS EKS, GKE provides a comprehensive, centralized, and fully managed Kubernetes experience.
 
-Use additional features like Cloud Service Mesh, Policy Controller and
-Config Controller, you must register your GKE clusters with a **GKE fleet.**
+Use additional features like **Cloud Service Mesh, Policy Controller and Config Controller**, you must register your GKE clusters with a **GKE fleet.**
 
-Authenticate
+**Authenticate**
 
 - For google cloud, use **Connect gateway** with Google ID 
 - **Workforce identity federation** for third party identity
 
 ### Single cluster GKE and containers
 
-containers
+Containers
 
 - portable, standalone, executable packages of software 
 - include everything needed to run an application-- code, runtime, system tools, system libraries, and settings
@@ -1863,11 +1860,8 @@ Kubernetes
 
 GKE
 
-- A fully-managed service that handles
-  infrastructure provisioning, networking, load
-  balancing, security, and upgrades
-- User friendly console, scalability, high availability,
-  security, and cost-effectiveness
+- A fully-managed service that handles infrastructure provisioning, networking, load balancing, security, and upgrades
+- User friendly console, scalability, high availability, security, and cost-effectiveness
 
 ### **A simple env for GKE**
 
@@ -1902,28 +1896,31 @@ Namespace is the logical division of the cluster, like it holds 4GB RAM, 2 CPU, 
 Tenant is the abstraction of users and workloads that uses the namespace.
 
 Eg.:
-Cluster 1 us-east1-a:
-    Namespace-1-prod-payment (Tenant 1): Service A, Service B
-    Namespace-1-prod-inventory (Tenant 1): Service C, Service D
-    Namespace-1-prod-frontend (Tenant 1): Service E, Service F
-    
-    Namespace-1-dev-payment (Tenant 1): Service A, Service B
-    Namespace-1-dev-inventory (Tenant 1): Service C, Service D
-    Namespace-1-dev-frontend (Tenant 1): Service E, Service F
-    
-    Namespace-2-prod-payment (Tenant 2): Service A, Service B
-    ...
-    Namespace-2-dev-payment (Tenant 2): Service A, Service B
-    ...
 
-Cluster 2 eu-west1-a:
-    Namespace-1-prod-payment (Tenant 1): Service A, Service B
-    ...
-    Namespace-1-dev-payment (Tenant 1): Service A, Service B
-    ...
-    Namespace-2-prod-payment (Tenant 2): Service A, Service B
-    ...
-    Namespace-2-dev-payment (Tenant 2): Service A, Service B
+
+    Cluster 1 us-east1-a:
+        Namespace-1-prod-payment (Tenant 1): Service A, Service B
+        Namespace-1-prod-inventory (Tenant 1): Service C, Service D
+        Namespace-1-prod-frontend (Tenant 1): Service E, Service F
+        Namespace-1-dev-payment (Tenant 1): Service A, Service B
+        Namespace-1-dev-inventory (Tenant 1): Service C, Service D
+        Namespace-1-dev-frontend (Tenant 1): Service E, Service F
+    
+        Namespace-2-prod-payment (Tenant 2): Service A, Service B
+        ...
+        Namespace-2-dev-payment (Tenant 2): Service A, Service B
+        ...
+        
+    Cluster 2 eu-west1-a:
+        Namespace-1-prod-payment (Tenant 1): Service A, Service B
+        ...
+        Namespace-1-dev-payment (Tenant 1): Service A, Service B
+        ...
+        Namespace-2-prod-payment (Tenant 2): Service A, Service B
+        ...
+        Namespace-2-dev-payment (Tenant 2): Service A, Service B
+
+
 
 ### **Structure of GKE**
 
@@ -2965,19 +2962,167 @@ Envoy 在收到证书后，逻辑确实如你所说，分成了两步：
 
 ![image-20260414180057734](E:\code\lc\gcp_note.assets\image-20260414180057734.png)
 
+这是一种“**一键全局加固**”的机制。在复杂的微服务架构中，你可能有成百上千个 Pod 分布在不同的 Namespace（命名空间）里，网格级策略让你不需要一个个去配置，就能实现全局的安全基准。
+
+**设定全局安全基准 (Setting default security policies)**：
+
+- **作用**：建立“默认安全”的原则。例如，你可以规定网格内所有通信默认必须加密。
+- **实现**：通常通过在 `istio-system`（根命名空间）中部署 `PeerAuthentication` 或 `AuthorizationPolicy` 来实现。
+
+**强制执行全局身份验证 (Enforcing global authentication)**：
+
+- **mTLS (双向 TLS)**：这是最常见的用法。你可以通过网格级策略强制所有服务之间必须通过 mTLS 进行通信，防止流量被窃听或中间人攻击。
+- **身份校验**：确保只有持有合法证书的服务才能互相访问。
+
+**提供兜底/回退机制 (Providing a fallback mechanism)**：
+
+- **策略优先级**：安全策略通常遵循“**最具体优先**”原则。如果一个特定的 Service 或 Namespace 没有定义自己的安全规则，系统就会自动套用这个“网格级”的全局规则。
+- **防止漏洞**：这能确保即使开发人员忘记为新服务配置安全规则，该服务也不会以“裸奔”状态暴露在网格中。
+
 **Namespace-specific policies**
 
-![image-20260414180110769](E:\code\lc\gcp_note.assets\image-20260414180110769.png)
+![image-20260414180110769](E:\code\lc\gcp_note.assets\image-20260414180110769.png)命名空间级策略将安全规则的范围缩小到了 Kubernetes 的 **Namespace**。它只会影响部署在该特定命名空间下的所有工作负载（Pod/Service)，而不会干扰集群中的其他部分。
 
 ![image-20260416211732403](./gcp_note.assets/image-20260416211732403.png)
 
+这类策略拥有**最高的优先级**。它通过使用 `selector`（选择器）标签，精确地锁定某一个特定的服务或一组 Pod。
+
 ![image-20260416211740438](./gcp_note.assets/image-20260416211740438.png)
+
+wordload > namespace > mesh-wide
 
 ![image-20260416211804335](./gcp_note.assets/image-20260416211804335.png)
 
+#### End-user authentication in Cloud Service Mesh
+
+![image-20260419233627806](./gcp_note.assets/image-20260419233627806.png)
+
+**令牌的位置 (The location)**：
+
+- 通常 JWT 放在 HTTP Header 的 `Authorization: Bearer <token>` 字段中。
+- 你可以自定义位置（比如查询参数或特定的 Header），但默认通常是标准的 Bearer 模式。
+
+**签发者 (The issuer)**：
+
+- 对应 YAML 中的 `issuer: "issuer-foo"`。
+- 这非常关键！它防止了“李鬼”冒充。比如你的应用只信任 `accounts.google.com` 签发的令牌，那么即使别人伪造了一个格式完全正确的 JWT，只要签发者不对，网格就会直接拒绝。
+
+**公钥集 (The public JSON Web Key Set - JWKS)**：
+
+- 对应 YAML 中的 `jwksURI`。
+- **原理**：身份提供商用私钥给令牌签名，网格用对应的 **公钥** 来验签。
+- 网格会自动从这个 URL 下载公钥，用来解密验证 JWT 里的签名。如果签名对不上，说明令牌内容被篡改过。
+
+没有JWT的请求也会被接受，比如需要公共访问的资源
+
+虽然可以接受多个服务商提供的JWT，但是一个请求中只能有一个供应商的JWT
 
 
 
+**什么是 authservice？**
+
+`authservice` 是一个与 Envoy（网格入口网关的底层代理）配合使用的外部授权服务。它的核心职责是：**把复杂的身份验证协议（如 OIDC）从你的应用程序中剥离出来。**
+
+**用户**发起请求。
+
+**Ingress Proxy** 拦截。
+
+Proxy 发现没登录，把请求发给 **authservice**。
+
+`authservice` 引导用户去完成 **JWT** 的获取和校验。
+
+验证通过后，请求才会被放行进入网格内部。
+
+![image-20260419234259531](./gcp_note.assets/image-20260419234259531.png)
+
+展示了 Google Cloud 零信任架构的核心组件 **IAP**。它主要解决的问题是：**如何在没有 VPN 的情况下，安全地让外部用户访问 GKE 内部的服务。**
+
+#### **IAP 的工作流程（五步法）：**
+
+1. **流量进入**：请求首先到达 Google Cloud 负载均衡器（HTTPS Load Balancer）。
+
+2. **触发校验**：负载均衡器检查该服务是否启用了 IAP。如果启用了，它会把请求头或 Cookie 送去 IAP 认证服务器。
+
+3. **身份重定向**：如果没有有效的登录信息，用户会被重定向到 **Google 账号登录页面**，或者供应商登录页面或者自己公司实现的ODIC页面（即常见的 OAuth 2.0 流程）。
+
+4. **身份获取**：登录成功后，IAP 拿到用户的身份（如 email 和 User ID）。
+
+5. **权限校验 (IAM)**：这是最关键的一步。IAP 会去查 **IAM 策略**，看该用户是否拥有 `IAP-secured Web App User` 这个角色。如果有权限，才放行进入 GKE 集群。
+
+   **身份（你是谁）**由第三方负责，但**权限（你能干什么）**由 Google IAM 负责
+
+   将第三方身份映射到 IAM
+
+![image-20260419235125073](./gcp_note.assets/image-20260419235125073.png)
+
+**员工认证与授权的完整链路**，核心是将 **Identity-Aware Proxy (IAP)** 与 **Cloud Service Mesh (CSM)** 结合使用
+
+1. **外部请求 (User)**：员工通过浏览器访问应用。
+
+2. **全球 HTTP(S) 负载均衡器**：流量进入 Google Cloud。
+
+3. **IAP 身份校验**：
+
+   - **认证 (AuthN)**：IAP 拦截请求。如果没有登录，重定向到 Google 登录页。
+
+   - **授权 (AuthZ)**：登录后，IAP 检查 IAM 策略，确认用户是否有 `IAP-secured Web App User` 权限。
+
+   - **签发令牌**：验证通过后，IAP 生成一个 **JWT**，并将其放入 HTTP Header 中传给后端。
+
+4. **Kubernetes Ingress**：
+
+   - 配合 `BackendConfig` 资源，Ingress 接收流量并将其导向集群内部。
+
+   - 这里使用 **Managed Certificate**（托管证书）来处理 HTTPS 卸载。
+
+5. **Service Mesh 内部流转**：
+
+   - **入口网关 (Ingress Gateway)**：流量进入网格。
+
+   - **Sidecar Proxy (Envoy)**：每个 Pod 旁边都有一个代理。它们根据 **Authorization Policies（授权策略）** 检查请求。
+
+   - **Mesh CA**：负责为网格内的 Pod 发放证书，实现服务间的 **mTLS（双向加密）** 通信
+
+   
+
+You can create an **Ingress resource** to configure an **HTTPS load balancer.**
+
+#### Authorization in Cloud Service Mesh
+
+![image-20260420000300539](./gcp_note.assets/image-20260420000300539.png)
+
+**Sidecar Proxy (边车代理)**：部署在每个业务 Pod（如 Pod 1, Pod 2）旁边。
+
+**Perimeter Proxy (边缘代理)**：即图中的 **Ingress** 和 **Egress** 网关。
+
+**工作原理**：当请求进入或离开 Pod 时，代理会先拦截它，询问“授权引擎”，根据结果决定 `Allow`（允许）还是 `Denied`（拒绝）。
+
+![image-20260420000720780](./gcp_note.assets/image-20260420000720780.png)
+
+
+
+授权（Authorization）被“剥离”出了业务代码，交由 Sidecar Proxy（边车代理）去执行 (The PEP)
+
+真正的执行者是 **Envoy Proxy**。
+
+- **位置**：在你的微服务（Pod）中，除了你的业务容器，还有一个自动注入的 **Proxy 容器**。
+- **动作**：所有的流入流量都会先经过这个 Proxy。 它是所谓的 **策略执行点 (Policy Enforcement Point, PEP)**。
+- **决策过程**：当请求到达时，Proxy 会停下该请求，将其交给内部的“授权引擎”进行评估，看它是否符合你定义的 `AuthorizationPolicy`。 只有通过评估，请求才会被转发给你写的代码（业务逻辑）。
+
+一个标准的授权策略包含三个主要部分，用于精确定义“谁在什么条件下可以做什么”：
+
+- **选择器 (Selector)**：指定该策略具体作用于哪些工作负载（Pods）。
+- **动作 (Action)**：定义当条件匹配时是允许 (**ALLOW**) 还是拒绝 (**DENY**) 请求。
+- **规则 (Rules)**：定义触发动作的具体场景：
+  - **from (来源)**：指定请求的源头，例如特定的服务身份（Principals）。
+  - **to (操作)**：指定允许或拒绝的 HTTP 方法（如 GET、POST）及访问路径（如 `/info`）。
+  - **when (条件)**：指定更复杂的匹配条件，例如校验 JWT 令牌中的签发者（iss）是否匹配。
+
+#### Multi-cluster Networking with Cloud Service Mesh
+
+![image-20260420201104829](./gcp_note.assets/image-20260420201104829.png)
+
+![image-20260420201317781](./gcp_note.assets/image-20260420201317781.png)
 
 ## Workload Identity
 
