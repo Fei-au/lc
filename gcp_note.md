@@ -1962,7 +1962,7 @@ Additional GKE services and tools
 - identity management features
 - observability features
 
-**Authentication and authorization**
+### **Authentication and authorization**
 
 - Using google credentials
 - Google identity
@@ -1991,7 +1991,7 @@ It provides:
 - observability (metrics, traces, service-level telemetry)
 - policy and access control between workloads
 
-**Application-level security**
+### **Application-level security**
 
 - Use binary authorization to deploy only trusted images on your clusters
 - Use Kubernetes network policy to control communication between Pods and network endpoints
@@ -2006,6 +2006,37 @@ It provides:
 
 
 ## Fleet
+
+pod ---> cluster ---> fleet
+
+- 一个pod就是一个可以独立运行的service，里面包括它需要运行的所有资源（支持运行的资源比如一个服务下的另外一个小服务）（不包括它连接的资源，那些是独立的，比如数据库）
+
+- 一个cluster，就是有很多的pods，pods之间可以互通，连接成了一个cluster。
+
+- 一个fleet就是有很多配置一样，但是资源可能不一样的cluster。也就是每个cluster内的服务都是一摸一样的，比如
+
+  ```
+  Fleet 1 for prod
+  	cluster A (部署在美洲，更高的CPU，memory，因为主要用户在美洲)
+  		namespace1-prod-frontend(tenant1) serviceA serviceB
+  		namespace1-prod-backend(tenant1)  serviceC serviceD
+  		namespace2-prod-frontend(tenant2)  serviceA serviceB
+  		namespace2-prod-backend(tenant2)  serviceC serviceD
+  		
+      cluster B (部署在亚洲，一般的CPU，memory，少量用户)
+  		namespace1-prod-frontend(tenant1)  serviceA serviceB
+  		namespace1-prod-backend(tenant1)  serviceC serviceD
+          namespace2-prod-frontend(tenant2)  serviceA serviceB
+  		namespace2-prod-backend(tenant2)  serviceC serviceD
+  		
+  Fleet2 for dev
+      cluster C
+  		namespace1-dev-frontend(devteam) serviceA serviceB
+  		namespace1-dev-backend(devteam) serviceC serviceD
+  
+  ```
+
+  
 
 For disaster recover, high availability
 
