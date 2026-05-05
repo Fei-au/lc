@@ -1011,13 +1011,13 @@ This is the actual hardware. It deals with the electrical signals, fiber optics,
 
 This layer handles node-to-node data transfer. It packages bits into **frames** and handles error correction from the physical layer. It uses **MAC addresses** to ensure data gets to the right hardware on a local network.
 
-- **Examples:** Switches, Bridges.
+- **Examples:** **Switches: use tag to implement subnet**, Bridges.
 
 3. Network Layer
 
-The Network Layer is responsible for **routing**. It decides the best physical path for the data to take. It uses **IP addresses** to transfer data packets between different networks.
+The Network Layer is responsible for **routing**. It decides the best physical path for the data to take. It uses **IP addresses** to transfer data packets between different networks. **Router，a map**
 
-- **Examples:** Routers, IP (IPv4/IPv6), ICMP.
+- **Examples:** **Routers**, IP (IPv4/IPv6), ICMP.
 
 4. Transport Layer
 
@@ -1151,11 +1151,18 @@ Cloud Gateway is a Regional Resources
 3 **Router**
 
 - Direct traffic, tells traffic where to go next
+
 - Does not encrypt data at this level
+
 - Router just do Routing and NAT (Network Address port Translation)
-  -  Router read the envelop source IP and destination IP, it checks it's routing table and routing the envelop.
-  -  NAT: relabeling station so your private IP becomes as public IP, mainly for TCP (which includes HTTP, HTTPS, SSH, FTP), UDP, which are all have port, so NAT is associate with them.
+  - Router read the envelop source IP and destination IP, it checks it's routing table and routing the envelop.
+  
+  - NAT: relabeling station so your private IP becomes as public IP, mainly for TCP (which includes HTTP, HTTPS, SSH, FTP), UDP, which are all have port, so NAT is associate with them.
+  
+    **核心问题：** 你家里有多台设备（手机、电脑、平板），但你的ISP（网络运营商）只给你**一个公网IP**。那多台设备怎么同时上网？答案就是NAT。家里只有一个公网IP，不同的设备使用不同的内网端口如 手机192.168.1.100，电脑192.168.1.100。当手机发出请求到Youtube时，请求到Router，NAT把手机内网IP转换成家庭公网IP，然后发送给Youtube公网IP。Youtube 处理完后发送给家庭的公网IP，Router中的NAT把这个响应目标地址转换成手机的内网IP，发给手机。
+  
 - Like a map. Static (Manual Map): does not change
+
 - Dynamic/BGP (Live GPS): pass new changes
 
 ### Cloud Router and BGP
@@ -1225,7 +1232,7 @@ maximum transmission unit, or MTU, for your on-premises VPN gateway cannot be gr
 - Architecture: A HA VPN gateway automatically provides two external IP addresses (two interfaces). So on premises gateway must configure a tunnel on each of these interfaces. So on the on-premises side, the peer VPN device has three form of configures
   - Two peer VPN devices each with one IP address
   - One peer VPN device with two IP addresses (two interfaces)
-  - One peer VPN device wit one Ip address
+  - One peer VPN device with one Ip address
 
 - Routing: Exclusively use Dynamic Routing. Must use a Cloud Router to manage Border Gateway Protocol BGP sessions.
 
@@ -1239,7 +1246,14 @@ Direct access to RFC1918 IPs in your **VPC**, private IP connect to VPC
 
 ### Dedicated Interconnect
 
-Layer 2, use VLAN Virtual local area network
+Layer 2, use VLAN Virtual local area network。
+
+- VLAN是实现Subnet的底层实现，第二层 数据链路层，查看MAC和tag。通过加tag标签来把连接到switch上不同的设备分为不同的subnet。如
+  - 交换机端口1 → tag: VLAN10（财务）→ 接电脑A
+    交换机端口2 → tag: VLAN10（财务）→ 接电脑B
+    交换机端口3 → tag: VLAN20（HR）  → 接电脑C
+    交换机端口4 → tag: VLAN20（HR）  → 接电脑D
+- Subnet是第三层IP层
 
 10 Gbps or 100 Gbps per link
 
@@ -1253,9 +1267,11 @@ Need a colocation facility between on-premises and VPC
 
 ![image-20260307131343451](./gcp_note.assets/image-20260307131343451.png)
 
-Peering is to send traffic between your business/the server and Google
+相对于**Interconnect**是连接**你的on-premises 和 your server on gcloud**，
 
-Network Tier is to send traffic between Google and end user/the customer
+- **Peering** is to send traffic between **your business/the server and Google** （Cloud APIs, YouTube, Gmail）
+
+- **Network Tier** is to send traffic between **Google and end user/the customer**
 
 ### Partner Interconnect
 
@@ -1323,7 +1339,7 @@ Designate a project as a host project and attach one or more other service proje
 - A standalone project is not a host project neither a service project, it does not participate this group
 - A standalone VPC is not from a host project, but can from service project or standalone project. When it from service project, the project has two types of VPCs, one is standalone VPC, another is shared VPC
 
-VPC Peering
+## VPC Peering
 
 Allows private RFC 1918 connectivity across two VPC networks, regardless of whether they belong to the same project or the same organization.
 
@@ -1350,23 +1366,34 @@ VPC Features:
 
 ### **Hub-and-Spoke**
 
-Eg: 
+<img src="./gcp_note.assets/image-20260505005147128.png" alt="image-20260505005147128" style="zoom:50%;" />
+
+可以是: 
 
 1. VPC Peering
 2. Cloud VPN
-3. NCC Network Connectivity Center 
+3. Dedicated Interconnect
+4. Partner Interconnect
 
 **Hub-and-Spoke（以及 NCC）** 的逻辑是**“把好几个独立的房子连在一起”**。
 
 - 每个 Spoke 都是一个**独立且完整**的 VPC。
 - 它们有自己的路由表、防火墙规则和管理边界。
-- NCC 的作用是作为一个“中央交换机”，让这些独立的房子能够互相通信（解决传递性路由问题）。
+- NCC Network Connectivity Center 的作用是作为一个“中央交换机”，让这些独立的房子能够互相通信（解决传递性路由问题）。
+
+**所有网络都只连到Hub，Spoke之间不直连，流量都经过Hub中转。**
+
+**有NCC：  把所有网络注册进来  NCC自动管理路由传播  → 一个中心管所有连接**
 
 对比之下Shared VPC只有一个VPC网络，大家都在里面通信，集中管理
 
-Two main types of spokes that can be connected to a hub: VPC spokes and Hybrid spokes (Cloud VPN, Cloud Interconnect, Router Appliance)
-
 **Global Spoke and Regional Spoke**
+
+Eg:
+
+​	**比如在东京的spoke，注册为regional spoke，那么它只和在这个区域内的spoke高效通信**
+
+​	**注册为global的spoke，在全球都高效通信**
 
 是VPC的路由行为
 
@@ -1385,11 +1412,23 @@ Two main types of spokes that can be connected to a hub: VPC spokes and Hybrid s
 
 The multiple paths between nodes in a mesh network ensure that if one connection fails, traffic can be rerouted.
 
-- high uptime
+ ✅ 高频率（每秒几千次请求）  ✅ 延迟敏感（不能多绕一跳）  ✅ 动态变化（Pod随时创建销毁）
 
 Full mesh: GKE
 
+<img src="./gcp_note.assets/image-20260505005419248.png" alt="image-20260505005419248" style="zoom:33%;" />
+
 Partial mesh: automatic failover
+
+不是所有节点都互连，**只有关键路径有备用连接**
+
+```
+A ——→ B ——→ C
+↕              ↕
+A ———————————→ C
+（备用路径，平时不用）
+B断了，A直接到C，自动failover
+```
 
 ### Mirrored topology
 
@@ -1416,34 +1455,45 @@ For public internet access.
 Google rent space at level 2 or some other place and place some servers for peering.
 You at home or your server at home access to google.com, your traffic through public internet and reach google edge PoP.
 
+**Interconnect**
+
 Connect between **on-premises** to **private VPC resources (GKE, VMs)**
-Interconnect
 
 - Where: Connect to private VPC, through colocation facilities
 - How: Use Google's private IPs
 - Performance: up to 99.99% SLA
 - Router: BGP routes
 
-VPN
+**Cloud VPN**
+
+Connect between **on-premises** to **private VPC resources (GKE, VMs)**
+
+- Through public Internet
+- HA VPN: SLA 99.99%
+- Router: BGP routes
+- Gateway
+
+**Peerings** (direct peering, carrier peering, and partner peering)
 
 Connect between **on-premises** to **Cloud Public services (Google APIs, Workspace, Map, Youtube, etc.)**
-Peerings (direct peering, carrier peering, and partner peering)
 
 - Where: Connect to google edge of presence
 - How: Use Google's Public IPs for service 
 - Performance: No SLA
 - Router: BGP routes
 
+**VPC Peerings**
+
 Connect amongst seperate **VPCs** in same project or different organizations
-VPC Peerings
 
 - Where: google private VPC --- google private VPC, through google network
 - How: Use private IPs
 - Performance: globally valid, network latency depends on distance, but cause it's within google's network, low hops and network congestion.
 - Router: Google Cloud’s underlying SDN (Software Defined Network), no BGP
 
+**Shared VPC**
+
 Connect across projects into one VPC, only within same organization
-Shared VPC
 
 - Where: Only one VPC, different projects use one VPC
 - How: Use private IPs to communicate, one project host the VPC and other projects use it
@@ -1509,12 +1559,6 @@ Feature:
 - You cannot delete a network interface without deleting the instance.
 - Each network interface configured in a single instance must be attached to a different VPC network.
 - internal DNS, domain name system, query is made with primary interface nic0 of the instance
-
-3. 
-
-
-
-
 
 
 
