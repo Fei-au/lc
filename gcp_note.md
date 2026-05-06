@@ -1587,6 +1587,8 @@ A load balancer usually contains **three parts**:
 
    Function: It captures incoming traffic and directs it to the Target Proxy.
 
+   是门牌，HTTPS, IP:port, 345.567.1.2:443. load balancer监听哪个协议，哪个IP的哪个端口。这样当有请求发送到345.567.1.2:443的时候，就会被load balance获取到
+
 2. Target Proxy & URL Map
 
    Role: The **"Dispatcher."**
@@ -1594,8 +1596,17 @@ A load balancer usually contains **three parts**:
    Logic:
 
    - **Target Proxy:** Terminates the connection (handles SSL/TLS decryption).
+     - 解 SSL/TLS （配置SSL钥匙，解析请求内容，从加密字节流转换成可读字节流），如`GET /user/1 HTTP/1.1\r\nHost: api.example.com\r\n...` 拿到chars，但是不懂意思
+
+     - 解析 HTTP 协议 （从四层升到七层，把字节流解析成 结构化的协议如HTTP协议）chars转换成结构化内容如{method: method, path: /user/1 ...}
+
+     - 识别 host/path
+
+     - 处理 HTTP 头
 
    - **URL Map:** The "Rulebook" that checks the request path (e.g., `/api` vs `/static`) or the hostname.
+     - 对应nginx中的location块，有路径，和对应的规则
+
 
    Function: It decides *which* backend service should handle the specific request
 
@@ -1608,6 +1619,30 @@ A load balancer usually contains **three parts**:
    **Scope:** In **Cross-Region** mode, this component is **Global**, allowing it to see backends across different regions.
 
    **Function:** It distributes the traffic to healthy individual instances and manages features like session affinity and connection draining.
+   
+   upstream 块
+   
+   ```conf
+      # === server 块 = 一个完整的"入口" ===
+       server {
+           # === 对应 Forwarding Rule（监听 IP:Port）===
+           listen 443 ssl;
+           server_name api.example.com;
+   
+           # === 对应 Target HTTPS Proxy（SSL 处理）===
+           ssl_certificate     /etc/nginx/certs/api.example.com.crt;
+           ssl_certificate_key /etc/nginx/certs/api.example.com.key;
+           ssl_protocols       TLSv1.2 TLSv1.3;
+           
+           # === 对应 URL Map（路由规则）===
+           location /user/ {
+               proxy_pass http://user_backend;     # 指向上面定义的 upstream
+               proxy_set_header Host $host;
+               proxy_set_header X-Real-IP $remote_addr;
+           }
+   ```
+   
+   
 
 **Traditional 3 tier web service**
 
@@ -1669,7 +1704,11 @@ Session affinity attempts to send all requests from the same client to the same 
 
 **Internal ALB** is **Envoy proxy-based regional** Layer 7 load balancers
 
-The Internal ALB itself is a **regional resource**, cause itself it located in a subnet, it must use a private IP to indicates itselives entry point. The VPC subnet is a regional resource so does the ALB.
+Internal ALB本身是只能在区域内部署，所以当它分发流量的时候，是分发到了这个区域中的distributed servers
+
+我们可以部署在全球范围内部署多个相同的Internal ALB，每个区域内都有多个distributed servers，从而实现了全球distributed
+
+The Internal ALB itself is a **regional resource**, cause itself is located in a subnet, it must use a private IP to indicates itself entry point. The VPC subnet is a regional resource so does the ALB.
 The internal ALB **could be regional**, which means the ALB is deployed in one region, and all the backends should be deployed at the same region.
 
 The internal ALB could be **cross-regional**, which means the ALBs could deployed in many regions, and backend services can be deployed **globally**. When a single region like region A, its service down, the ALB in region A know that and forwards traffic to region B service, where it accomplish a global manner. (fail over to another region)
@@ -1683,7 +1722,7 @@ and the backend services it serves should also be **regional or cross-regional**
 In comparison with target HTTP proxy
 
 - At least one signed SSL certificate
-- Client session terminates at the load balancer
+- **Client session terminates at the load balancer**
 - QUIC is a transport layer protocol that allows faster client connection initiation, eliminates head-of-line blocking in multiplexed streams, and supports connection migration when a client's IP address changes.
 
 **Network endpoint groups NEG**
@@ -1867,33 +1906,30 @@ But for web service, we do not need to keep the stateful IP, cause load balancer
 
 # GKE
 
-## Multi-cloud and multi-cluster
+## Features
+
+**Multi-cloud and multi-cluster**
 
 - Compliance
 - Minimize risk
 - Increase resilience
 - Leveraging existing cloud commitments
 
-### Centralize
+**Centralize**
 
 With GKE, you can manage your clusters in one place, regardless of where they're located. From running clusters in Google Cloud, to Azure AKS, or AWS EKS, GKE provides a comprehensive, centralized, and fully managed Kubernetes experience.
 
 Use additional features like **Cloud Service Mesh, Policy Controller and Config Controller**, you must register your GKE clusters with a **GKE fleet.**
 
-**Authenticate**
+## Concepts
 
-- For google cloud, use **Connect gateway** with Google ID 
-- **Workforce identity federation** for third party identity
-
-### Single cluster GKE and containers
-
-Containers
+### Containers
 
 - portable, standalone, executable packages of software 
 - include everything needed to run an application-- code, runtime, system tools, system libraries, and settings
 - DevOps teams can leverage containers to rapidly deploy and scale applications
 
-Kubernetes
+### Kubernetes
 
 - automated placement
 - Service discovery and load balancing
@@ -1902,28 +1938,70 @@ Kubernetes
 - Health monitoring and healing
 - Centralized management
 
-GKE
+### GKE
 
 - A fully-managed service that handles infrastructure provisioning, networking, load balancing, security, and upgrades
 - User friendly console, scalability, high availability, security, and cost-effectiveness
 
-### **A simple env for GKE**
-
-Configuration parts
+#### Configuration parts
 
 - Config Sync
-- Workload Identity
+
+- Workload Identity (Pod → Google Cloud)
+
 - Policy Controller
+
+  Policy Controller is a Kubernetes policy enforcement engine (based on OPA Gatekeeper) used to validate and govern cluster resources.
+
+  - Consistent enforcement of security and regulatory compliance across a fleet can be challenging
+  - Validates every API requests to your Kubernetes cluster and ensures compliance
+
+  - only approved container registries are allowed
+  - required labels/annotations must exist
+  - privileged pods or hostPath mounts are blocked
+  - namespaces must follow naming/security standards
+
 - Service Mesh: controls and secures traffic flow between your services
 
-Clusters
+  Cloud Service Mesh is Google’s managed service mesh (Istio-based) for service-to-service networking and security.
+  It provides:
+
+  - mTLS encryption between services
+  - traffic management (routing, canary, retries, failover)
+  - observability (metrics, traces, service-level telemetry)
+  - policy and access control between workloads
+
+#### Clusters
+
 - eg. 2 clusters for prod, 1 cluster for dev
 - distributed across regions
 
-Load Balancing
+#### Load Balancing
+
 - Cloud Load Balancing distributes application traffic across regions to Kubernetes service objects (in each cluster).
 
-### Namespaces and Tenants
+####  Authentication and authorization 
+
+用户/管理员访问集群的认证方式
+
+- Using google credentials
+- Google identity
+- Third-party credentials
+- SAML and LDAP 
+
+#### **Application-level security**
+
+- Use binary authorization to deploy only trusted images on your clusters
+- Use Kubernetes network policy to control communication between Pods and network endpoints
+- Use Cloud Service Mesh to control communication between services
+
+#### **Observability**
+
+- Observability and dashboard
+- Cloud logging and Cloud monitoring
+- Integrate tools
+
+#### **Namespaces and Tenants**
 
 Resource management and optimization
 
@@ -1966,7 +2044,7 @@ Eg.:
 
 
 
-### **Structure of GKE**
+#### **Structure of GKE**
 
 ![image-20260326140932866](E:\code\lc\gcp_note.assets\image-20260326140932866.png)
 
@@ -1983,73 +2061,11 @@ Development
 3. Adjacent Cloud Services
 like Cloud Monitoring and Cloud Logging
 
-- 
-
-
-
-## GKE
-
-clusters across different projects, other provider, on-premises
-
-- modernize your existing applications and infrastructure
-- create, update, and optimize container clusters
-- scale large multi-cluster applications
-- enforce consistent governance and security
-
-![image-20260320225609890](./gcp_note.assets/image-20260320225609890.png)
-
-Additional GKE services and tools
-
-- configuration and policy management
-- Team management
-- Cloud Service Mesh
-- identity management features
-- observability features
-
-### **Authentication and authorization**
-
-- Using google credentials
-- Google identity
-- Third-party credentials
-- SAML and LDAP 
-
-### **Policy Controller**
-
-Policy Controller is a Kubernetes policy enforcement engine (based on OPA Gatekeeper) used to validate and govern cluster resources.
-
-- Consistent enforcement of security and regulatory compliance across a fleet can be challenging
-- Validates every API requests to your Kubernetes cluster and ensures compliance
-
-- only approved container registries are allowed
-- required labels/annotations must exist
-- privileged pods or hostPath mounts are blocked
-- namespaces must follow naming/security standards
-
-### **Cloud Service Mesh**
-
-Cloud Service Mesh is Google’s managed service mesh (Istio-based) for service-to-service networking and security.
-It provides:
-
-- mTLS encryption between services
-- traffic management (routing, canary, retries, failover)
-- observability (metrics, traces, service-level telemetry)
-- policy and access control between workloads
-
-### **Application-level security**
-
-- Use binary authorization to deploy only trusted images on your clusters
-- Use Kubernetes network policy to control communication between Pods and network endpoints
-- Use Cloud Service Mesh to control communication between services
-
-### **Observability**
-
-- Observability and dashboard
-- Cloud logging and Cloud monitoring
-- Integrate tools
-
 
 
 ## Fleet
+
+![image-20260320225609890](./gcp_note.assets/image-20260320225609890.png)
 
 pod ---> cluster ---> fleet
 
@@ -2080,7 +2096,6 @@ pod ---> cluster ---> fleet
   
   ```
 
-  
 
 For disaster recover, high availability
 
