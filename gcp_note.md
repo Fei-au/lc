@@ -2,7 +2,7 @@
 
 ## Defining Services
 
-### 1 Describe users roles and personas
+1 Describe users roles and personas
 
 - Who
   - Who are users
@@ -39,13 +39,13 @@ User stories
 - As a [role], I want to..., so that I can...
 - Evaluate user stories with INVEST criteria
 
-### 2 Write qualitative requirements with user stories
+2 Write qualitative requirements with user stories
 
 1. Define role
 2. Write personas for each roles
 3. Write user stories for main features of case study
 
-### 3 Write quantitative requirements using key performance indicators (KPIs)
+3 Write quantitative requirements using key performance indicators (KPIs)
 
 - Availability: whether the request has responded to
 - Latency: How long does it take to response
@@ -73,7 +73,7 @@ The KPI is a metric that indicates whether you are on track to achieve the goal.
 
 Eg: As an example, a goal may be to increase turnover for an online store, and an associated KPI may be the percentage of conversions on the website.
 
-### 4 Use SMART criteria to evaluate your service requirements
+4 Use SMART criteria to evaluate your service requirements
 
 SMART
 
@@ -83,7 +83,7 @@ SMART
 - Relevant
 - Time-bound
 
-### 5 Determine appropriate SLOs and SLIs for you services
+5 Determine appropriate SLOs and SLIs for you services
 
 SLI Service Level Indicator: Availability, latency
 
@@ -109,7 +109,7 @@ Eg:
 
 ![image-20260316134928483](./gcp_note.assets/image-20260316134928483.png)
 
-### Definitions
+Definitions
 
 App Engine, Cloud Run, GKE, and Cloud Run functions could deploy microservices
 
@@ -316,7 +316,7 @@ Decision chart
 
 **Upload data, use Cloud Storage Transfer Service**
 
-## Google Cloud and Hybrid Network Architecture
+## 
 
 ## Cloud networks
 
@@ -2105,7 +2105,7 @@ For disaster recover, high availability
 
 Fleet-enabled components
 
-- Workload identity pools: simplify service authentication and authorization
+- Workload identity pools: simplify **service** authentication and authorization
 - Multi-cluster gateways: low latency and high availability (load-balancing)
 - Cloud Service Mesh: monitor and manage a reliable service mesh on Google Cloud, on premises, or on other supported Cloud providers.
 - Config Controller: deploys, monitors, and enforces declarative policies from a central Git repository
@@ -2123,7 +2123,20 @@ Create fleet
 
 Register a new cluster (Autopilot cluster, GKE standard cluster) to a fleet in (same project, different project)
 
-### Config Controller
+
+
+### **Configuration management Config Controller**
+
+The platform administrator creates policies and configurations and pushes them
+to a Git repository
+
+1. Then GKE Config Sync synchronizes and applies the changes in the GKE clusters. 
+2. GKE Policy Controller enforces the applied policies, whether they were custom created or selected from the default policy library.
+3. Then Config Controller creates resources in Google Cloud, extending the configuration beyond just Kubernetes
+
+### 
+
+持续监听 Git 仓库（或 OCI registry），将里面的 Kubernetes 资源清单（YAML/Helm/Kustomize）自动同步到集群中。它是声明式 GitOps 的执行者——你改了 Git，它负责把集群状态拉到一致。
 
 a fully managed service that allows you to manage Google Cloud resources (like bucket, DB, network) using Kubernetes-style declarative configuration.
 
@@ -2136,7 +2149,7 @@ benefits
 - scalable, automated, and reliable management of configurations and systems in production.
 - Reduce risk with customizable and consistent policies across environments.
 
-**Config Sync**
+#### **Config Sync**
 
 **“Multi-cluster consistency”**、**“GitOps”** , **“Declarative management”**
 
@@ -2155,7 +2168,7 @@ For example: get YAML from git, move to clusters
 
   
 
-### **Policy Controller**
+#### **Policy Controller**
 
 - enforces programmable policies
 - prevent configurations from violating security and compliance controls
