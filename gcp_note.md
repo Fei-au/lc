@@ -2003,7 +2003,53 @@ Use additional features like **Cloud Service Mesh, Policy Controller and Config 
 
 #### **Namespaces and Tenants**
 
-Resource management and optimization
+Namespace 负责集群内隔离身份.
+
+想象一个 GKE 集群是一栋**办公楼**。
+
+楼里有很多公司（团队）共用这栋楼，但他们互相不能随便进入对方的办公室。
+
+**Namespace 就是每个公司的独立楼层。**
+
+```
+办公楼（GKE 集群）
+├── 3楼：frontend 公司（Namespace: frontend）
+├── 4楼：backend 公司（Namespace: backend）
+└── 5楼：auth 公司（Namespace: auth）
+```
+
+------
+
+Namespace 具体隔离了什么
+
+**① 资源隔离**
+
+每层楼的东西只属于自己：
+
+```
+frontend namespace 里有：
+  - 自己的 Pod
+  - 自己的 Service
+  - 自己的 ConfigMap
+  - 自己的 Secret
+
+backend namespace 完全看不到上面这些
+```
+
+**② 权限隔离**
+
+`frontend` 的 ServiceAccount（front-ksa）只能操作 `frontend` namespace 里的资源，无法触碰 `backend` 的东西。就像3楼员工没有4楼的门禁卡。
+
+**③ 名字隔离**
+
+两个 Namespace 里可以有同名的资源，互不冲突：
+
+```
+frontend/back-ksa  ← 这是两个完全
+backend/back-ksa  ← 不同的东西
+```
+
+就像3楼和4楼都可以有一个叫"会议室A"的房间，互不影响。
 
 - Namespaces provide a fundamental way to divide a cluster into multiple virtual clusters
     - own resource quotas and limits, amount of CPU, memory
@@ -2065,9 +2111,47 @@ like Cloud Monitoring and Cloud Logging
 
 ## Fleet
 
+### **Concepts**
+
+**RBAC** = Role-Based Access Control，基于角色的访问控制。
+
+就是"你是什么角色，就有什么权限"。比如：
+
+- developer 角色 → 只能读 Pod，不能删
+- admin 角色 → 什么都能做
+- Config Sync 的 ServiceAccount → 只能操作指定 namespace 的资源
+
+**etcd** 是 Kubernetes 的数据库，所有集群状态都存在里面。
+
+你可以把它理解成 K8s 的"账本"：
+
+- 有哪些 Pod、状态是什么
+- 有哪些 Deployment、配置是什么
+- RBAC 策略、ConfigMap、Secret……
+
+所有东西都记在 etcd 里。当你 `kubectl get pods` 的时候，本质上就是去 etcd 里查了一条记录。
+
+K8s 的各个控制器就是不断地读 etcd（期望状态）和观察现实（实际状态），发现不一样就去纠正——这就是 K8s **控制循环**的核心思想。
+
+### Fleet特点
+
+#### Identity Sameness
+
+Cluster和fleet通过namespace and identity sameness管理服务
+
+Identity Sameness 的核心：**跨集群，只要 Namespace + ServiceAccount 名字一样，GCP 就认同它们身份相同** 如下图中`back-ksa + backend`
+
+![image-20260514003227404](./gcp_note.assets/image-20260514003227404.png)
+
+#### Fleet-enabled components
+
+![image-20260514004149368](./gcp_note.assets/image-20260514004149368.png)
+
+#### Structure
+
 ![image-20260320225609890](./gcp_note.assets/image-20260320225609890.png)
 
-pod ---> cluster ---> fleet
+**pod ---> cluster ---> fleet**
 
 - 一个pod就是一个可以独立运行的service，里面包括它需要运行的所有资源（支持运行的资源比如一个服务下的另外一个小服务）（不包括它连接的资源，那些是独立的，比如数据库）
 
@@ -2075,6 +2159,8 @@ pod ---> cluster ---> fleet
 
 - 一个fleet就是有很多配置一样，但是资源可能不一样的cluster。也就是每个cluster内的服务都是一摸一样的，比如
 
+  其他例子见Fleet Example
+  
   ```
   Fleet 1 for prod
   	cluster A (部署在美洲，更高的CPU，memory，因为主要用户在美洲)
@@ -2096,21 +2182,15 @@ pod ---> cluster ---> fleet
   
   ```
 
+#### Feature
 
-For disaster recover, high availability
+**For disaster recover, high availability**
 
 - A fleet includes many same cluster, same ingress, same config, same services, VMs
 - It is within a host project, spanning across Google Cloud, VPC networks, and projects
 - A high level load balancer distribute traffic between them for disaster, high availability
 
-Fleet-enabled components
-
-- Workload identity pools: simplify **service** authentication and authorization
-- Multi-cluster gateways: low latency and high availability (load-balancing)
-- Cloud Service Mesh: monitor and manage a reliable service mesh on Google Cloud, on premises, or on other supported Cloud providers.
-- Config Controller: deploys, monitors, and enforces declarative policies from a central Git repository
-
-Benefits:
+**Benefits**
 
 - same namespaces, services, workload identities, mesh identity, and access.
 - Each fleet-aware resource, like a namespace or service, belongs to only one fleet.
@@ -2119,24 +2199,63 @@ Benefits:
 - Flexible service organization for easier administration
 - centralizing policy and governance at the fleet level while retaining multiple clusters
 
-Create fleet
+#### **Create fleet**
 
 Register a new cluster (Autopilot cluster, GKE standard cluster) to a fleet in (same project, different project)
 
+### Fleet Example
+
+假如有4个cluster，两个prod，一个staging，一个dev
+
+![image-20260514001734709](./gcp_note.assets/image-20260514001734709.png)
+
+方法1：各自放一个fleet中
+
+![image-20260514002232955](./gcp_note.assets/image-20260514002232955.png)
+
+方法2：都放在一个fleet中
+
+![image-20260514001814940](./gcp_note.assets/image-20260514001814940.png)
+
+方法3：staging和dev放一个fleet，prod放一个fleet
+
+![image-20260514001905923](./gcp_note.assets/image-20260514001905923.png)
 
 
-### **Configuration management Config Controller**
+
+### Management
+
+#### **Config Controller**
+
+![image-20260513235548700](./gcp_note.assets/image-20260513235548700.png)
+
+Google 托管的一个专用 GKE 集群，预装了下面三个组件，省去自己安装和维护的麻烦。你只需要推 Git，其余交给它。
+
+**例子：**
+
+![image-20260513235602437](./gcp_note.assets/image-20260513235602437.png)
 
 The platform administrator creates policies and configurations and pushes them
 to a Git repository
 
-1. Then GKE Config Sync synchronizes and applies the changes in the GKE clusters. 
-2. GKE Policy Controller enforces the applied policies, whether they were custom created or selected from the default policy library.
-3. Then Config Controller creates resources in Google Cloud, extending the configuration beyond just Kubernetes
+1. Config Sync通过把最新的Yaml等配置，推送到集群中，并且执行。也就是下面两个命令的合集
 
-### 
+   1. `git pull`
+   2. `kubectl apply`
 
-持续监听 Git 仓库（或 OCI registry），将里面的 Kubernetes 资源清单（YAML/Helm/Kustomize）自动同步到集群中。它是声明式 GitOps 的执行者——你改了 Git，它负责把集群状态拉到一致。
+2. 请求发送到K8s API Server，它调用Policy Controller。Policy Controller检查这个配置符不符合规范，比如
+
+   1. 镜像必须来自公司内部仓库
+   2. Pod必须设置resource limits等
+
+   如果符合，写入etcd，资源生效；如果不符合，则不执行
+3. 在执行的时候，这个资源分为k8s原生资源和外部（GC）资源。
+
+   1. 如果是k8s原生资源（namesapce，pod，RBAC）则直接执行
+   2. 如果是GCP资源如bucket，则通过Config Connector，它把YAML声明的内容，转换成GCP API命令。调用GCP资源。
+
+
+
 
 a fully managed service that allows you to manage Google Cloud resources (like bucket, DB, network) using Kubernetes-style declarative configuration.
 
@@ -2149,7 +2268,9 @@ benefits
 - scalable, automated, and reliable management of configurations and systems in production.
 - Reduce risk with customizable and consistent policies across environments.
 
-#### **Config Sync**
+##### **Config Sync**
+
+持续监听 Git 仓库（或 OCI registry），将里面的 Kubernetes 资源清单（YAML/Helm/Kustomize）自动同步到集群中。它是声明式 GitOps 的执行者——你改了 Git，它负责把集群状态拉到一致。
 
 **“Multi-cluster consistency”**、**“GitOps”** , **“Declarative management”**
 
@@ -2168,7 +2289,9 @@ For example: get YAML from git, move to clusters
 
   
 
-#### **Policy Controller**
+##### **Policy Controller**
+
+基于 OPA/Gatekeeper，在资源被创建/修改时执行约束策略。例如：所有容器必须设置 resource limits，不允许使用 `latest` 镜像标签
 
 - enforces programmable policies
 - prevent configurations from violating security and compliance controls
@@ -2190,7 +2313,9 @@ For example: check YAML configuration follow compliance or any other rules
 3. Custom Policy (自定义策略)
 4. Policy Constraints 的执行动作 enforcement
 
-### **Config Connector**
+##### **Config Connector**
+
+让你用 Kubernetes CRD 的方式声明 GCP 云资源（如 CloudSQL、GCS bucket、IAM），然后它去调 GCP API 真正创建这些资源
 
 - uses an API endpoint to provision and orchestrate GKE and Google Cloud resources
 - can also be run in your cluster
@@ -2201,11 +2326,11 @@ For example: run the YAML and do the work
 
 ![image-20260329212642024](./gcp_note.assets/image-20260329212642024.png)
 
-### Blueprints
+#### Blueprints
 
-To simplify matters and make things easier
+Blueprints 把最佳实践和 Policy 规范打包在一起，作为一个完整的解决方案，通过 Config Controller 部署到 K8s 集群。
 
-![image-20260329212924630](./gcp_note.assets/image-20260329212924630.png)
+使用Config Controller每次用都要自己写 YAML，自己想清楚结构。而 Blueprints 是 Google 或者你的团队提前写好的"标准套餐"。比如有下面的这些
 
 Google provides pre-built blueprints for both Kubernetes and Terraform.
 
@@ -2228,24 +2353,9 @@ Google Cloud 提供了几种针对不同场景的蓝图：
 3. **PCI-DSS on GKE Blueprint:**
    - 如果你的 WMS 系统需要处理支付信息，这个蓝图会自动帮你配置好所有符合 PCI 安全标准的合规项。
 
-### Sameness and trust
 
-Sameness 
 
-Kubernetes objects that have the same name, like namespaces, are treated equally, even if they are in different clusters.
 
-Trust
-
-resources can be managed at the fleet level instead of individually configuring each cluster.
-
-Organize fleets based on organizational requirements
-
-- fleet host project
-- Clusters with services that frequently communicate with each other have significant advantages when managed in a fleet.
-
-Teams
-
-- Teams might go against the principles of sameness within GKE
 
 ### fleet management
 
