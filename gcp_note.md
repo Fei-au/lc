@@ -2143,6 +2143,37 @@ Identity Sameness 的核心：**跨集群，只要 Namespace + ServiceAccount �
 
 ![image-20260514003227404](./gcp_note.assets/image-20260514003227404.png)
 
+#### Team scope
+
+Team Scope 管的是 namespace 这一层
+
+```
+Team Scope A (backend团队)
+├── Namespace: backend-api    ← Team Scope直接管这个
+└── Namespace: backend-db     ← 和这个
+```
+
+Team Scope 的工作就是说："这两个namespace归backend团队"，**仅此而已**。
+
+namespace里的东西"间接"归他们管
+
+**你拥有一个namespace的访问权 = 你拥有该namespace里所有资源的访问权**
+
+所以一旦 Team Scope A 把 `backend-api` 这个namespace划给backend团队，里面的：
+
+- ServiceAccount
+- Pod
+- Deployment
+- Secret
+- ConfigMap
+- ...
+
+**Team-based sequences** require each team to have its own dedicated cluster, and team scope must be in a separate fleet.
+
+![image-20260329002633824](./gcp_note.assets/image-20260329002633824.png)
+
+
+
 #### Fleet-enabled components
 
 ![image-20260514004149368](./gcp_note.assets/image-20260514004149368.png)
@@ -2353,23 +2384,9 @@ Google Cloud 提供了几种针对不同场景的蓝图：
 3. **PCI-DSS on GKE Blueprint:**
    - 如果你的 WMS 系统需要处理支付信息，这个蓝图会自动帮你配置好所有符合 PCI 安全标准的合规项。
 
+### Upgrade strategy
 
-
-
-
-### fleet management
-
-**Team scope**
-
-- operators and admins can access information defined by the scope, like resource utilization, logs, errors, and metrics.
-- facilitate resource assessment, troubleshooting, and rollout sequencing upgrades.
-- members can use Connect gateway to log in with their Google credentials and authenticate with Google groups
-
-![image-20260329001217406](./gcp_note.assets/image-20260329001217406.png)
-
-![image-20260329001607270](./gcp_note.assets/image-20260329001607270.png)
-
-**Rollout sequencing**
+#### **Rollout sequencing**
 
 fleet management feature used to manage software updates at scale.
 
@@ -2410,9 +2427,7 @@ Google Cloud 选项
 
 ![image-20260329002137190](./gcp_note.assets/image-20260329002137190.png)
 
-**Team-based sequences** require each team to have its own dedicated cluster, and team scope must be in a separate fleet.
 
-![image-20260329002633824](./gcp_note.assets/image-20260329002633824.png)
 
 ### Soak time
 
@@ -2439,153 +2454,141 @@ Google Cloud 选项
 
 ![image-20260329002912045](./gcp_note.assets/image-20260329002912045.png)
 
-**Connect Agent**
 
-- Manage fleet connections between Google Cloud and other cloud providers
-- Automatically installed with cluster registration
-- Securely connect cluster and Google Cloud host project
-- This connection is authenticated and encrypted using Transport Layer Security, or TLS.
-- If you want to manage an existing Kubernetes cluster with GKE, you must register it with a GKE fleet.
-
-**Connect Gateway**
-
-- a secure entry point for accessing your registered clusters from anywhere, regardless of your network location.
-
-**Load balancing solutions**
-
-Network Load balancer
-
-Application Load balancer
-
-- Within one fleet, among clusters
-
-  There is a high level load balancer that can distribute traffic to different clusters in one fleet
-
-**Authenticate**
-
-- OIDC, Microsoft Entra AD or Azure AD, and Okta and bearer tokens.
-
-
-
-### Fleet Solutions
-
-![image-20260328235820131](./gcp_note.assets/image-20260328235820131.png)
-
-![image-20260329000012985](./gcp_note.assets/image-20260329000012985.png)
-
-![image-20260329000221762](./gcp_note.assets/image-20260329000221762.png)
-
-
-
-### Management
-
-**Drift** is when the real-world state of your infrastructure differs from the state defined in your configuration.
-
-To solve this challenge, you can manage configuration declaratively with **GitOps**.
-
-Instead of individual teams or tools directly modifying the state of a cluster, changes are made and stored in a shared centralized repository.
-
-automatically synchronize configurations and policies across clusters and Cloud resources
 
 ## Fleet Networking
 
 | **技术名称**               | **缩写** | **核心功能（人话版）**                                       | **作用层级**           |
 | -------------------------- | -------- | ------------------------------------------------------------ | ---------------------- |
-| **Network Endpoint Group** | **NEG**  | **“定位器”**。把具体的 Pod IP 映射给负载均衡器，直接对接硬件。 | **L3/L4 (网络层)**     |
-| **MultiCluster Services**  | **MCS**  | **“虚空之门”**。让 A 集群能直接用域名访问 B 集群的内网服务。 | **L4 (传输层/DNS)**    |
-| **Multi-cluster Gateway**  | **MCG**  | **“海关/大门”**。外网流量进入多个集群的总入口，负责分流。    | **L7 (应用层/入口)**   |
+| **Network Endpoint Group** | **NEG**  | **“定位器”**。把具体的 Pod IP 映射给负载均衡器，直接对接硬件。南北 | **L3/L4 (网络层)**     |
+| **MultiCluster Services**  | **MCS**  | **“虚空之门”**。让 A 集群能直接用域名访问 B 集群的内网服务。东西 | **L4 (传输层/DNS)**    |
+| **Multi-cluster Gateway**  | **MCG**  | **“海关/大门”**。外网流量进入多个集群的总入口，负责分流。南北 | **L7 (应用层/入口)**   |
 | **Cloud Service Mesh**     | **CSM**  | **“智能交警+保镖”**。精细控制服务间怎么说话、加不加密、报不报警。 | **L7 (应用层/全路径)** |
 
 - NEG不可替代，是IP层的硬件功能
 - 在多集群服务治理场景下，CSM 确实替代了 MCS 的角色
 - 现在的 **Cloud Service Mesh (1.23+)** 已经深度集成了 **Gateway API**。这意味着你以后可以用**同一种语法**（Gateway 规格）来配置 MCG 和 CSM
 
-### Network Endpoint Group
+### North-South, West-east
 
-Global HTTPS load balancers use Anycast IPs and Network Endpoint Groups, or NEGs, to distribute traffic efficiently.
+![image-20260518212112301](./gcp_note.assets/image-20260518212112301.png)
 
-#### **Service discovery mechanisms**
+**南北向**关心的问题是：这个外部请求有没有资格进来？谁来鉴权？进来之后路由到哪个版本？这是"边界管控"，关注点是信任边界的穿越。
 
-Problem: Pods are ephemeral, can be created and destroyed dynamically. So it's hard to communicate with each other
+南北向的外部流量默认不可信，需要在边界做 TLS 终止、身份验证、速率限制，然后才允许进来。
 
-#### **Service**
+**东西向**关心的问题是：服务 A 调服务 B，这条路怎么走？走不通怎么办？两边怎么互信？这是"内部治理"，关注点是已经在边界内部的流量怎么流动。
 
-Within one cluster
+东西向的内部流量过去被默认为可信（"防火墙内部是安全的"），但现代零信任架构认为这个假设很危险——内网横向移动是很多攻击的路径。所以 Service Mesh 的 mTLS 就是专门解决东西向信任问题的：哪怕两个 Pod 在同一个集群里，也要互相验证身份才能通信。
 
-It is a permanent, logical object in the Kubernetes API. It's in the **Network Layer**. It includes
+### Anycast IP
 
-- **A selector**. A rule like app: orders-db
-- **A Port Mapping**: it defines which port it listens on
-- **An Endpoints list**: GKE maintains a hidden list called Endpoints, it's the real-time list of all healthy Pods IPs that match the selector.
+![image-20260518233910838](./gcp_note.assets/image-20260518233910838.png)
 
-The path of sending requests to a service
+普通 IP 是一个 IP 对应一台服务器，全球用户都连那一台。Anycast 是同一个 IP 在全球多个地点同时广播，BGP 路由协议自动把用户连到网络上离他最近的那个接入点（PoP）。GCP GLB 的 IP 就是 Anycast 的，所以欧洲用户的 TCP 握手在欧洲完成，不需要跨洋。
 
-1. The frontend code sends a request to http://orders-db:3306
-2. The frontend Pod asks the internal GKE DNS, the IP of orderes-db
-   1. The Internal GKE DNS runs as a Pods inside your cluster (usually in the `kube-system` namespace). And both services are within in one cluster. Every node in your cluster has a small cache (NodeLocal DNSCache) to make these lookups fast.
-3. DNS server responses the IP of the selector
-4. The traffic hits the selector, and the selector redirects the traffic to actual Pod IP
-   1. It's the Linux Kernel to route traffic to each nodes
-   2. Every node in the cluster has a component called `kube-proxy`, it programs the **IPtables** (or IPVS) of the Linux kernel on that node based on the **Endpoint list**.
+### Network Endpoint Group NEG
+
+
+
+![image-20260518215500562](./gcp_note.assets/image-20260518215500562.png)
+
+本质上是一张**端点列表**，记录的是 `IP:Port` 对
+
+GLB是外部流量入口，NEG是让外部流量分到健康的Pod
+
+三个机制：
+
+GKE 集群默认用 VPC-native 模式，每个 Pod 分配的是真实的 VPC IP 地址，而不是只在 Node 内部可见的虚拟 IP
+
+
+
+GKE 里有一个 **NEG Controller** 跑在控制面，它 watch Kubernetes 的 `Endpoints`（或 `EndpointSlice`）对象。每当 Pod 创建、删除、就绪状态变化，Controller 就调用 GCP Compute API，把对应的 `Pod IP:Port` 从 NEG 里加入或摘除。这个同步是秒级的，比传统 iptables 规则更新要快，而且精准——GLB 马上就知道哪个 Pod 不该收流量了。
+
+
+
+因为 GLB 的后端是 NEG 里的每个 `Pod IP:Port`，GLB 的 Health Check 探针也直接打到 Pod。一个 Pod 没通过健康检查，GLB 就停止向它发流量，不会绕道去问 Node、也不经过 kube-proxy。
+
+NEG 的三种类型
+
+GKE 里实际上有三种 NEG，解决不同场景：
+
+| 类型           | 端点是什么                    | 典型用途                               |
+| -------------- | ----------------------------- | -------------------------------------- |
+| Zonal NEG      | Pod IP:Port（同一个 zone 内） | 最常见，GKE Ingress / Gateway 默认使用 |
+| Serverless NEG | Cloud Run / App Engine URL    | 让 GLB 把流量打到无服务器后端          |
+| Hybrid NEG     | 数据中心内的 VM IP            | 多云/混合云，把线下机器接入 GLB        |
+
+
 
 ### MultiCluster Services MCS
 
-MCS acts as a central definition for a service that spans multiple clusters
+![image-20260518224112208](./gcp_note.assets/image-20260518224112208.png)
 
-- MCS uses Cloud DNS to enable cross-cluster service discovery.
-- Multicluster service configuration is separate from Istio and Cloud service mesh.
-- Multicluster service is only available for GKE clusters, and those clusters must be using VPC native networking.
+db.default.svc.cluster.local 是单个cluster内部中的服务
 
-An MCS selects pods using labels and clusters.
+db.default.svc.clusterset.local 是集群中的服务
 
-- MCS chooses from clusters registered to the fleet called member clusters
-- Then it generates a **derived service**, which creates a NEG (network endpoint group)
-- NEG tracks POD endpoints for all pods that match the specified label selector in the cluster.
-- If there is label selector in the cluster, NEG is empty, otherwise, those POD IPs will be added as backends for the multicluster gateway
+**比较**
 
-the MCS is acting as the blueprint for the matching clusters to create a derived service from
+MCS 是 DNS + L4 端点列表，没有 HTTP 路由、没有权重、没有重试。如果你需要这些，要叠加 Service Mesh 或 Gateway。
 
-While MCS typically schedules derived services on all target clusters, you can explicitly select specific clusters for deployment.
+L4 只看 **IP + Port**，它不知道这个连接里传的是什么内容。它只管"把这个 TCP 连接转发到某个 Pod"，连接建立之后它就不再参与了。
 
-**Enable** **MCS**
+L7 能看到 **HTTP 请求的内容**——URL path、Header、Host、方法等等。它在应用层拆包，所以每一个 HTTP 请求它都能单独做决策。
 
-1. First enable APIs-- MCS, Fleet Hub, Resource Manager, Cloud Service Mesh and Cloud DNS.
-2. use the gcloud container fleet
-3. Use command to enable the MCS feature for your project's fleet
-4. use the gcloud container fleet memberships register command to register your GKE clusters to the fleet
+## 
+
+**MCS 解决的问题**
+
+单集群内的 Service 用 `cluster.local` DNS 就够了，但它只在本集群有效——`orders-db.default.svc.cluster.local` 在 Cluster B 里查不到任何东西。MCS 要解决的就是：如何让另一个集群的 Pod 也能"叫得到"这个服务。
+
+
+
+**三个核心对象**
+
+**ServiceExport** — 你在 Cluster A 里手动创建的声明，告诉 Fleet："我愿意把 `orders-db` 这个 Service 共享出去。" 它本身不携带任何路由逻辑，只是一个意图声明。
+
+**ServiceImport** — Fleet 的 MCS Controller 看到 Cluster A 有 ServiceExport 之后，自动在其他所有集群（Cluster B、C…）里创建对应的 ServiceImport 对象。这个对象带一个 VIP（`240.x.x.x` 段，专门给 MCS 用），并且携带所有导出集群的 endpoint 信息。
+
+**`clusterset.local` DNS** — 每个集群的 CoreDNS 被 MCS 扩展了一条规则：凡是查询 `*.svc.clusterset.local` 的请求，就去查本集群的 ServiceImport。这样 `orders-db.default.svc.clusterset.local` 在任何成员集群里都能解析到那个 VIP。
+
+
+
+**完整路径走一遍**
+
+Cluster B 的 Frontend Pod 想访问 Cluster A 的 `orders-db`：
+
+1. Pod 发请求到 `orders-db.default.svc.clusterset.local`
+2. CoreDNS 查到本地的 ServiceImport，返回 VIP `240.0.0.1`
+3. 流量打到 VIP，被 kube-proxy 的 iptables 规则拦截
+4. iptables 做 DNAT，从 ServiceImport 里的 endpoint 列表里选一个——这些 endpoint 就是 Cluster A 的 Pod IP（因为两个集群都在同一个 VPC 或已打通网络，Pod IP 可直路由）
+5. 包直接路由到 Cluster A 的 Pod
+
+注意这里数据面是**直连 Pod IP** 的，中间没有经过 Cluster A 的 kube-proxy 再转一次，跳数很少。
+
+
 
 ### Multi-cluster gateway MCG
 
-Gateway API has several key resources, including gateway class, gateways, routes, and policies
+南北向，外部流量流入
 
-**Gateway class** provides a template for creating load balancers.
+**MCG（Multi-cluster Gateway）** 是一套 Kubernetes YAML 接口，让你用 K8s 的方式去控制 GCP中的一些资源，尤其是GLB，NEG等。
 
-**Gateways** define where and how load balancers listen for traffic. Cluster operators create gateways based on a gateway class.
+它是一套**声明式接口**
 
-**HTTP routes** define rules for routing HTTP(S) requests from a gateway to Kubernetes services.
+![image-20260518234741540](./gcp_note.assets/image-20260518234741540.png)
 
-**Policies** define implementation-specific characteristics of a gateway resource -- for example, health checks and front end or back end configurations.
+**MCG 控制的 GCP 资源全景**
 
-**Configure steps**
+![image-20260518235624686](./gcp_note.assets/image-20260518235624686.png)
 
-1. gateway Custom Resource Definition, CRD
+- GLB 内部的四层（Forwarding Rule → Proxy → URL Map → Backend Service）是 GLB 自己的组成部分，它们合在一起才叫一个完整的 GLB
+- NEG 是独立存在的 GCP 资源
 
-2. gateway API is enabled
+问：为什么K8s不直接用load balance声明来控制GCP中的GLB呢，这样不是更直观？
 
-3. gateway YAML file, specify the 
-
-   1. name of the resource 
-   2. the target namespace
-   3. The gatewayClassName, which determines the type of load balancer that will be provisioned.
-   4. To load balance across clusters, include mc at the end of the load balancer name.
-   5. create routes inside the gateway or in a separate HTTP route resource
-      1. An HTTPRoute defines rules for routing HTTPS requests from a gateway to backend services.
-      2. Use traffic splits to deliver requests based on weights
-   6. supports the GCPBackendConfig resource
-      1. connectionDraining to enable existing connections to complete when a backend is removed
-      2. iap enables you to authenticate and authorize employees to use internal applications
-      3. Cloud Armor Security policies help you protect your load balanced applications from web-based attacks, such as denial of service, cross-scripting injection, or SQL injection.
-      4. Enabling logging can log all HTTP requests from clients to cloud logging at a sampling rate of your choice.
+答：K8s中的service确实有一个是 `type: LoadBalancer`，它生成一个L4层的LB，只认IP+Port。而GCP中的GLB，有上面4个功能，L7层的，更优
 
 ## Cloud Service Mesh
 
