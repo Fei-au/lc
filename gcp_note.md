@@ -1904,6 +1904,201 @@ Configuring stateful IP addresses in a managed instance group ensures that appli
 
 But for web service, we do not need to keep the stateful IP, cause load balancer is pointing to the instance group, and the LB update the states of each instances and IPs, so the stateful IP is not necessary.
 
+
+
+# K8s
+
+## 工作负载 (Workloads)
+
+| 资源              | 用途                                         |
+| ----------------- | -------------------------------------------- |
+| **Pod**           | 最小调度单元，包含一个或多个容器             |
+| **Deployment**    | 管理无状态应用，支持滚动更新                 |
+| **StatefulSet**   | 管理有状态应用（数据库等），有稳定的网络标识 |
+| **DaemonSet**     | 每个节点上运行一个 Pod（如日志采集）         |
+| **Job / CronJob** | 一次性任务 / 定时任务                        |
+
+### Cluster
+
+
+
+### Node
+
+一个虚拟机，里面可以运行多个Pod。
+
+有自己的IP
+
+### Pod
+
+Pod 更像是一个"共享环境的容器组" ---- 里面的容器共享同一个网络栈和存储卷，但不共享进程空间
+
+可以类比到docker中一次打包多个程序到container中，其中有
+
+- 主程序
+- 日志程序 （在K8s中叫sidecar模式，读volumn内容发送到远端）
+- 依赖程序等
+
+有虚拟IP
+
+### Deployment
+
+**核心思想：声明式管理**
+
+适用于**无状态**应用
+
+你不说"**怎么做**"，你说"**我要什么状态**"，Kubernetes 负责实现并维持它。
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-app
+spec:
+  replicas: 3          # 我要 3 个副本
+  selector:
+    matchLabels:
+      app: my-app
+  template:            # 每个 Pod 长什么样
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+      - name: my-app
+        image: my-app:v1.0
+```
+
+你提交这个文件，K8s 就会确保**始终有 3 个这样的 Pod 在跑**。
+
+它会做
+
+1. **副本管理** 某个 Pod 挂了？Deployment 自动重建一个，始终维持 `replicas: 3`。
+
+2. **滚动更新** 把镜像从 `v1.0` 改成 `v2.0`，Deployment 不会一次性杀掉所有 Pod，而是逐步替换
+
+3. **回滚** 更新出问题了？一条命令回到上一个版本
+
+   `kubectl rollout undo deployment/my-app`
+
+通过中间层管理pods:
+
+```
+Deployment
+    └── ReplicaSet（自动创建，你一般不用管它）
+            ├── Pod
+            ├── Pod
+            └── Pod
+```
+
+每次更新镜像，Deployment 会创建一个新的 ReplicaSet，旧的缩到 0，新的扩到目标数量。这也是回滚能实现的原因——旧 ReplicaSet 还在。
+
+
+
+## 网络与服务发现
+
+- **Service** — 为一组 Pod 提供稳定的访问入口（ClusterIP / NodePort / LoadBalancer）
+- **Ingress** — HTTP/HTTPS 路由规则，集群的流量入口
+- **DNS** — 集群内服务自动注册域名
+
+
+
+### Service
+
+问题：
+
+1. pod有自己的IP
+2. Pod重建后IP会变
+3. 选择让哪个Pod处理
+
+Service 就是解决这个问题的——它提供一个**稳定的访问入口**，背后自动对接Pod
+
+Service 通过 **Label Selector** 找到目标 Pod：
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-app-svc
+spec:
+  type: ClusterIP	   # Service的默认type，可以不写
+  selector:
+    app: my-app        # 找所有带这个 label 的 Pod
+  ports:
+  - port: 80           # Service 对外暴露的端口
+    targetPort: 8080   # Pod 实际监听的端口
+```
+
+只要 Pod 带着 `app: my-app` 这个 label，Service 就自动把它纳入，无论 Pod IP 怎么变。
+
+**Service的三种类型**
+
+#### ClusterIP（默认）
+
+只在集群**内部**可访问，给服务间互相调用用的。
+
+```
+集群内部 → Service → Pods
+集群外部 ✗ 无法访问
+```
+
+比如你的 API 服务访问数据库 Service，外部用户不需要直接碰数据库。见上面例子
+
+------
+
+#### NodePort
+
+在每个节点上开一个端口，外部可以通过 `节点IP:端口` 访问。
+
+```
+外部用户 → 节点IP:30080 → Service → Pods
+```
+
+
+
+```yaml
+spec:
+  type: NodePort
+  ports:
+  - port: 80  # Service监听端口
+    targetPort: 8080  # pod监听端口
+    nodePort: 30080    # 范围固定 30000-32767
+```
+
+缺点明显：端口丑、要知道节点 IP、节点挂了就没了。**一般只在测试时用。**
+
+例子：
+
+这里假如有NodeA，NodeB，NodeC。其中只有NodeB里面有my-app pod。
+
+我们绑定30080为my-app的对外端口
+
+1. 客户访问NodeA:30080，即想要发送请求到my-app
+2. 真实请求并不会达到NodeA里面，而是打到Service中，service重新调度，发现只有NodeB中有该pod，把请求发给NodeB中的pod
+
+------
+
+#### LoadBalancer
+
+在云环境（比如 GKE）中最常用，自动创建一个**云负载均衡器**，给你一个公网 IP。
+
+```
+外部用户 → 公网IP → 云LB → Service → Pods
+```
+
+yaml
+
+```yaml
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: 8080
+```
+
+在 GKE 上提交这个，Google Cloud 会自动帮你开一个 Cloud Load Balancer，非常方便。
+
+缺点是**每个 Service 都要一个独立公网 IP**，服务多了成本高。这就是为什么还需要 Ingress。
+
 # GKE
 
 ## Features
