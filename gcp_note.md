@@ -1160,6 +1160,16 @@ Cloud Gateway is a Regional Resources
   - NAT: relabeling station so your private IP becomes as public IP, mainly for TCP (which includes HTTP, HTTPS, SSH, FTP), UDP, which are all have port, so NAT is associate with them.
   
     **核心问题：** 你家里有多台设备（手机、电脑、平板），但你的ISP（网络运营商）只给你**一个公网IP**。那多台设备怎么同时上网？答案就是NAT。家里只有一个公网IP，不同的设备使用不同的内网端口如 手机192.168.1.100，电脑192.168.1.100。当手机发出请求到Youtube时，请求到Router，NAT把手机内网IP转换成家庭公网IP，然后发送给Youtube公网IP。Youtube 处理完后发送给家庭的公网IP，Router中的NAT把这个响应目标地址转换成手机的内网IP，发给手机。
+    
+    内网设备发出请求时，Router维护一张 **NAT映射表**：
+    
+    | 内网IP:Port          | 公网IP:Port      | 目标IP:Port       |
+    | -------------------- | ---------------- | ----------------- |
+    | 192.168.1.1:**5001** | 1.2.3.4:**8001** | 93.184.216.34:80  |
+    | 192.168.1.2:**5001** | 1.2.3.4:**8002** | 142.250.80.46:443 |
+    | 192.168.1.1:**5002** | 1.2.3.4:**8003** | 142.250.80.46:443 |
+    
+    一个设备可以请求到不同的public ip，上网，听歌。这个时候用port来区分不同的process。
   
 - Like a map. Static (Manual Map): does not change
 
@@ -2026,6 +2036,8 @@ spec:
   ports:
   - port: 80           # Service 对外暴露的端口
     targetPort: 8080   # Pod 实际监听的端口
+    
+    # 即当外部访问cluster的 80 端口的时候，service 就把这个请求转pod的8080
 ```
 
 只要 Pod 带着 `app: my-app` 这个 label，Service 就自动把它纳入，无论 Pod IP 怎么变。
